@@ -190,7 +190,7 @@ const PLAYERS = [
   { name:"Ousmane Dembélé",      club:"PSG",              league:"Ligue1",     nation:"🇫🇷", pos:"FW", goals:16, assists:18, ga:0,  cs:0,  rating:8.6, teamId:"fra", award:"Ligue 1 Player of Year 2025-26" },
   { name:"Bradley Barcola",      club:"PSG",              league:"Ligue1",     nation:"🇫🇷", pos:"FW", goals:20, assists:9,  ga:0,  cs:0,  rating:8.5, teamId:"fra", award:"Ligue 1 Top Scorer 2025-26" },
   { name:"Désiré Doué",          club:"PSG",              league:"Ligue1",     nation:"🇫🇷", pos:"MF", goals:14, assists:10, ga:0,  cs:0,  rating:8.3, teamId:"fra" },
-  { name:"Gianluigi Donnarumma", club:"PSG",              league:"Ligue1",     nation:"🇫🇷", pos:"GK", goals:0,  assists:0,  ga:21, cs:19, rating:8.6, teamId:"fra" },
+  { name:"Gianluigi Donnarumma", club:"Manchester City",  league:"EPL",        nation:"🇮🇹", pos:"GK", goals:0,  assists:0,  ga:21, cs:19, rating:8.6 },
   { name:"Achraf Hakimi",        club:"PSG",              league:"Ligue1",     nation:"🇲🇦", pos:"DF", goals:5,  assists:10, ga:0,  cs:0,  rating:8.5, teamId:"mar" },
   { name:"Endrick",              club:"Lyon",             league:"Ligue1",     nation:"🇧🇷", pos:"FW", goals:12, assists:6,  ga:0,  cs:0,  rating:8.0, teamId:"bra" },
 
@@ -343,7 +343,7 @@ const SQUADS = {
     players: [
       // GK
       { name:"Mike Maignan",          pos:"GK", club:"AC Milan",          league:"SerieA"     },
-      { name:"Gianluigi Donnarumma",  pos:"GK", club:"PSG",               league:"Ligue1"     },
+      { name:"Alban Lafont",           pos:"GK", club:"Nantes",            league:"Ligue1"     },
       { name:"Brice Samba",           pos:"GK", club:"Nottm Forest",       league:"EPL"        },
       // DF
       { name:"William Saliba",        pos:"DF", club:"Arsenal",            league:"EPL"        },

@@ -152,13 +152,17 @@ function renderEaCard(p) {
   const stat1val = p.pos === "GK" ? p.cs  : p.pos === "DF" ? p.ga  : p.goals;
   const stat2lbl = p.pos === "GK" ? "RTG" : "AST";
   const stat2val = p.pos === "GK" ? p.rating : p.assists;
+  // Only show WC team flag if it differs from player's nationality flag
+  const natCode = (() => { try { const cps=[...p.nation].map(c=>c.codePointAt(0)); return cps.filter(cp=>cp>=0x1F1E6&&cp<=0x1F1FF).map(cp=>String.fromCharCode(cp-0x1F1E6+65)).join('').toLowerCase(); } catch(e){return '';} })();
+  const wcCode  = wct ? (FLAG_CODES[wct.id] || '') : '';
+  const showWcFlag = wct && wcCode && wcCode !== natCode;
   return `
     <div class="ea-card ea-${tier} card-enter" title="${p.name} — ${p.club}">
       <div class="ea-top">
         <div class="ea-ovr">${ovr}</div>
         <div class="ea-pos">${p.pos}</div>
         <div class="ea-nation" style="font-size:0">${flagImgFromEmoji(p.nation, 18)}</div>
-        ${wct ? `<div class="ea-wcteam" style="font-size:0;">${flagImg(wct.id, 20)}</div>` : ''}
+        ${showWcFlag ? `<div class="ea-wcteam" style="font-size:0;">${flagImg(wct.id, 20)}</div>` : ''}
       </div>
       <div class="ea-photo-ring">
         <img src="${_photoPlaceholder}" data-player="${p.name}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;object-position:top" />
