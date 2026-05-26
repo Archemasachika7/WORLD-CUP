@@ -729,9 +729,10 @@ const MeetSystem = (() => {
     row.innerHTML = ids.map(id => {
       const th   = TEAM_THEMES[id];
       const team = (typeof TEAMS !== "undefined") ? TEAMS.find(x => x.id === id) : null;
-      return `<button class="theme-chip" style="--chip-color:${th?.accent||"#e50914"}"
+      const flag = (typeof flagImg === "function") ? flagImg(id, 36) : (team?.flag || id.toUpperCase());
+      return `<button class="theme-chip" style="--chip-color:${th?.accent||"#e50914"};display:flex;align-items:center;justify-content:center;overflow:hidden;"
         title="${team?.name||id}" onclick="MeetSystem.previewTheme('${id}')">
-        ${team?.flag || "🏳️"}
+        ${flag}
       </button>`;
     }).join("");
   }
