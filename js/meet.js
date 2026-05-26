@@ -74,11 +74,14 @@ const MeetSystem = (() => {
   async function createRoom() {
     if (!readIdentity()) return;
     const roomId = genId();
-    const { error } = await _sb.from("rooms").insert({ id: roomId });
-    if (error && error.code !== "23505") {
-      alert2("Could not create room — make sure you ran the Supabase SQL setup. Check console.");
-      console.error(error); return;
-    }
+    // Try to register the room — non-fatal if table doesn't exist or RLS blocks it
+    try {
+      const { error } = await _sb.from("rooms").insert({ id: roomId });
+      if (error && error.code !== "23505") {
+        console.warn("rooms table insert failed (non-fatal):", error.code, error.message);
+        // Continue anyway — Realtime channels work without this table
+      }
+    } catch (e) { console.warn("rooms insert exception (non-fatal):", e); }
     await enter(roomId);
   }
 
@@ -134,10 +137,13 @@ const MeetSystem = (() => {
   }
 
   async function loadHistory(roomId) {
-    const { data } = await _sb.from("messages")
-      .select("*").eq("room_id", roomId)
-      .order("created_at", { ascending: true }).limit(100);
-    (data || []).forEach(m => appendMsg(m, true));
+    try {
+      const { data, error } = await _sb.from("messages")
+        .select("*").eq("room_id", roomId)
+        .order("created_at", { ascending: true }).limit(100);
+      if (error) console.warn("loadHistory:", error.code, error.message);
+      (data || []).forEach(m => appendMsg(m, true));
+    } catch (e) { console.warn("loadHistory exception:", e); }
   }
 
   // ── Chat ───────────────────────────────────────────────
@@ -152,10 +158,14 @@ const MeetSystem = (() => {
 
     appendMsg(payload, false, true);
     sbCh?.send({ type:"broadcast", event:"chat", payload });
-    await _sb.from("messages").insert({
-      room_id: payload.room_id, nickname: payload.nickname,
-      team_flag: payload.team_flag, text: payload.text, type: "msg"
-    });
+    // Persist — non-fatal if messages table not set up yet
+    try {
+      const { error } = await _sb.from("messages").insert({
+        room_id: payload.room_id, nickname: payload.nickname,
+        team_flag: payload.team_flag, text: payload.text, type: "msg"
+      });
+      if (error) console.warn("messages insert:", error.code, error.message);
+    } catch (e) { console.warn("messages insert exception:", e); }
   }
 
   function appendMsg(m, _hist = false, self = false) {

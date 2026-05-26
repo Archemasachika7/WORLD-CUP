@@ -2,6 +2,9 @@
    World Cup 2026 — Netflix-Dark Theme
    ============================================================ */
 
+/* Utility */
+.hidden { display: none !important; }
+
 :root {
   --bg-dark:    #0a0a0f;
   --bg-card:    #141420;
