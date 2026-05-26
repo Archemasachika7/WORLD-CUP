@@ -103,7 +103,7 @@ function renderStats() {
 
   let html = `<div class="awards-banner"><h3>🏆 2025-26 Season Honours</h3><div class="awards-scroll">
     ${AWARDS.map(a => `<div class="award-chip">
-      <span class="award-nation">${a.nation}</span>
+      <div class="award-nation" style="font-size:0;flex-shrink:0">${flagImgFromEmoji(a.nation, 32)}</div>
       <div><strong>${a.winner}</strong><br><small>${a.award}</small></div>
     </div>`).join("")}
   </div></div>`;
@@ -122,7 +122,7 @@ function renderStats() {
     Object.entries(byLeague).forEach(([league, players]) => {
       const lm = LEAGUE_META[league] || {};
       html += `<div class="league-section">
-        <h3 class="league-title">${lm.nation} ${lm.name} <span class="weight-tag">Weight: ${lm.weight}</span></h3>
+        <h3 class="league-title" style="display:flex;align-items:center;gap:8px"><span style="font-size:0">${flagImgFromEmoji(lm.nation, 24)}</span> ${lm.name} <span class="weight-tag">Weight: ${lm.weight}</span></h3>
         ${playerTable(players)}
       </div>`;
     });
@@ -156,7 +156,7 @@ function renderEaCard(p) {
       <div class="ea-top">
         <div class="ea-ovr">${ovr}</div>
         <div class="ea-pos">${p.pos}</div>
-        <div class="ea-nation">${p.nation}</div>
+        <div class="ea-nation" style="font-size:0">${flagImgFromEmoji(p.nation, 18)}</div>
         ${wct ? `<div class="ea-wcteam" style="font-size:0;">${flagImg(wct.id, 20)}</div>` : ''}
       </div>
       <div class="ea-photo-ring">
@@ -165,7 +165,7 @@ function renderEaCard(p) {
       </div>
       <div class="ea-name">${p.name.toUpperCase().split(" ").pop()}</div>
       <div class="ea-fullname">${p.name}</div>
-      <div class="ea-club">${lm.nation} ${p.club}</div>
+      <div class="ea-club" style="display:flex;align-items:center;gap:3px"><span style="font-size:0">${flagImgFromEmoji(lm.nation, 14)}</span> ${p.club}</div>
       <div class="ea-stats">
         <div class="ea-stat"><span class="ea-sv">${stat1val||"—"}</span><span class="ea-sl">${stat1lbl}</span></div>
         <div class="ea-stat"><span class="ea-sv">${stat2val||"—"}</span><span class="ea-sl">${stat2lbl}</span></div>
@@ -193,8 +193,8 @@ function playerTable(players) {
       const wct = p.teamId ? TEAMS.find(t => t.id === p.teamId) : null;
       return `<tr class="${p.award?'award-row':''}">
         <td><strong>${p.name}</strong>${p.award?' 🏆':''}</td>
-        <td><span class="league-pill ${lm.tier===1?'tier1-pill':'tier2-pill'}">${lm.nation}</span> ${p.club}</td>
-        <td>${p.nation}</td>
+        <td><span class="league-pill ${lm.tier===1?'tier1-pill':'tier2-pill'}" style="font-size:0;vertical-align:middle">${flagImgFromEmoji(lm.nation, 18)}</span> ${p.club}</td>
+        <td style="font-size:0">${flagImgFromEmoji(p.nation, 20)}</td>
         <td>${wct ? flagImg(wct.id, 24) : '—'}</td>
         <td>${p.goals||'—'}</td>
         <td>${p.assists||'—'}</td>
