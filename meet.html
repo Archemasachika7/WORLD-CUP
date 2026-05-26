@@ -199,8 +199,8 @@ document.addEventListener("DOMContentLoaded", () => {
 function populateMeetTeamSelector() {
   const sel = document.getElementById("meet-team-select");
   if (!sel) return;
-  sel.innerHTML = '<option value="⚽" data-id="">⚽ Neutral</option>' +
-    TEAMS.map(t => `<option value="${t.flag}" data-id="${t.id}">${t.flag} ${t.name}</option>`).join("");
+  sel.innerHTML = '<option value="⚽" data-id="">Neutral</option>' +
+    TEAMS.map(t => `<option value="${t.flag}" data-id="${t.id}">${t.name}</option>`).join("");
 }
 
 function buildStreamPresets(containerId, compact) {
