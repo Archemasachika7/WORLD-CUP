@@ -1,0 +1,838 @@
+/* ============================================================
+   World Cup 2026 — Animations
+   ============================================================ */
+
+/* ---- 1. Page Fade-In ---- */
+body {
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+body.page-loaded {
+  opacity: 1;
+}
+
+/* ---- 2. Hero Particles (floating soccer balls) ---- */
+.hero-particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.hero-particle {
+  position: absolute;
+  font-size: 1.5rem;
+  opacity: 0;
+  animation: floatUp var(--dur, 12s) var(--delay, 0s) linear infinite;
+  left: var(--x, 50%);
+  bottom: -40px;
+  filter: blur(0.5px);
+}
+
+@keyframes floatUp {
+  0%   { opacity: 0;   transform: translateY(0) rotate(0deg) scale(0.8); }
+  10%  { opacity: 0.35; }
+  80%  { opacity: 0.2; }
+  100% { opacity: 0;   transform: translateY(-110vh) rotate(360deg) scale(1.1); }
+}
+
+/* ---- 3. Card Entrance (scroll) ---- */
+.card-enter {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.card-enter.card-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ---- 4. Countdown Flip ---- */
+.countdown-flip-wrap {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.flip-unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.flip-digit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: #ffd700;
+  font-variant-numeric: tabular-nums;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.15s ease;
+}
+
+.flip-digit.flipping {
+  animation: flipCard 0.3s ease;
+}
+
+@keyframes flipCard {
+  0%   { transform: rotateX(0deg);    }
+  50%  { transform: rotateX(-90deg);  }
+  100% { transform: rotateX(0deg);    }
+}
+
+.flip-label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+}
+
+.flip-sep {
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--accent);
+  margin-bottom: 20px;
+  animation: sepBlink 1s infinite;
+}
+
+@keyframes sepBlink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+
+/* ---- 5. Flag Wave on hover ---- */
+.flag-img {
+  border-radius: 3px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  vertical-align: middle;
+  display: inline-block;
+}
+
+.flag-img:hover {
+  transform: scale(1.12) rotate(-2deg);
+  box-shadow: 0 4px 16px rgba(229,9,20,0.35);
+  animation: flagWave 0.6s ease;
+}
+
+@keyframes flagWave {
+  0%   { transform: scale(1.12) rotate(-2deg) skewX(0deg); }
+  25%  { transform: scale(1.12) rotate(-2deg) skewX(3deg);  }
+  50%  { transform: scale(1.12) rotate(-2deg) skewX(-3deg); }
+  75%  { transform: scale(1.12) rotate(-2deg) skewX(2deg);  }
+  100% { transform: scale(1.12) rotate(-2deg) skewX(0deg);  }
+}
+
+.flag-emoji {
+  font-size: inherit;
+}
+
+/* ---- 6. Stat Bar Fill ---- */
+.stat-bar-fill {
+  height: 100%;
+  width: 0%;
+  transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: inherit;
+}
+
+.stat-bar-container {
+  background: rgba(255,255,255,0.08);
+  border-radius: 6px;
+  height: 8px;
+  overflow: hidden;
+}
+
+/* Prob bars */
+.prob-bar .prob-home,
+.prob-bar .prob-draw,
+.prob-bar .prob-away,
+.rank-bar {
+  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ---- 7. Trophy Bounce ---- */
+.trophy-bounce {
+  display: inline-block;
+  animation: trophyBounce 2.5s ease-in-out infinite;
+}
+
+@keyframes trophyBounce {
+  0%, 100% { transform: translateY(0) scale(1);    }
+  30%       { transform: translateY(-10px) scale(1.06); }
+  60%       { transform: translateY(-4px) scale(1.02);  }
+}
+
+/* ---- Shared Nav Active State ---- */
+.nav-link.nav-active {
+  color: var(--text) !important;
+  position: relative;
+}
+
+.nav-link.nav-active::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--accent);
+  border-radius: 2px;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+/* ---- Nav Icon ---- */
+.nav-icon {
+  font-size: 0.9rem;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* ---- Mobile Hamburger ---- */
+.nav-hamburger {
+  display: none;
+  background: none;
+  border: 1px solid rgba(255,255,255,0.2);
+  color: var(--text);
+  font-size: 1.2rem;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .nav-hamburger {
+    display: block;
+  }
+  #nav-links-list {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: rgba(10,10,15,0.98);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 0;
+    gap: 0;
+  }
+  #nav-links-list.nav-open {
+    display: flex;
+  }
+  #nav-links-list li {
+    width: 100%;
+  }
+  #nav-links-list .nav-link {
+    display: block;
+    padding: 12px 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .nav-cta {
+    display: none;
+  }
+}
+
+/* ---- Host City Cards ---- */
+.host-cities-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-bottom: 60px;
+}
+
+.host-city-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 32px;
+  text-align: center;
+  transition: transform 0.3s, border-color 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+.host-city-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--accent);
+}
+
+.host-city-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--accent);
+}
+
+.host-city-flag {
+  font-size: 3rem;
+  margin-bottom: 12px;
+}
+
+.host-city-name {
+  font-size: 1.3rem;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.host-city-venues {
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--accent);
+  line-height: 1;
+}
+
+.host-city-venues-label {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ---- Quick Nav Tiles ---- */
+.quick-nav-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-bottom: 60px;
+}
+
+.quick-nav-tile {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  text-decoration: none;
+  color: var(--text);
+  transition: transform 0.3s, border-color 0.3s, background 0.3s;
+  cursor: pointer;
+}
+
+.quick-nav-tile:hover {
+  transform: translateY(-4px);
+  border-color: var(--accent);
+  background: var(--bg-hover);
+}
+
+.quick-nav-icon {
+  font-size: 2.4rem;
+  flex-shrink: 0;
+}
+
+.quick-nav-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.quick-nav-desc {
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  line-height: 1.4;
+}
+
+/* ---- Favourites Preview ---- */
+.favs-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+  margin-bottom: 40px;
+}
+
+.fav-preview-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.3s, border-color 0.3s;
+}
+
+.fav-preview-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--accent);
+}
+
+.fav-rank {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.fav-flag-img {
+  display: block;
+  margin: 0 auto 10px;
+}
+
+.fav-name {
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.fav-pct {
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: var(--accent);
+}
+
+/* ---- WC Quiz styles ---- */
+.quiz-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 40px;
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.quiz-progress {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+
+.quiz-timer {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--gold);
+  background: rgba(255,215,0,0.1);
+  border: 1px solid rgba(255,215,0,0.2);
+  padding: 4px 14px;
+  border-radius: 20px;
+}
+
+.quiz-timer.timer-urgent {
+  color: var(--accent);
+  background: rgba(229,9,20,0.12);
+  border-color: rgba(229,9,20,0.3);
+  animation: pulse 0.8s infinite;
+}
+
+.quiz-question {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 28px;
+  line-height: 1.5;
+}
+
+.quiz-options {
+  display: grid;
+  gap: 12px;
+}
+
+.quiz-opt-btn {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 14px 20px;
+  border-radius: 8px;
+  text-align: left;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.quiz-opt-btn:hover:not(:disabled) {
+  background: rgba(229,9,20,0.12);
+  border-color: var(--accent);
+}
+
+.quiz-opt-btn.correct {
+  background: rgba(46,204,113,0.15);
+  border-color: #2ecc71;
+  color: #2ecc71;
+}
+
+.quiz-opt-btn.wrong {
+  background: rgba(229,9,20,0.15);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.quiz-feedback {
+  margin-top: 16px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.quiz-feedback.correct {
+  background: rgba(46,204,113,0.1);
+  border: 1px solid rgba(46,204,113,0.3);
+  color: #2ecc71;
+}
+
+.quiz-feedback.wrong {
+  background: rgba(229,9,20,0.1);
+  border: 1px solid rgba(229,9,20,0.3);
+  color: var(--accent);
+}
+
+.quiz-score-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 48px 40px;
+  text-align: center;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.quiz-score-emoji {
+  font-size: 4rem;
+  margin-bottom: 16px;
+}
+
+.quiz-score-num {
+  font-size: 3.5rem;
+  font-weight: 900;
+  color: var(--accent);
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+/* ---- Penalty Shootout ---- */
+.shootout-field {
+  background: linear-gradient(135deg, #0a3d0a, #1a5c1a);
+  border-radius: var(--radius);
+  padding: 32px;
+  max-width: 700px;
+  margin: 0 auto;
+  position: relative;
+  overflow: hidden;
+}
+
+.shootout-scoreboard {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 32px;
+  background: rgba(0,0,0,0.4);
+  border-radius: 8px;
+  padding: 16px 24px;
+}
+
+.shoot-team-score {
+  text-align: center;
+}
+
+.shoot-score-num {
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: var(--gold);
+  line-height: 1;
+}
+
+.shoot-score-name {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  margin-top: 4px;
+}
+
+.shoot-score-sep {
+  font-size: 2rem;
+  color: var(--text-dim);
+  font-weight: 300;
+}
+
+.shoot-dots {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+.shoot-dot {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.3);
+  background: transparent;
+  transition: background 0.3s, border-color 0.3s;
+}
+
+.shoot-dot.scored {
+  background: #2ecc71;
+  border-color: #2ecc71;
+}
+
+.shoot-dot.missed {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.shootout-goal-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.goal-visual {
+  width: 280px;
+  height: 120px;
+  border: 4px solid white;
+  border-top: 0;
+  border-radius: 0 0 8px 8px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  background: rgba(0,0,0,0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.goal-visual::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: 0; right: 0;
+  height: 4px;
+  background: white;
+}
+
+.goal-zone-btn {
+  background: rgba(255,255,255,0.05);
+  border: 2px solid rgba(255,255,255,0.15);
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.goal-zone-btn:hover:not(:disabled) {
+  background: rgba(229,9,20,0.3);
+  border-color: var(--accent);
+}
+
+.goal-zone-btn.scored {
+  background: rgba(46,204,113,0.4);
+  border-color: #2ecc71;
+}
+
+.goal-zone-btn.saved {
+  background: rgba(229,9,20,0.4);
+  border-color: var(--accent);
+}
+
+.shoot-action-result {
+  font-size: 1.3rem;
+  font-weight: 700;
+  text-align: center;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.shoot-action-result.goal { color: #2ecc71; }
+.shoot-action-result.save { color: var(--accent); }
+
+.shoot-turn-label {
+  font-size: 0.9rem;
+  color: var(--text-dim);
+  text-align: center;
+}
+
+.shoot-winner-banner {
+  text-align: center;
+  padding: 32px;
+  animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1);
+}
+
+@keyframes popIn {
+  from { transform: scale(0.7); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
+/* ---- Score Predictor ---- */
+.predictor-game-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 36px;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.predictor-matchup {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 28px;
+}
+
+.predictor-team-side {
+  text-align: center;
+}
+
+.predictor-team-flag {
+  font-size: 2.5rem;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.predictor-score-side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.score-input-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.score-up-down {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.score-stepper {
+  background: var(--bg-hover);
+  border: 1px solid var(--border);
+  color: var(--text);
+  width: 28px;
+  height: 24px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.score-stepper:hover { background: var(--accent); }
+
+.score-display {
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: var(--gold);
+  min-width: 48px;
+  text-align: center;
+}
+
+.predictor-vs-label {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-dim);
+}
+
+.predictor-ai-card {
+  background: rgba(229,9,20,0.06);
+  border: 1px solid rgba(229,9,20,0.2);
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.predictor-ai-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--accent);
+  margin-bottom: 12px;
+}
+
+.predictor-result-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.predictor-pts-badge {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--gold);
+}
+
+/* ---- Games page main layout ---- */
+.games-tabs {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 40px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0;
+}
+
+.game-tab-btn {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 12px 20px;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: color 0.2s, border-color 0.2s;
+  margin-bottom: -1px;
+}
+
+.game-tab-btn.active {
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+.game-panel {
+  display: none;
+}
+.game-panel.active {
+  display: block;
+}
+
+/* ---- Responsive grids ---- */
+@media (max-width: 900px) {
+  .host-cities-grid { grid-template-columns: 1fr; }
+  .quick-nav-grid   { grid-template-columns: repeat(2, 1fr); }
+  .favs-preview-grid{ grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 600px) {
+  .quick-nav-grid    { grid-template-columns: 1fr; }
+  .favs-preview-grid { grid-template-columns: repeat(2, 1fr); }
+  .flip-digit        { width: 48px; height: 48px; font-size: 1.3rem; }
+  .predictor-matchup { grid-template-columns: 1fr; }
+}
