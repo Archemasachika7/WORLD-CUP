@@ -612,6 +612,30 @@ function flagImg(teamId, size=32) {
   return `<img class="flag-img" src="https://flagcdn.com/w${size}/${code}.png" alt="${team?.name||teamId}" width="${size}" height="${h}" loading="lazy" onerror="this.style.display='none';this.nextSibling.style.display='inline'" /><span class="flag-emoji" style="display:none;font-size:${Math.round(size*0.7)}px;line-height:1;vertical-align:middle">${emoji}</span>`;
 }
 
+// Converts any flag emoji (🇦🇷, 🇫🇷, 🏴󠁧󠁢󠁥󠁮󠁧󠁿 etc.) → real flagcdn.com <img>
+// Falls back to the emoji if conversion fails
+function flagImgFromEmoji(emoji, size=24) {
+  if (!emoji || emoji === '🌍') {
+    return `<span style="font-size:${size}px;line-height:1;vertical-align:middle">${emoji || '🌍'}</span>`;
+  }
+  // Subdivision flags (England, Scotland, Wales)
+  const subdivMap = { '🏴󠁧󠁢󠁥󠁮󠁧󠁿': 'gb-eng', '🏴󠁧󠁢󠁳󠁣󠁴󠁿': 'gb-sct', '🏴󠁧󠁢󠁷󠁬󠁳󠁿': 'gb-wls' };
+  let code = subdivMap[emoji];
+  if (!code) {
+    try {
+      const cps = [...emoji].map(c => c.codePointAt(0));
+      const letters = cps
+        .filter(cp => cp >= 0x1F1E6 && cp <= 0x1F1FF)
+        .map(cp => String.fromCharCode(cp - 0x1F1E6 + 65))
+        .join('');
+      if (letters.length === 2) code = letters.toLowerCase();
+    } catch(e) {}
+  }
+  if (!code) return `<span style="font-size:${size}px;line-height:1;vertical-align:middle">${emoji}</span>`;
+  const h = Math.round(size * 0.667);
+  return `<img class="flag-img" src="https://flagcdn.com/w${size}/${code}.png" alt="${emoji}" width="${size}" height="${h}" loading="lazy" onerror="this.style.display='none';this.nextSibling&&(this.nextSibling.style.display='inline')" /><span style="display:none;font-size:${size}px;line-height:1;vertical-align:middle">${emoji}</span>`;
+}
+
 // ---- Player Photo System (Wikipedia REST API + sessionStorage cache) ----
 const PLAYER_WIKI_TITLES = {
   // ── Stars (explicit titles to avoid disambiguation) ──

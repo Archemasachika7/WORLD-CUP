@@ -654,7 +654,7 @@ function renderSquadTab(squad, trackedPlayers) {
           <div class="squad-pos-dot ${posCls[pos]}">${pos}</div>
           <div style="flex:1;min-width:0;">
             <div class="sr-name">${p.name}</div>
-            <div class="sr-club">${lm.nation} ${p.club} <span class="sr-league">· ${lm.name}</span></div>
+            <div class="sr-club" style="display:flex;align-items:center;gap:4px"><span style="font-size:0">${flagImgFromEmoji(lm.nation, 16)}</span> ${p.club} <span class="sr-league">· ${lm.name}</span></div>
           </div>
           ${tracked ? `<div style="text-align:right;flex-shrink:0;font-size:0.72rem;">
             <div style="color:var(--gold);font-weight:700">⭐ ${tracked.rating}</div>
@@ -689,7 +689,7 @@ function renderKeyPlayersTab(players) {
             <div class="kp-name">${p.name}</div>
             <div class="kp-rating">⭐ ${p.rating}</div>
             <div class="kp-stat">${p.goals ? `⚽${p.goals}G ${p.assists}A` : p.cs ? `🧤${p.cs}CS` : p.pos}</div>
-            <div class="kp-club">${lm.nation} ${p.club.split(' ').slice(0,2).join(' ')}</div>
+            <div class="kp-club" style="display:flex;align-items:center;justify-content:center;gap:3px"><span style="font-size:0">${flagImgFromEmoji(lm.nation, 14)}</span> ${p.club.split(' ').slice(0,2).join(' ')}</div>
             ${p.award ? `<div style="font-size:0.6rem;color:var(--gold);margin-top:3px">🏆</div>` : ''}
           </div>`;
       }).join('')}
@@ -702,9 +702,9 @@ function renderKeyPlayersTab(players) {
         const lm = LEAGUE_META[p.league] || LEAGUE_META["Other"];
         const eff = (p.rating * lm.weight).toFixed(2);
         return `<div class="player-row">
-          <span class="player-nation">${p.nation}</span>
+          <span class="player-nation" style="font-size:0">${flagImgFromEmoji(p.nation, 20)}</span>
           <span class="player-name">${p.name}</span>
-          <span class="player-club ${lm.tier===1?'':'non-top5'}">${lm.nation} ${p.club}</span>
+          <span class="player-club ${lm.tier===1?'':'non-top5'}" style="display:inline-flex;align-items:center;gap:3px"><span style="font-size:0">${flagImgFromEmoji(lm.nation, 16)}</span> ${p.club}</span>
           <span class="player-stats">${p.goals?`⚽ ${p.goals}G ${p.assists}A`:p.cs?`🧤 ${p.cs} CS`:`🛡️ ${p.pos}`}</span>
           <span class="player-rating">⭐ ${p.rating} <small>(eff ${eff})</small></span>
           ${p.award?`<span class="player-award">🏆 ${p.award}</span>`:''}
@@ -913,7 +913,7 @@ function _buildAndRevealCards(players) {
           <div class="fc-card-top">
             <div class="fc-card-rating">${rStr}</div>
             <div class="fc-card-pos">${p.pos}</div>
-            <div class="fc-card-nation">${p.nation || '🌍'}</div>
+            <div class="fc-card-nation" style="font-size:0">${flagImgFromEmoji(p.nation || '🌍', 18)}</div>
           </div>
           <div class="fc-card-photo-wrap">
             <img class="fc-card-photo" src="${_photoPlaceholder}"
