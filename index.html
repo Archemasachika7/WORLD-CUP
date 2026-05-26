@@ -7,6 +7,7 @@
   <meta name="description" content="FIFA World Cup 2026 — live stream + watch party, all 48 teams, real 2025-26 stats, in-play predictor." />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚽</text></svg>" />
   <link rel="stylesheet" href="css/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 <body>
 
@@ -26,8 +27,9 @@
     <li><a class="nav-link" href="#predictions">Predictions</a></li>
     <li><a class="nav-link" href="#live-predictor-section">Live</a></li>
     <li><a class="nav-link" href="#news">News</a></li>
+    <li><a class="nav-link" href="#meet">Meet</a></li>
   </ul>
-  <a class="nav-cta" href="#watch-party-section">▶ Watch + Chat</a>
+  <a class="nav-cta" href="#meet">🏟️ Meet Rooms</a>
 </nav>
 
 <!-- ======================================================
@@ -92,6 +94,7 @@
   </div>
   <div id="stream-alert" class="stream-alert"></div>
   <div class="stream-presets">
+    <button class="preset-stream" data-url="https://me.epicsports.online/">🏆 EpicSports</button>
     <button class="preset-stream" data-url="https://www.fifa.com/fifaplus">📺 FIFA+</button>
     <button class="preset-stream" data-url="https://www.foxsports.com">🇺🇸 Fox Sports</button>
     <button class="preset-stream" data-url="https://www.bbc.co.uk/iplayer">🇬🇧 BBC iPlayer</button>
@@ -252,6 +255,130 @@
 </section>
 
 <!-- ======================================================
+     Meet Rooms
+     ====================================================== -->
+<section id="meet" class="section section-fade">
+  <div class="section-header">
+    <span class="section-tag">🏟️ Watch Together</span>
+    <h2 class="section-title">Meet Rooms</h2>
+    <p class="section-desc">Create a room — get a shareable code. Real-time chat across all devices, live voice &amp; video, emoji spam, and synced stream for everyone in the room. No sign-up needed.</p>
+  </div>
+
+  <div id="meet-alert" class="meet-alert"></div>
+
+  <!-- Landing -->
+  <div id="meet-landing" class="meet-landing">
+    <div class="meet-landing-grid">
+
+      <div class="meet-identity-card">
+        <h3 class="meet-card-title">👤 Your Identity</h3>
+        <input id="meet-nickname-input" type="text" placeholder="Your nickname" maxlength="24" class="meet-field" />
+        <select id="meet-team-select" class="meet-field">
+          <option value="⚽" data-id="">⚽ Neutral</option>
+        </select>
+        <p class="meet-theme-hint">Pick your team — it themes the room with their colours:</p>
+        <div id="meet-themes-row" class="meet-themes-row"></div>
+      </div>
+
+      <div class="meet-action-card">
+        <h3 class="meet-card-title">🎉 Start a Room</h3>
+        <p class="meet-card-desc">Create a private room, get a code, and share it with friends worldwide. Paste the stream URL inside and everyone watches together.</p>
+        <button id="meet-create-btn" class="btn-primary meet-big-btn">Create Room →</button>
+      </div>
+
+      <div class="meet-action-card">
+        <h3 class="meet-card-title">🔗 Join a Room</h3>
+        <p class="meet-card-desc">Got a code from a friend? Enter it below and jump straight into the action — chat, video, and the stream already loaded.</p>
+        <div class="meet-join-row">
+          <input id="meet-room-code-input" type="text" placeholder="WC-XXXXX" maxlength="10" class="meet-field meet-code-field" />
+          <button id="meet-join-btn" class="btn-primary">Join →</button>
+        </div>
+      </div>
+
+    </div>
+  </div><!-- /meet-landing -->
+
+  <!-- In-Room UI (hidden until joined) -->
+  <div id="meet-room" class="meet-room hidden">
+
+    <div class="meet-room-header">
+      <div class="meet-room-id-wrap">
+        <span class="meet-room-label">Room</span>
+        <strong id="meet-room-code-display" class="meet-code-badge"></strong>
+      </div>
+      <div class="meet-share-wrap">
+        <input id="meet-share-url" type="text" readonly class="meet-share-input" />
+        <button id="meet-copy-link-btn" class="meet-copy-btn">📋 Copy Link</button>
+      </div>
+      <div class="meet-room-right">
+        <span id="meet-user-count" class="meet-user-count">0 watching</span>
+        <button id="meet-leave-btn" class="meet-leave-btn">🚪 Leave</button>
+      </div>
+    </div>
+
+    <div id="meet-presence-bar" class="meet-presence-bar"></div>
+
+    <div class="meet-main-layout">
+
+      <!-- Left: video grid + stream -->
+      <div class="meet-left-col">
+        <div id="meet-video-grid" class="meet-video-grid">
+          <div id="meet-local-vid-wrap" class="meet-peer-video meet-local hidden">
+            <video id="meet-local-video" autoplay muted playsinline></video>
+            <div class="meet-vid-label">You</div>
+          </div>
+        </div>
+
+        <div class="meet-stream-bar">
+          <span class="meet-stream-icon">📺</span>
+          <input id="meet-stream-input" type="url" placeholder="Paste stream URL — syncs for everyone in this room instantly" class="meet-stream-url-in" />
+          <button id="meet-stream-go" class="meet-stream-go">▶ Sync</button>
+        </div>
+        <div id="meet-stream-frame-wrap" class="meet-stream-frame-wrap hidden">
+          <iframe id="meet-stream-iframe" src="about:blank" allowfullscreen allow="autoplay; fullscreen; picture-in-picture" frameborder="0" title="Room stream"></iframe>
+        </div>
+
+        <div id="meet-emoji-rain" class="meet-emoji-rain" aria-hidden="true"></div>
+      </div>
+
+      <!-- Right: chat -->
+      <div class="meet-right-col">
+        <div class="meet-chat-header">💬 Room Chat</div>
+        <div id="meet-messages" class="meet-messages"></div>
+        <div class="meet-chat-input-wrap">
+          <input id="meet-msg-input" type="text" placeholder="Say something… ⚽" maxlength="200" class="meet-msg-input" />
+          <button id="meet-send-btn" class="meet-send-btn">Send</button>
+        </div>
+      </div>
+
+    </div><!-- /meet-main-layout -->
+
+    <!-- Controls: mic + cam + emoji spam -->
+    <div class="meet-controls-bar">
+      <div class="meet-media-group">
+        <button id="meet-mic-btn" class="meet-media-btn">🔇 Muted</button>
+        <button id="meet-cam-btn" class="meet-media-btn">📷 Cam Off</button>
+      </div>
+      <div class="meet-reactions-group">
+        <button class="emoji-reaction-btn" data-emoji="⚽">⚽</button>
+        <button class="emoji-reaction-btn" data-emoji="🔥">🔥</button>
+        <button class="emoji-reaction-btn" data-emoji="❤️">❤️</button>
+        <button class="emoji-reaction-btn" data-emoji="😱">😱</button>
+        <button class="emoji-reaction-btn" data-emoji="🎉">🎉</button>
+        <button class="emoji-reaction-btn" data-emoji="👏">👏</button>
+        <button class="emoji-reaction-btn" data-emoji="🚀">🚀</button>
+        <button class="emoji-reaction-btn" data-emoji="💪">💪</button>
+        <button class="emoji-reaction-btn" data-emoji="🏆">🏆</button>
+        <button class="emoji-reaction-btn" data-emoji="😭">😭</button>
+        <button class="emoji-reaction-btn" data-emoji="🤩">🤩</button>
+        <button class="emoji-reaction-btn" data-emoji="💥">💥</button>
+      </div>
+    </div>
+
+  </div><!-- /meet-room -->
+</section>
+
+<!-- ======================================================
      Footer
      ====================================================== -->
 <footer id="footer">
@@ -284,6 +411,8 @@
 <script src="js/predictions.js"></script>
 <script src="js/api.js"></script>
 <script src="js/watchparty.js"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/meet.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

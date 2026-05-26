@@ -5,7 +5,9 @@
 document.addEventListener("DOMContentLoaded", () => {
   initNav();
   populateTeamSelector();
+  populateMeetTeamSelector();
   WatchParty.init();
+  MeetSystem.init();
   renderHero();
   renderTeams();
   renderMatches();
@@ -17,6 +19,14 @@ document.addEventListener("DOMContentLoaded", () => {
   initScrollAnimations();
   initStatsViewToggle();
 });
+
+// ---- Meet Rooms team selector ----
+function populateMeetTeamSelector() {
+  const sel = document.getElementById("meet-team-select");
+  if (!sel) return;
+  sel.innerHTML = '<option value="⚽" data-id="">⚽ Neutral</option>' +
+    TEAMS.map(t => `<option value="${t.flag}" data-id="${t.id}">${t.flag} ${t.name}</option>`).join("");
+}
 
 // ---- Watch Party team selector ----
 function populateTeamSelector() {
