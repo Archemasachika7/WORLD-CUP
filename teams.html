@@ -6,6 +6,9 @@
   <title>Teams — World Cup 2026</title>
   <meta name="description" content="All 48 teams at FIFA World Cup 2026 — real flags, squads, player photos, FIFA rankings." />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚽</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Teko:wght@400;500;600;700&family=Syncopate:wght@400;700&display=swap" />
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/animations.css" />
 <style>
@@ -27,12 +30,12 @@
 }
 #fc-close-btn:hover { background: rgba(229,9,20,.55); }
 
-.fc-screen { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.fc-screen { flex:1; display:flex; flex-direction:column; overflow:hidden; min-height:0; }
 
 /* ── Pack Screen ── */
 #fc-pack-screen {
   align-items: center; justify-content: space-between;
-  padding: 56px 20px 24px; gap: 14px;
+  padding: 56px 20px 24px; gap: 14px; overflow-y: auto;
   background:
     radial-gradient(ellipse 80% 50% at 50% 0%, rgba(80,0,140,.38) 0%, transparent 68%),
     radial-gradient(ellipse 60% 40% at 50% 100%, rgba(180,80,0,.18) 0%, transparent 60%),
@@ -96,6 +99,15 @@
 .tier-gold     { background:linear-gradient(150deg,#2a1a00,#7a5600,#c49a00,#e8c84a); border:2px solid #c49a00; }
 .tier-silver   { background:linear-gradient(150deg,#1a1a1a,#555,#a0a0a0,#d8d8d8);   border:2px solid #aaa; }
 .tier-bronze   { background:linear-gradient(150deg,#1c0a00,#6b3a1f,#a0703f,#d4a060); border:2px solid #a0703f; }
+
+/* Squad confirmed/projected badge */
+.fc-squad-badge {
+  position:absolute; top:5px; right:6px; z-index:6;
+  font-size:.5rem; font-weight:900; padding:1px 4px;
+  border-radius:3px; letter-spacing:.5px; line-height:1.4;
+}
+.fc-squad-badge.confirmed { background:rgba(46,204,113,.9); color:#fff; }
+.fc-squad-badge.projected  { background:rgba(255,193,7,.85); color:#000; }
 
 .fc-card-shine {
   position:absolute; inset:0;
@@ -219,13 +231,47 @@
 .fc-pp-pos.MF { background:#66bb6a; color:#fff; }
 .fc-pp-pos.FW { background:#ef5350; color:#fff; }
 
+/* ── Mobile: pack screen scrolls, cards shrink ── */
+@media (max-width:600px) {
+  #fc-pack-screen { padding:50px 12px 16px; gap:10px; overflow-y:auto; }
+  .fc-pack-header  { margin-bottom:0; }
+  #fc-team-name-disp { letter-spacing:3px; }
+  .fc-pack-label   { letter-spacing:4px; font-size:.6rem; }
+  #fc-cards-row    { gap:7px; }
+  .fc-pack-footer  { min-height:44px; }
+  #fc-view-pitch-btn { padding:11px 28px; font-size:.85rem; letter-spacing:1px; }
+}
 @media (max-width:480px) {
-  .fc-card { width:76px; height:108px; }
-  .fc-card-rating { font-size:1.05rem; }
-  .fc-card-photo { width:50px; height:50px; }
-  .fc-pp-wrap { width:32px; height:32px; }
-  .fc-pp-name { font-size:.46rem; }
-  .fc-pp-rating { font-size:.4rem; }
+  .fc-card          { width:74px; height:105px; }
+  .fc-card-rating   { font-size:1rem; }
+  .fc-card-photo    { width:48px; height:48px; }
+  .fc-card-name     { font-size:.55rem; }
+  .fc-card-club     { display:none; }
+  .fc-card-stats    { font-size:.42rem; gap:3px; }
+}
+@media (max-width:360px) {
+  .fc-card          { width:64px; height:90px; }
+  .fc-card-rating   { font-size:.9rem; }
+  .fc-card-photo    { width:40px; height:40px; }
+  #fc-cards-row     { gap:5px; }
+}
+/* ── Mobile: pitch ── */
+@media (max-width:600px) {
+  #fc-pitch-screen   { padding:50px 10px 10px; gap:8px; }
+  .fc-pitch-topbar   { max-width:100%; }
+  #fc-formation-label{ font-size:.78rem; letter-spacing:1px; }
+  #fc-squad-status-lbl{ font-size:.58rem; }
+  #fc-back-btn       { padding:5px 10px; font-size:.72rem; }
+  .fc-pitch-field    { width:min(100%,320px); }
+  .fc-pp-wrap        { width:34px; height:34px; }
+  .fc-pp-name        { font-size:.46rem; max-width:58px; }
+  .fc-pp-rating      { font-size:.38rem; padding:1px 2px; }
+  .fc-pp-pos         { font-size:.38rem; }
+}
+@media (max-width:360px) {
+  .fc-pitch-field    { width:min(100%,280px); }
+  .fc-pp-wrap        { width:28px; height:28px; border-width:2px; }
+  .fc-pp-name        { display:none; }
 }
 </style>
 </head>
@@ -733,44 +779,72 @@ function initScrollAnimations() {
 let _fcTeam   = null;
 let _fcLineup = [];
 
-/* Build the best probable XI from the squad call-up list.
-   Falls back to tracked PLAYERS if squad not yet announced. */
+/* Squad-first probable XI builder:
+   1. Start with official squad call-up list (SQUADS)
+   2. Enrich each player with tracked season stats (PLAYERS)
+   3. Estimate rating for squad players without tracked data — no league penalty
+   4. Pick best XI by raw rating */
 function _buildFCLineup(teamId) {
   const squad      = SQUADS[teamId] || { status:'UNANNOUNCED', players:[] };
   const trackedArr = PLAYERS.filter(p => p.teamId === teamId);
   const trackedMap = new Map(trackedArr.map(p => [p.name.toLowerCase(), p]));
 
-  const lgW = lg  => (LEAGUE_META[lg]  || LEAGUE_META['Other']).weight;
-  const est = lg  => 6.5 + lgW(lg) * 1.8;
+  // Honest baseline for squad players not in our stats database
+  // No league weight penalty — Saudi/MLS players aren't worse humans
+  function baselineRating(league) {
+    const lm = LEAGUE_META[league] || LEAGUE_META['Other'];
+    if (lm.tier === 1 && lm.weight >= 0.95) return 7.8; // Top-5 European league
+    if (lm.tier === 1)                       return 7.5; // Liga Portugal, etc.
+    if (lm.tier === 2)                       return 7.2; // Saudi Pro, MLS, Jupiler
+    return 6.8;                                          // Other leagues
+  }
 
   let pool = [];
 
   if (squad.players && squad.players.length > 0) {
+    // PRIMARY PATH: use official squad call-up
     pool = squad.players.map(sp => {
       const tp     = trackedMap.get(sp.name.toLowerCase());
-      const rating = tp ? tp.rating : est(sp.league);
+      const rating = tp ? tp.rating : baselineRating(sp.league);
       return {
-        name:sp.name, pos:sp.pos, club:sp.club, league:sp.league, rating,
-        goals:tp?.goals||0, assists:tp?.assists||0, cs:tp?.cs||0,
-        nation:tp?.nation||'🌍', selectScore: rating * lgW(sp.league)
+        name:    sp.name,
+        pos:     sp.pos,
+        club:    sp.club,      // club from squad call-up (most accurate)
+        league:  sp.league,
+        rating,
+        goals:   tp?.goals   || 0,
+        assists: tp?.assists  || 0,
+        cs:      tp?.cs       || 0,
+        nation:  tp?.nation   || '🌍',
+        tracked: !!tp,         // true = has real season stats
+        inSquad: true,
       };
     });
   } else {
-    pool = trackedArr.map(p => ({ ...p, selectScore: p.rating * lgW(p.league) }));
+    // FALLBACK: squad not announced — use tracked players only
+    pool = trackedArr.map(p => ({
+      ...p,
+      inSquad: false,
+      tracked: true,
+    }));
   }
 
+  // Pick XI purely by raw rating (no discounting)
   const byPos = { GK:[], DF:[], MF:[], FW:[] };
   pool.forEach(p => { if (byPos[p.pos]) byPos[p.pos].push(p); });
-  Object.values(byPos).forEach(a => a.sort((a,b) => b.selectScore - a.selectScore));
+  Object.values(byPos).forEach(a => a.sort((a, b) => b.rating - a.rating));
 
   let xi = [
-    ...byPos.GK.slice(0,1), ...byPos.DF.slice(0,4),
-    ...byPos.MF.slice(0,3), ...byPos.FW.slice(0,3)
+    ...byPos.GK.slice(0, 1),
+    ...byPos.DF.slice(0, 4),
+    ...byPos.MF.slice(0, 3),
+    ...byPos.FW.slice(0, 3),
   ];
 
+  // Fill if short (e.g. squad has few players of a position)
   if (xi.length < 11) {
     const used  = new Set(xi.map(p => p.name));
-    const extra = pool.filter(p => !used.has(p.name)).sort((a,b) => b.selectScore - a.selectScore);
+    const extra = pool.filter(p => !used.has(p.name)).sort((a, b) => b.rating - a.rating);
     xi = [...xi, ...extra].slice(0, 11);
   }
   return xi;
@@ -820,6 +894,13 @@ function _buildAndRevealCards(players) {
     card.className = 'fc-card';
     card.dataset.idx = i;
     card.style.animationDelay = `${i * 0.09}s`;
+    const squadBadge = p.inSquad
+      ? `<span class="fc-squad-badge confirmed" title="Official squad call-up">✓</span>`
+      : `<span class="fc-squad-badge projected" title="Projected — squad unannounced">~</span>`;
+    const statLine = p.tracked
+      ? (p.goals ? `⚽${p.goals} 🅰${p.assists}` : p.cs ? `🧤${p.cs} CS` : p.pos)
+      : `${p.pos} · ${(p.club||'').split(' ').slice(0,2).join(' ')}`;
+
     card.innerHTML = `
       <div class="fc-card-inner">
         <div class="fc-card-back">
@@ -828,6 +909,7 @@ function _buildAndRevealCards(players) {
         </div>
         <div class="fc-card-front tier-${tier}">
           <div class="fc-card-shine"></div>
+          ${squadBadge}
           <div class="fc-card-top">
             <div class="fc-card-rating">${rStr}</div>
             <div class="fc-card-pos">${p.pos}</div>
@@ -840,11 +922,7 @@ function _buildAndRevealCards(players) {
           <div class="fc-card-info">
             <div class="fc-card-name">${_fcShort(p.name)}</div>
             <div class="fc-card-club">${(p.club||'').split(' ').slice(0,2).join(' ')}</div>
-            <div class="fc-card-stats">
-              ${p.goals   ? `<span>⚽${p.goals}</span>`   : ''}
-              ${p.assists ? `<span>🅰${p.assists}</span>` : ''}
-              ${p.cs      ? `<span>🧤${p.cs}</span>`      : ''}
-            </div>
+            <div class="fc-card-stats">${statLine}</div>
           </div>
         </div>
       </div>`;
