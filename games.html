@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Games — World Cup 2026</title>
+  <meta name="description" content="Fun World Cup 2026 games — score predictor, quiz, and penalty shootout simulator." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚽</text></svg>" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+</head>
+<body>
+
+<nav id="main-nav"></nav>
+
+<div class="page-hero" style="padding:100px 40px 40px;max-width:1100px;margin:0 auto;">
+  <span class="section-tag">Fun & Interactive</span>
+  <h1 class="section-title" style="font-size:2.5rem;margin-top:8px">🎮 World Cup Games</h1>
+  <p class="section-desc">Test your predictions, knowledge, and penalties against the World Cup universe.</p>
+</div>
+
+<div style="max-width:1100px;margin:0 auto;padding:0 40px 80px;">
+
+  <!-- Tab Navigation -->
+  <div class="games-tabs">
+    <button class="game-tab-btn active" data-game="predictor">⚽ Score Predictor</button>
+    <button class="game-tab-btn" data-game="quiz">🧠 WC Quiz</button>
+    <button class="game-tab-btn" data-game="shootout">🥅 Penalty Shootout</button>
+  </div>
+
+  <!-- Game 1: Score Predictor -->
+  <div id="game-predictor" class="game-panel active">
+    <div class="predictor-game-card">
+      <h2 style="font-size:1.4rem;font-weight:800;margin-bottom:8px">Score Predictor</h2>
+      <p style="color:var(--text-dim);font-size:0.88rem;margin-bottom:28px">
+        Pick two teams and predict the score. The AI model predicts too — earn +3 for exact score, +1 for correct result.
+        <strong id="predictor-total-pts" style="color:var(--gold)"></strong>
+      </p>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;">
+        <div>
+          <label style="font-size:0.8rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;">Home Team</label>
+          <select id="pred-home" style="width:100%;margin-top:6px;padding:10px;background:var(--bg-hover);border:1px solid var(--border);border-radius:8px;color:var(--text);">
+          </select>
+        </div>
+        <div>
+          <label style="font-size:0.8rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;">Away Team</label>
+          <select id="pred-away" style="width:100%;margin-top:6px;padding:10px;background:var(--bg-hover);border:1px solid var(--border);border-radius:8px;color:var(--text);">
+          </select>
+        </div>
+      </div>
+
+      <div class="predictor-matchup">
+        <div class="predictor-team-side">
+          <span id="pred-home-flag" class="predictor-team-flag">🏴󠁧󠁢󠁥󠁮󠁧󠁿</span>
+          <div style="font-weight:700;font-size:0.9rem;" id="pred-home-name">Team 1</div>
+        </div>
+        <div class="predictor-score-side">
+          <div class="score-input-group">
+            <div class="score-up-down">
+              <button class="score-stepper" data-team="home" data-dir="up">▲</button>
+              <button class="score-stepper" data-team="home" data-dir="dn">▼</button>
+            </div>
+            <div class="score-display" id="pred-home-score">0</div>
+            <span style="font-size:1.5rem;color:var(--text-dim);padding:0 8px;">–</span>
+            <div class="score-display" id="pred-away-score">0</div>
+            <div class="score-up-down">
+              <button class="score-stepper" data-team="away" data-dir="up">▲</button>
+              <button class="score-stepper" data-team="away" data-dir="dn">▼</button>
+            </div>
+          </div>
+          <div class="predictor-vs-label">Your Prediction</div>
+        </div>
+        <div class="predictor-team-side">
+          <span id="pred-away-flag" class="predictor-team-flag">🇫🇷</span>
+          <div style="font-weight:700;font-size:0.9rem;" id="pred-away-name">Team 2</div>
+        </div>
+      </div>
+
+      <button id="pred-submit-btn" class="btn-primary" style="width:100%;margin-bottom:16px;">🔮 Submit Prediction</button>
+
+      <div id="pred-ai-card" class="predictor-ai-card hidden">
+        <div class="predictor-ai-label">🤖 AI Model Prediction</div>
+        <div id="pred-ai-result"></div>
+        <div id="pred-points-row" class="predictor-result-row hidden">
+          <div>
+            <div style="font-size:0.85rem;color:var(--text-dim)">Your result:</div>
+            <div id="pred-pts-label" style="font-weight:700;font-size:1rem;margin-top:4px"></div>
+          </div>
+          <div class="predictor-pts-badge" id="pred-pts-num"></div>
+        </div>
+      </div>
+
+      <!-- Past predictions -->
+      <div id="pred-history" style="margin-top:24px;"></div>
+    </div>
+  </div>
+
+  <!-- Game 2: World Cup Quiz -->
+  <div id="game-quiz" class="game-panel">
+    <div id="quiz-container" class="quiz-card">
+      <div style="text-align:center;padding:20px 0">
+        <div style="font-size:3rem;margin-bottom:16px">🧠</div>
+        <h2 style="font-size:1.5rem;font-weight:800;margin-bottom:8px">World Cup Quiz</h2>
+        <p style="color:var(--text-dim);margin-bottom:24px">10 questions, 30 seconds each. How much do you know about the beautiful game?</p>
+        <button id="quiz-start-btn" class="btn-primary" style="padding:14px 36px;font-size:1.1rem;">Start Quiz</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Game 3: Penalty Shootout -->
+  <div id="game-shootout" class="game-panel">
+    <div style="max-width:720px;margin:0 auto">
+      <div style="text-align:center;margin-bottom:28px">
+        <h2 style="font-size:1.4rem;font-weight:800;margin-bottom:8px">🥅 Penalty Shootout</h2>
+        <p style="color:var(--text-dim);font-size:0.88rem;margin-bottom:16px">Pick your team. 5 kicks each. Choose a zone — if you and the CPU pick the same zone, it's a save!</p>
+        <div style="display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;">
+          <select id="shootout-team-select" style="padding:10px 16px;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;color:var(--text);">
+          </select>
+          <button id="shootout-start-btn" class="btn-primary">Start Shootout</button>
+        </div>
+      </div>
+      <div id="shootout-container"></div>
+    </div>
+  </div>
+
+</div>
+
+<footer id="footer"></footer>
+
+<script src="js/data.js"></script>
+<script src="js/predictions.js"></script>
+<script src="js/shared.js"></script>
+<script src="js/games.js"></script>
+</body>
+</html>

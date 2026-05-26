@@ -591,3 +591,22 @@ const MATCHES = [
 const NEWS_KEY   = "wc2026_news";
 const NEWS_TTL   = 6 * 60 * 60 * 1000;
 const STREAM_KEY = "wc2026_stream";
+
+// ---- Real Flag Images via flagcdn.com ----
+const FLAG_CODES = {
+  mex:"mx", zaf:"za", kor:"kr", cze:"cz", can:"ca", bih:"ba", qat:"qa",
+  sui:"ch", bra:"br", mar:"ma", hai:"ht", sco:"gb-sct", usa:"us", par:"py",
+  aus:"au", tur:"tr", ger:"de", cuw:"cw", civ:"ci", ecu:"ec", ned:"nl",
+  jpn:"jp", swe:"se", tun:"tn", bel:"be", egy:"eg", irn:"ir", nzl:"nz",
+  esp:"es", cpv:"cv", sau:"sa", uru:"uy", fra:"fr", sen:"sn", irq:"iq",
+  nor:"no", arg:"ar", dza:"dz", aut:"at", jor:"jo", por:"pt", cod:"cd",
+  uzb:"uz", col:"co", eng:"gb-eng", cro:"hr", gha:"gh", pan:"pa",
+};
+
+function flagImg(teamId, size=32) {
+  const code = FLAG_CODES[teamId];
+  const team = TEAMS.find(t => t.id === teamId);
+  const emoji = team?.flag || '🏳️';
+  if (!code) return `<span class="flag-emoji">${emoji}</span>`;
+  return `<img class="flag-img" src="https://flagcdn.com/w${size}/${code}.png" alt="${teamId}" width="${size}" loading="lazy" onerror="this.style.display='none';this.nextSibling.style.display='inline'" /><span class="flag-emoji" style="display:none">${emoji}</span>`;
+}
