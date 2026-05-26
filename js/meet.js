@@ -450,6 +450,68 @@ const MeetSystem = (() => {
     }});
   }
 
+  // ── Focused stream share ───────────────────────────────
+  // Tries Chrome Crop API (element-level capture) first;
+  // falls back to fullscreen overlay + tab share.
+  async function shareStreamFocused() {
+    const wrap = document.getElementById("meet-stream-frame-wrap");
+    const iframeSrc = document.getElementById("meet-stream-iframe")?.src;
+    if (!iframeSrc || iframeSrc === "about:blank") {
+      alert2("Load a stream first, then click Share Stream.");
+      return;
+    }
+
+    // Chrome 104+: Crop API — captures only this element
+    if (typeof CropTarget !== "undefined" && wrap) {
+      try {
+        const stream = await navigator.mediaDevices.getDisplayMedia({
+          video: { displaySurface: "browser" },
+          preferCurrentTab: true,
+          audio: false,
+        });
+        const [videoTrack] = stream.getVideoTracks();
+        try {
+          const cropTarget = await CropTarget.fromElement(wrap);
+          await videoTrack.cropTo(cropTarget);
+        } catch { /* Crop failed — still share the full tab */ }
+        videoTrack.addEventListener("ended", stopScreenShare);
+        if (screenStream) stopScreenShare();
+        screenStream = stream;
+        Object.values(peers).forEach(({ pc }) => {
+          const sender = pc.getSenders().find(s => s.track?.kind === "video");
+          if (sender) sender.replaceTrack(videoTrack).catch(() => {});
+          else pc.addTrack(videoTrack, stream);
+        });
+        updateLocalVid();
+        updateBtns();
+        sysMsg(`${st.teamFlag} ${st.nickname} is sharing the stream — all peers now see it live`);
+        return;
+      } catch(e) {
+        if (e.name === "NotAllowedError") return;
+        // Other error — fall through to fullscreen overlay
+      }
+    }
+
+    // Fallback: open fullscreen overlay, then user shares the tab
+    openFullscreenStream();
+  }
+
+  function openFullscreenStream() {
+    const src = document.getElementById("meet-stream-iframe")?.src;
+    if (!src || src === "about:blank") { alert2("Load a stream first."); return; }
+    const overlay = document.getElementById("meet-fullscreen-overlay");
+    const fsIframe = document.getElementById("meet-fullscreen-iframe");
+    if (fsIframe) fsIframe.src = src;
+    if (overlay)  overlay.style.display = "flex";
+  }
+
+  function closeFullscreenStream() {
+    const overlay = document.getElementById("meet-fullscreen-overlay");
+    const fsIframe = document.getElementById("meet-fullscreen-iframe");
+    if (overlay)  overlay.style.display = "none";
+    if (fsIframe) { fsIframe.src = "about:blank"; }
+  }
+
   function stopScreenShare() {
     if (!screenStream) return;
     screenStream.getTracks().forEach(t => t.stop());
@@ -584,6 +646,7 @@ const MeetSystem = (() => {
     await sbCh?.untrack();
     await sbCh?.unsubscribe();
     sbCh = null;
+    closeFullscreenStream();
     screenStream?.getTracks().forEach(t => t.stop());
     screenStream = null;
     localStream?.getTracks().forEach(t => t.stop());
@@ -631,6 +694,13 @@ const MeetSystem = (() => {
     document.getElementById("meet-mic-btn")?.addEventListener("click", toggleMic);
     document.getElementById("meet-cam-btn")?.addEventListener("click", toggleCam);
     document.getElementById("meet-screen-btn")?.addEventListener("click", toggleScreenShare);
+    document.getElementById("meet-stream-share-focused-btn")?.addEventListener("click", shareStreamFocused);
+    document.getElementById("meet-stream-expand-btn")?.addEventListener("click", openFullscreenStream);
+    document.getElementById("meet-fs-close-btn")?.addEventListener("click", closeFullscreenStream);
+    document.getElementById("meet-fs-share-btn")?.addEventListener("click", () => {
+      closeFullscreenStream();
+      toggleScreenShare();
+    });
     document.getElementById("meet-stream-go")?.addEventListener("click", async () => {
       const url = (document.getElementById("meet-stream-input")?.value || "").trim();
       if (url) await loadStream(url, true);
