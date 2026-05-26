@@ -27,12 +27,12 @@
 }
 #fc-close-btn:hover { background: rgba(229,9,20,.55); }
 
-.fc-screen { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.fc-screen { flex:1; display:flex; flex-direction:column; overflow:hidden; min-height:0; }
 
 /* ── Pack Screen ── */
 #fc-pack-screen {
   align-items: center; justify-content: space-between;
-  padding: 56px 20px 24px; gap: 14px;
+  padding: 56px 20px 24px; gap: 14px; overflow-y: auto;
   background:
     radial-gradient(ellipse 80% 50% at 50% 0%, rgba(80,0,140,.38) 0%, transparent 68%),
     radial-gradient(ellipse 60% 40% at 50% 100%, rgba(180,80,0,.18) 0%, transparent 60%),
@@ -219,13 +219,47 @@
 .fc-pp-pos.MF { background:#66bb6a; color:#fff; }
 .fc-pp-pos.FW { background:#ef5350; color:#fff; }
 
+/* ── Mobile: pack screen scrolls, cards shrink ── */
+@media (max-width:600px) {
+  #fc-pack-screen { padding:50px 12px 16px; gap:10px; overflow-y:auto; }
+  .fc-pack-header  { margin-bottom:0; }
+  #fc-team-name-disp { letter-spacing:3px; }
+  .fc-pack-label   { letter-spacing:4px; font-size:.6rem; }
+  #fc-cards-row    { gap:7px; }
+  .fc-pack-footer  { min-height:44px; }
+  #fc-view-pitch-btn { padding:11px 28px; font-size:.85rem; letter-spacing:1px; }
+}
 @media (max-width:480px) {
-  .fc-card { width:76px; height:108px; }
-  .fc-card-rating { font-size:1.05rem; }
-  .fc-card-photo { width:50px; height:50px; }
-  .fc-pp-wrap { width:32px; height:32px; }
-  .fc-pp-name { font-size:.46rem; }
-  .fc-pp-rating { font-size:.4rem; }
+  .fc-card          { width:74px; height:105px; }
+  .fc-card-rating   { font-size:1rem; }
+  .fc-card-photo    { width:48px; height:48px; }
+  .fc-card-name     { font-size:.55rem; }
+  .fc-card-club     { display:none; }
+  .fc-card-stats    { font-size:.42rem; gap:3px; }
+}
+@media (max-width:360px) {
+  .fc-card          { width:64px; height:90px; }
+  .fc-card-rating   { font-size:.9rem; }
+  .fc-card-photo    { width:40px; height:40px; }
+  #fc-cards-row     { gap:5px; }
+}
+/* ── Mobile: pitch ── */
+@media (max-width:600px) {
+  #fc-pitch-screen   { padding:50px 10px 10px; gap:8px; }
+  .fc-pitch-topbar   { max-width:100%; }
+  #fc-formation-label{ font-size:.78rem; letter-spacing:1px; }
+  #fc-squad-status-lbl{ font-size:.58rem; }
+  #fc-back-btn       { padding:5px 10px; font-size:.72rem; }
+  .fc-pitch-field    { width:min(100%,320px); }
+  .fc-pp-wrap        { width:34px; height:34px; }
+  .fc-pp-name        { font-size:.46rem; max-width:58px; }
+  .fc-pp-rating      { font-size:.38rem; padding:1px 2px; }
+  .fc-pp-pos         { font-size:.38rem; }
+}
+@media (max-width:360px) {
+  .fc-pitch-field    { width:min(100%,280px); }
+  .fc-pp-wrap        { width:28px; height:28px; border-width:2px; }
+  .fc-pp-name        { display:none; }
 }
 </style>
 </head>
@@ -761,7 +795,8 @@ function _buildFCLineup(teamId) {
 
   const byPos = { GK:[], DF:[], MF:[], FW:[] };
   pool.forEach(p => { if (byPos[p.pos]) byPos[p.pos].push(p); });
-  Object.values(byPos).forEach(a => a.sort((a,b) => b.selectScore - a.selectScore));
+  // Sort by raw rating — league weight is for squad strength scoring, not XI selection
+  Object.values(byPos).forEach(a => a.sort((a,b) => b.rating - a.rating));
 
   let xi = [
     ...byPos.GK.slice(0,1), ...byPos.DF.slice(0,4),
