@@ -47,6 +47,7 @@ const MeetSystem = (() => {
   let localStream = null;
   let screenStream = null;
   let peers = {};
+  const screenSharers = new Set(); // peerIds currently sharing screen
   let _lastSyncedUrl = "";
   let _syncDebounceT = null;
 
@@ -140,6 +141,21 @@ const MeetSystem = (() => {
         _lastSyncedUrl = payload.url;
         clearTimeout(_syncDebounceT);
         _syncDebounceT = setTimeout(() => loadStream(payload.url, false), 300);
+      })
+      .on("broadcast", { event: "rtc_screen_start" }, ({ payload }) => {
+        if (!payload?.p) return;
+        screenSharers.add(payload.p);
+        // If the track already arrived before this signal, re-route it now
+        const peerEl = document.getElementById(`peer-${payload.p}`);
+        if (peerEl) {
+          const existingVid = peerEl.querySelector("video");
+          if (existingVid?.srcObject) { renderScreenInContainer(existingVid.srcObject); peerEl.remove(); }
+        }
+      })
+      .on("broadcast", { event: "rtc_screen_stop" }, ({ payload }) => {
+        if (!payload?.p) return;
+        screenSharers.delete(payload.p);
+        clearScreenContainer();
       })
       .on("broadcast", { event: "rtc_hello"   }, ({ payload }) => { if (payload.p !== st.peerId) sendOffer(payload.p); })
       .on("broadcast", { event: "rtc_offer"   }, ({ payload }) => { if (payload.to === st.peerId) handleOffer(payload); })
@@ -444,12 +460,9 @@ const MeetSystem = (() => {
 
     updateLocalVid();
     updateBtns();
-    sysMsg(`${st.teamFlag} ${st.nickname} started screen sharing — all users now see your screen via WebRTC`);
-    sbCh?.send({ type:"broadcast", event:"chat", payload:{
-      room_id: st.roomId, nickname: "📺 System", team_flag: "🖥️",
-      text: `${st.nickname} started screen sharing`, type:"msg",
-      created_at: new Date().toISOString(),
-    }});
+    // Signal all peers: incoming video from me is a screen share, show it in stream container
+    sbCh?.send({ type:"broadcast", event:"rtc_screen_start", payload:{ p: st.peerId } });
+    sysMsg(`${st.teamFlag} ${st.nickname} started screen sharing — showing in stream area for all users`);
   }
 
   // ── Focused stream share ───────────────────────────────
@@ -528,6 +541,7 @@ const MeetSystem = (() => {
 
     updateLocalVid();
     updateBtns();
+    sbCh?.send({ type:"broadcast", event:"rtc_screen_stop", payload:{ p: st.peerId } });
     sysMsg("Screen share ended");
   }
 
@@ -625,7 +639,32 @@ const MeetSystem = (() => {
     if (pc && candidate) try { await pc.addIceCandidate(new RTCIceCandidate(candidate)); } catch {}
   }
 
+  function renderScreenInContainer(stream) {
+    const screenVid = document.getElementById("meet-peer-screen-video");
+    const iframe    = document.getElementById("meet-stream-iframe");
+    const wrap      = document.getElementById("meet-stream-frame-wrap");
+    const actBar    = document.getElementById("meet-stream-actions");
+    if (screenVid) { screenVid.srcObject = stream; screenVid.style.display = "block"; }
+    if (iframe)    iframe.style.display = "none";
+    if (actBar)    actBar.style.display = "flex";
+    wrap?.classList.remove("hidden");
+    sysMsg("A participant is sharing their screen — shown in the stream area below");
+  }
+
+  function clearScreenContainer() {
+    const screenVid = document.getElementById("meet-peer-screen-video");
+    const iframe    = document.getElementById("meet-stream-iframe");
+    if (screenVid) { screenVid.srcObject = null; screenVid.style.display = "none"; }
+    if (iframe)    iframe.style.display = "";
+    sysMsg("Screen share ended");
+  }
+
   function renderRemote(peerId, stream) {
+    // Screen share tracks go to the stream container, not the camera grid
+    if (screenSharers.has(peerId)) {
+      renderScreenInContainer(stream);
+      return;
+    }
     const grid = document.getElementById("meet-video-grid");
     if (!grid) return;
     let wrap = document.getElementById(`peer-${peerId}`);
@@ -660,8 +699,11 @@ const MeetSystem = (() => {
     const iframe = document.getElementById("meet-stream-iframe");
     if (iframe) iframe.src = "about:blank";
     document.getElementById("meet-stream-frame-wrap")?.classList.add("hidden");
+    document.getElementById("meet-stream-actions")?.style.setProperty("display","none");
     document.getElementById("meet-messages").innerHTML = "";
     document.getElementById("meet-presence-bar").innerHTML = "";
+    screenSharers.clear();
+    clearScreenContainer();
 
     // Reset video grid
     const grid = document.getElementById("meet-video-grid");

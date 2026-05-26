@@ -115,6 +115,8 @@
         <div class="stream-presets" id="room-stream-presets" style="padding:6px 0;"></div>
 
         <div id="meet-stream-frame-wrap" class="meet-stream-frame-wrap hidden">
+          <!-- Peer screen share video (shown instead of iframe when someone shares screen) -->
+          <video id="meet-peer-screen-video" autoplay playsinline style="display:none;width:100%;background:#000;"></video>
           <iframe id="meet-stream-iframe" src="about:blank" allowfullscreen allow="autoplay; fullscreen; picture-in-picture" frameborder="0" title="Room stream"></iframe>
         </div>
 
