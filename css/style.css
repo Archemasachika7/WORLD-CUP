@@ -3198,3 +3198,246 @@ button { cursor: pointer; }
   .h2h-selectors select { width: 100%; }
   .favs-podium { grid-template-columns: 1fr; }
 }
+
+/* ============================================================
+   FLAG IMAGE FIX (critical — was missing)
+   ============================================================ */
+.flag-img {
+  display: inline-block;
+  border-radius: 3px;
+  object-fit: cover;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+.flag-emoji { vertical-align: middle; line-height: 1; }
+
+/* ============================================================
+   Player Photo Frames
+   ============================================================ */
+.player-photo-wrap {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: rgba(255,255,255,0.06);
+  flex-shrink: 0;
+  position: relative;
+}
+.player-photo-wrap img {
+  width: 100%; height: 100%;
+  object-fit: cover; object-position: top center;
+  transition: opacity 0.3s;
+}
+.player-photo-wrap.shimmer::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg,rgba(255,255,255,0.04) 25%,rgba(255,255,255,0.12) 50%,rgba(255,255,255,0.04) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: 50%;
+}
+@keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+.photo-loaded { opacity: 1; }
+
+/* ============================================================
+   Team Card — enhanced
+   ============================================================ */
+.team-card {
+  overflow: hidden; /* ensure overlay clips */
+}
+.tc-elo-bar-wrap {
+  height: 3px; background: rgba(255,255,255,0.07);
+  border-radius: 2px; overflow: hidden;
+  margin: 5px 0 4px;
+}
+.tc-elo-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  border-radius: 2px;
+  transition: width 0.8s cubic-bezier(.4,0,.2,1);
+}
+.star-overlay {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.95) 70%, transparent);
+  padding: 24px 10px 8px;
+  transform: translateY(100%);
+  transition: transform 0.28s cubic-bezier(.4,0,.2,1);
+}
+.team-card:hover .star-overlay { transform: translateY(0); }
+.star-pill {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 0.72rem;
+}
+.star-pill img {
+  width: 28px; height: 28px; border-radius: 50%;
+  object-fit: cover; object-position: top;
+  border: 1.5px solid rgba(255,215,0,0.55);
+  background: rgba(255,255,255,0.08);
+  flex-shrink: 0;
+}
+.star-pill-name { font-weight: 700; color: #fff; }
+.star-pill-stat { color: var(--gold); font-size: 0.68rem; }
+
+/* ============================================================
+   Modal — wider + tabs
+   ============================================================ */
+#modal-inner {
+  max-width: 760px;
+}
+.modal-tabs {
+  display: flex; gap: 2px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 20px; overflow-x: auto;
+  scrollbar-width: none;
+}
+.modal-tabs::-webkit-scrollbar { display: none; }
+.modal-tab-btn {
+  background: transparent; border: none;
+  color: var(--text-dim); padding: 10px 18px;
+  font-size: 0.82rem; font-weight: 600; cursor: pointer;
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+  transition: color 0.2s, border-color 0.2s;
+  white-space: nowrap;
+}
+.modal-tab-btn.active { color: var(--text); border-bottom-color: var(--accent); }
+.modal-tab-btn:hover:not(.active) { color: var(--text); }
+.modal-tab-pane { display: none; }
+.modal-tab-pane.active { display: block; }
+
+/* ============================================================
+   Squad Tab — players by position with photos
+   ============================================================ */
+.pos-group-title {
+  font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1px; color: var(--text-dim);
+  margin: 14px 0 8px; display: flex; align-items: center; gap: 8px;
+}
+.pos-group-title::after {
+  content: ''; flex: 1; height: 1px;
+  background: var(--border);
+}
+.squad-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 12px; background: var(--bg-dark);
+  border: 1px solid var(--border); border-radius: 8px;
+  margin-bottom: 5px; transition: background 0.15s;
+}
+.squad-row:hover { background: var(--bg-hover); }
+.squad-pos-dot {
+  width: 26px; height: 26px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.6rem; font-weight: 900; flex-shrink: 0;
+}
+.spos-gk { background:rgba(241,196,15,.2); color:var(--yellow); border:1px solid rgba(241,196,15,.3); }
+.spos-df { background:rgba(52,152,219,.2); color:#3498db; border:1px solid rgba(52,152,219,.3); }
+.spos-mf { background:rgba(46,204,113,.2); color:var(--green); border:1px solid rgba(46,204,113,.3); }
+.spos-fw { background:rgba(229,9,20,.2); color:var(--accent); border:1px solid rgba(229,9,20,.3); }
+.squad-row .sr-name { font-weight: 700; font-size: 0.85rem; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.squad-row .sr-club { font-size: 0.72rem; color: var(--text-dim); }
+.squad-row .sr-league { font-size: 0.65rem; opacity: 0.7; }
+.squad-photo { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; object-position: top; border: 1px solid rgba(255,255,255,.15); background: rgba(255,255,255,.06); flex-shrink: 0; }
+
+/* ============================================================
+   Key Players Tab
+   ============================================================ */
+.key-players-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+  gap: 10px; margin-top: 8px;
+}
+.kp-card {
+  background: var(--bg-dark); border: 1px solid var(--border);
+  border-radius: 10px; padding: 14px 8px; text-align: center;
+  transition: transform 0.2s, border-color 0.2s;
+}
+.kp-card:hover { transform: translateY(-3px); border-color: rgba(229,9,20,.35); }
+.kp-photo {
+  width: 54px; height: 54px; border-radius: 50%;
+  object-fit: cover; object-position: top;
+  border: 2px solid rgba(229,9,20,.35);
+  background: rgba(255,255,255,.06);
+  margin: 0 auto 8px; display: block;
+}
+.kp-name { font-size: 0.78rem; font-weight: 700; margin-bottom: 2px; line-height: 1.2; }
+.kp-rating { font-size: 0.72rem; color: var(--accent); font-weight: 900; }
+.kp-stat { font-size: 0.65rem; color: var(--gold); margin-top: 1px; }
+.kp-club { font-size: 0.62rem; color: var(--text-dim); margin-top: 2px; }
+
+/* ============================================================
+   Formation — improved nodes
+   ============================================================ */
+.fm-wrap {
+  position: relative; height: 480px; border-radius: 14px;
+  background: linear-gradient(180deg,#1e6b2e,#145020);
+  border: 2px solid rgba(255,255,255,.22); overflow: hidden;
+}
+.fm-lines {
+  position: absolute; inset: 0; pointer-events: none;
+}
+.fm-node {
+  position: absolute; transform: translate(-50%,-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  animation: nodeIn .5s ease both;
+}
+@keyframes nodeIn { from{opacity:0;transform:translate(-50%,-50%) scale(.3)} to{opacity:1;transform:translate(-50%,-50%) scale(1)} }
+.fm-photo {
+  width: 44px; height: 44px; border-radius: 50%;
+  object-fit: cover; object-position: top;
+  border: 2px solid rgba(255,255,255,.45);
+  background: rgba(255,255,255,.1);
+  transition: border-color .2s;
+}
+.fm-node:hover .fm-photo { border-color: var(--gold); }
+.fm-label {
+  background: rgba(0,0,0,.82); border: 1px solid rgba(255,255,255,.22);
+  border-radius: 10px; padding: 2px 7px;
+  font-size: 0.62rem; font-weight: 700; color: #fff;
+  white-space: nowrap; max-width: 80px;
+  overflow: hidden; text-overflow: ellipsis;
+}
+.fm-rating { font-size: 0.6rem; color: var(--gold); }
+
+/* ============================================================
+   EA Card — player photo
+   ============================================================ */
+.ea-photo-ring {
+  width: 52px; height: 52px; border-radius: 50%;
+  overflow: hidden; margin: 4px auto;
+  border: 2px solid rgba(255,255,255,.15);
+  background: rgba(255,255,255,.06);
+  position: relative;
+}
+.ea-photo-ring img {
+  width: 100%; height: 100%;
+  object-fit: cover; object-position: top;
+}
+.ea-photo-fallback {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.6rem;
+}
+.ea-gold .ea-photo-ring { border-color: rgba(212,175,55,.6); }
+.ea-silver .ea-photo-ring { border-color: rgba(192,192,192,.5); }
+.ea-bronze .ea-photo-ring { border-color: rgba(140,80,30,.6); }
+
+/* ============================================================
+   Fav preview card flag fix
+   ============================================================ */
+.fav-preview-card { position: relative; }
+.favs-preview-grid {
+  display: flex; gap: 16px; flex-wrap: wrap; justify-content: center;
+}
+.fav-preview-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 24px 20px;
+  text-align: center; flex: 1; min-width: 140px; max-width: 200px;
+  cursor: pointer; transition: transform .2s, border-color .2s;
+}
+.fav-preview-card:hover { transform: translateY(-5px); border-color: rgba(229,9,20,.4); }
+.fav-rank { font-size: 1.6rem; font-weight: 900; color: var(--gold); margin-bottom: 6px; }
+.fav-name { font-weight: 700; margin: 6px 0 2px; }
+.fav-pct { font-size: 1.4rem; font-weight: 900; color: var(--accent); }
+
+@media (max-width: 600px) {
+  .key-players-grid { grid-template-columns: repeat(auto-fill,minmax(100px,1fr)); }
+  .modal-tab-btn { padding: 8px 12px; font-size: 0.76rem; }
+}

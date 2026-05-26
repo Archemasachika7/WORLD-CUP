@@ -133,6 +133,8 @@ function renderStats() {
 
   container.innerHTML = html;
   initScrollAnimations();
+  // Async load player photos into EA cards
+  loadPhotosIntoImgs('#stats-container img[data-player]');
 }
 
 function renderEaCard(p) {
@@ -154,7 +156,10 @@ function renderEaCard(p) {
         <div class="ea-nation">${p.nation}</div>
         ${wct ? `<div class="ea-wcteam" style="font-size:0;">${flagImg(wct.id, 20)}</div>` : ''}
       </div>
-      <div class="ea-silhouette">${posIcon}</div>
+      <div class="ea-photo-ring">
+        <img src="${_photoPlaceholder}" data-player="${p.name}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;object-position:top" />
+        <div class="ea-photo-fallback" id="efb_${p.name.replace(/\s+/g,'_').replace(/[^a-zA-Z_]/g,'')}">${posIcon}</div>
+      </div>
       <div class="ea-name">${p.name.toUpperCase().split(" ").pop()}</div>
       <div class="ea-fullname">${p.name}</div>
       <div class="ea-club">${lm.nation} ${p.club}</div>
