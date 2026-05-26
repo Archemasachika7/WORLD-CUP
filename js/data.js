@@ -592,7 +592,7 @@ const NEWS_KEY   = "wc2026_news";
 const NEWS_TTL   = 6 * 60 * 60 * 1000;
 const STREAM_KEY = "wc2026_stream";
 
-// ---- Real Flag Images via flagcdn.com ----
+// ---- Real Flag Images via flag-icons CSS library ----
 const FLAG_CODES = {
   mex:"mx", zaf:"za", kor:"kr", cze:"cz", can:"ca", bih:"ba", qat:"qa",
   sui:"ch", bra:"br", mar:"ma", hai:"ht", sco:"gb-sct", usa:"us", par:"py",
@@ -606,34 +606,29 @@ const FLAG_CODES = {
 function flagImg(teamId, size=32) {
   const code = FLAG_CODES[teamId];
   const team = TEAMS.find(t => t.id === teamId);
-  const emoji = team?.flag || '🏳️';
-  if (!code) return `<span class="flag-emoji" style="font-size:${Math.round(size*0.7)}px;line-height:1;vertical-align:middle">${emoji}</span>`;
-  const h = Math.round(size * 0.667);
-  return `<img class="flag-img" src="https://flagcdn.com/w${size}/${code}.png" alt="${team?.name||teamId}" width="${size}" height="${h}" loading="lazy" onerror="this.style.display='none';this.nextSibling.style.display='inline'" /><span class="flag-emoji" style="display:none;font-size:${Math.round(size*0.7)}px;line-height:1;vertical-align:middle">${emoji}</span>`;
+  if (!code) {
+    return `<span title="${team?.name||teamId}" style="font-size:${Math.round(size*0.7)}px;line-height:1;vertical-align:middle">${team?.flag||'🏳️'}</span>`;
+  }
+  return `<span class="fi fi-${code}" style="width:${size}px;height:${Math.round(size*0.75)}px;display:inline-block;flex-shrink:0;border-radius:2px;vertical-align:middle" title="${team?.name||teamId}"></span>`;
 }
 
-// Converts any flag emoji (🇦🇷, 🇫🇷, 🏴󠁧󠁢󠁥󠁮󠁧󠁿 etc.) → real flagcdn.com <img>
-// Falls back to the emoji if conversion fails
+// Converts any flag emoji (🇦🇷, 🇫🇷, 🏴󠁧󠁢󠁥󠁮󠁧󠁿 etc.) → flag-icons CSS span
 function flagImgFromEmoji(emoji, size=24) {
   if (!emoji || emoji === '🌍') {
-    return `<span style="font-size:${size}px;line-height:1;vertical-align:middle">${emoji || '🌍'}</span>`;
+    return `<span style="font-size:${size}px;line-height:1;vertical-align:middle">${emoji||'🌍'}</span>`;
   }
-  // Subdivision flags (England, Scotland, Wales)
   const subdivMap = { '🏴󠁧󠁢󠁥󠁮󠁧󠁿': 'gb-eng', '🏴󠁧󠁢󠁳󠁣󠁴󠁿': 'gb-sct', '🏴󠁧󠁢󠁷󠁬󠁳󠁿': 'gb-wls' };
   let code = subdivMap[emoji];
   if (!code) {
     try {
       const cps = [...emoji].map(c => c.codePointAt(0));
-      const letters = cps
-        .filter(cp => cp >= 0x1F1E6 && cp <= 0x1F1FF)
-        .map(cp => String.fromCharCode(cp - 0x1F1E6 + 65))
-        .join('');
+      const letters = cps.filter(cp => cp >= 0x1F1E6 && cp <= 0x1F1FF)
+        .map(cp => String.fromCharCode(cp - 0x1F1E6 + 65)).join('');
       if (letters.length === 2) code = letters.toLowerCase();
     } catch(e) {}
   }
   if (!code) return `<span style="font-size:${size}px;line-height:1;vertical-align:middle">${emoji}</span>`;
-  const h = Math.round(size * 0.667);
-  return `<img class="flag-img" src="https://flagcdn.com/w${size}/${code}.png" alt="${emoji}" width="${size}" height="${h}" loading="lazy" onerror="this.style.display='none';this.nextSibling&&(this.nextSibling.style.display='inline')" /><span style="display:none;font-size:${size}px;line-height:1;vertical-align:middle">${emoji}</span>`;
+  return `<span class="fi fi-${code}" style="width:${size}px;height:${Math.round(size*0.75)}px;display:inline-block;flex-shrink:0;border-radius:2px;vertical-align:middle" title="${emoji}"></span>`;
 }
 
 // ---- Player Photo System (Wikipedia REST API + sessionStorage cache) ----
