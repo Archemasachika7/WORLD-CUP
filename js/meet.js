@@ -110,6 +110,14 @@ const MeetSystem = (() => {
     bindRoom();
     await subscribe(roomId);
     await loadHistory(roomId);
+    // Fetch and auto-load any existing stream for this room
+    try {
+      const { data } = await _sb.from("rooms").select("stream_url").eq("id", roomId).maybeSingle();
+      if (data?.stream_url) {
+        loadStream(data.stream_url, false);
+        sysMsg("Loading the room's current stream…");
+      }
+    } catch(e) { /* non-fatal */ }
     sysMsg(`You joined as ${st.teamFlag} ${st.nickname}`);
   }
 
@@ -233,7 +241,7 @@ const MeetSystem = (() => {
   }
 
   // ── Stream Sync ────────────────────────────────────────
-  function loadStream(url, broadcast = true) {
+  async function loadStream(url, broadcast = true) {
     const iframe = document.getElementById("meet-stream-iframe");
     const wrap   = document.getElementById("meet-stream-frame-wrap");
     const inp    = document.getElementById("meet-stream-input");
@@ -242,6 +250,10 @@ const MeetSystem = (() => {
     wrap?.classList.remove("hidden");
     if (broadcast) {
       sbCh?.send({ type:"broadcast", event:"stream_sync", payload:{ url } });
+      // Persist so late-joiners can fetch it
+      try {
+        await _sb.from("rooms").upsert({ id: st.roomId, stream_url: url, updated_at: new Date().toISOString() }, { onConflict: "id" });
+      } catch(e) { /* non-fatal */ }
       sysMsg(`${st.teamFlag} ${st.nickname} synced a stream for everyone`);
     } else {
       sysMsg("Host synced a stream — loading for you…");
@@ -463,9 +475,9 @@ const MeetSystem = (() => {
     document.getElementById("meet-copy-link-btn")?.addEventListener("click", copyLink);
     document.getElementById("meet-mic-btn")?.addEventListener("click", toggleMic);
     document.getElementById("meet-cam-btn")?.addEventListener("click", toggleCam);
-    document.getElementById("meet-stream-go")?.addEventListener("click", () => {
+    document.getElementById("meet-stream-go")?.addEventListener("click", async () => {
       const url = (document.getElementById("meet-stream-input")?.value || "").trim();
-      if (url) loadStream(url, true);
+      if (url) await loadStream(url, true);
     });
     document.getElementById("meet-stream-input")?.addEventListener("keydown", e => {
       if (e.key === "Enter") document.getElementById("meet-stream-go")?.click();

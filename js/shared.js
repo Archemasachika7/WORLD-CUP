@@ -18,7 +18,7 @@ function buildNav(activePage) {
 
   container.innerHTML = `
     <div class="nav-logo">
-      <img src="https://upload.wikimedia.org/wikipedia/en/thumb/8/86/2026_FIFA_World_Cup_logo.svg/120px-2026_FIFA_World_Cup_logo.svg.png" alt="FIFA World Cup 2026 logo" style="height:44px;width:auto" loading="lazy" />
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/86/2026_FIFA_World_Cup_logo.svg/120px-2026_FIFA_World_Cup_logo.svg.png" alt="FIFA World Cup 2026 logo" style="height:44px;width:auto" loading="lazy" onerror="this.style.display='none'" />
       <span>World Cup <span class="logo-wc">2026</span></span>
     </div>
     <button class="nav-hamburger" id="nav-hamburger" aria-label="Menu">☰</button>
