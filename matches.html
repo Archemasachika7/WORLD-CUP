@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Matches — World Cup 2026</title>
+  <meta name="description" content="Full FIFA World Cup 2026 match schedule with win probability and H2H predictor." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚽</text></svg>" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+</head>
+<body>
+
+<nav id="main-nav"></nav>
+
+<div class="page-hero" style="padding:100px 40px 40px;max-width:1200px;margin:0 auto;">
+  <span class="section-tag">Full Schedule</span>
+  <h1 class="section-title" style="font-size:2.5rem;margin-top:8px">All Matches</h1>
+  <p class="section-desc">Click a match for full H2H analysis. Animated probability bars show win chances based on Elo + squad strength.</p>
+</div>
+
+<div style="max-width:1200px;margin:0 auto;padding:0 40px 20px;">
+  <div class="match-tabs-wrap"><div id="match-tabs"></div></div>
+</div>
+
+<div id="matches-list" style="max-width:1200px;margin:0 auto;padding:0 40px 40px;"></div>
+
+<!-- Live In-Play Predictor -->
+<section class="section section-fade" id="live-predictor-section" style="max-width:1200px;margin:0 auto;padding:0 40px 80px;">
+  <div class="section-header">
+    <span class="section-tag">🔴 Live</span>
+    <h2 class="section-title">In-Play Match Predictor</h2>
+    <p class="section-desc">Simulate a live match — score, minute, and red cards shift win probability instantly.</p>
+  </div>
+  <div id="live-predictor" class="live-predictor-card"></div>
+</section>
+
+<footer id="footer"></footer>
+
+<!-- Modal -->
+<div id="modal">
+  <div id="modal-inner">
+    <button id="modal-close" aria-label="Close">✕</button>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/predictions.js"></script>
+<script src="js/shared.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  buildNav("matches");
+  buildFooter("footer");
+  renderMatches();
+  renderLivePredictor();
+  initScrollAnimations();
+});
+
+function renderMatches() {
+  const container = document.getElementById("matches-list");
+  if (!container) return;
+  const groups = [...new Set(MATCHES.map(m => m.stage))];
+  const tabs = document.getElementById("match-tabs");
+  tabs.innerHTML = ["All", ...groups].map((g, i) =>
+    `<button class="tab-btn ${i===0?'active':''}" data-group="${g}">${g}</button>`
+  ).join("");
+  tabs.querySelectorAll(".tab-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      tabs.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      displayMatches(btn.dataset.group);
+    });
+  });
+  displayMatches("All");
+}
+
+function displayMatches(group) {
+  const container = document.getElementById("matches-list");
+  const list = group === "All" ? MATCHES : MATCHES.filter(m => m.stage === group);
+  container.innerHTML = list.map(m => {
+    const home = TEAMS.find(t => t.id === m.home);
+    const away = TEAMS.find(t => t.id === m.away);
+    if (!home || !away) return "";
+    const prob = Predictions.getProbability(m.home, m.away);
+    const dt   = new Date(m.date + "T" + m.time);
+    const ds   = dt.toLocaleDateString("en-US", {weekday:"short", month:"short", day:"numeric"});
+    return `
+      <div class="match-card card-enter" data-match="${m.id}">
+        <div class="match-stage">${m.stage}</div>
+        <div class="match-date">${ds} ${m.time} &bull; ${m.venue}</div>
+        <div class="match-teams">
+          <div class="match-team">
+            ${flagImg(home.id, 48)}
+            <span class="mname-sm">${home.name}</span>
+          </div>
+          <div class="match-center">
+            ${m.homeScore !== null
+              ? `<span class="final-score">${m.homeScore}–${m.awayScore}</span>`
+              : `<span class="vs-badge">VS</span>`}
+          </div>
+          <div class="match-team">
+            ${flagImg(away.id, 48)}
+            <span class="mname-sm">${away.name}</span>
+          </div>
+        </div>
+        <div class="prob-bar">
+          <div class="prob-home stat-bar-fill" style="width:${prob.home}%">${prob.home}%</div>
+          <div class="prob-draw" style="width:${prob.draw}%">${prob.draw}%</div>
+          <div class="prob-away stat-bar-fill" style="width:${prob.away}%">${prob.away}%</div>
+        </div>
+        <div class="prob-labels">
+          <span>${home.name} Win</span><span>Draw</span><span>Win ${away.name}</span>
+        </div>
+      </div>`;
+  }).join("");
+
+  container.querySelectorAll(".match-card").forEach(card => {
+    card.addEventListener("click", () => {
+      const m = MATCHES.find(x => x.id === +card.dataset.match);
+      if (m) openMatchModal(m);
+    });
+  });
+  initScrollAnimations();
+}
+
+function openMatchModal(match) {
+  const home = TEAMS.find(t => t.id === match.home);
+  const away = TEAMS.find(t => t.id === match.away);
+  const prob = Predictions.getProbability(match.home, match.away);
+  const body = document.getElementById("modal-body");
+  const dt   = new Date(match.date + "T" + match.time).toLocaleDateString("en-US",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
+  body.innerHTML = `
+    <div class="match-modal-header">
+      <h2>${match.stage}</h2><p>${dt} &bull; ${match.time}</p><p>📍 ${match.venue}</p>
+    </div>
+    <div class="big-matchup">
+      <div class="bm-team">${flagImg(home.id, 80)}<br><strong>${home.name}</strong><br><small>FIFA #${home.ranking} &bull; Elo ${home.elo}</small></div>
+      <div class="bm-vs">VS</div>
+      <div class="bm-team">${flagImg(away.id, 80)}<br><strong>${away.name}</strong><br><small>FIFA #${away.ranking} &bull; Elo ${away.elo}</small></div>
+    </div>
+    <h3 class="modal-section-title">Pre-Match Win Probability</h3>
+    <div class="big-prob-bar">
+      <div class="bpb-home" style="width:${prob.home}%">${home.name} ${prob.home}%</div>
+      <div class="bpb-draw" style="width:${prob.draw}%">Draw<br>${prob.draw}%</div>
+      <div class="bpb-away" style="width:${prob.away}%">${away.name} ${prob.away}%</div>
+    </div>
+    <div class="modal-scores mt-16">
+      <div class="score-box"><div class="score-val">${prob.homeSqScore}</div><div class="score-lbl">${home.name} Squad</div></div>
+      <div class="score-box"><div class="score-val">${prob.homeTop5}</div><div class="score-lbl">${home.name} Top-5</div></div>
+      <div class="score-box"><div class="score-val">${prob.awaySqScore}</div><div class="score-lbl">${away.name} Squad</div></div>
+      <div class="score-box"><div class="score-val">${prob.awayTop5}</div><div class="score-lbl">${away.name} Top-5</div></div>
+    </div>
+    <p class="prediction-verdict mt-10">
+      🔮 <strong>${prob.home > prob.away + 10 ? home.name + " to win" : prob.away > prob.home + 10 ? away.name + " to win" : "Very close — could go either way"}</strong>
+    </p>
+    <div class="quick-live-link" style="margin-top:16px">
+      <button class="btn-sm" onclick="document.getElementById('modal').classList.remove('open');prefillPredictor('${home.id}','${away.id}')">
+        ▶ Run live in-play predictor for this match →
+      </button>
+    </div>`;
+  document.getElementById("modal").classList.add("open");
+}
+
+function prefillPredictor(hId, aId) {
+  const hs = document.getElementById("lp-home");
+  const as = document.getElementById("lp-away");
+  if (hs) hs.value = hId;
+  if (as) as.value = aId;
+  document.getElementById("live-predictor-section")?.scrollIntoView({ behavior: "smooth" });
+  setTimeout(() => document.getElementById("lp-home")?.dispatchEvent(new Event("change")), 200);
+}
+
+document.addEventListener("click", e => {
+  if (e.target.id === "modal" || e.target.id === "modal-close")
+    document.getElementById("modal").classList.remove("open");
+});
+
+function renderLivePredictor() {
+  const container = document.getElementById("live-predictor");
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="lp-teams">
+      <select id="lp-home">${TEAMS.map(t=>`<option value="${t.id}">${t.name}</option>`).join("")}</select>
+      <span class="lp-vs">vs</span>
+      <select id="lp-away">${TEAMS.map((t,i)=>`<option value="${t.id}" ${i===1?'selected':''}>${t.name}</option>`).join("")}</select>
+    </div>
+    <div class="lp-controls">
+      <div class="lp-score-wrap">
+        <label>Score</label>
+        <div class="lp-score-inputs">
+          <div class="lp-goals">
+            <button class="goal-btn" data-team="home" data-action="minus">−</button>
+            <span id="lp-home-goals">0</span>
+            <button class="goal-btn" data-team="home" data-action="plus">+</button>
+          </div>
+          <span class="lp-score-dash">—</span>
+          <div class="lp-goals">
+            <button class="goal-btn" data-team="away" data-action="minus">−</button>
+            <span id="lp-away-goals">0</span>
+            <button class="goal-btn" data-team="away" data-action="plus">+</button>
+          </div>
+        </div>
+      </div>
+      <div class="lp-minute-wrap">
+        <label>Minute: <strong id="lp-minute-val">0'</strong></label>
+        <input type="range" id="lp-minute" min="0" max="120" value="0" step="1" />
+      </div>
+      <div class="lp-cards-wrap">
+        <label>Red Cards</label>
+        <div class="lp-cards">
+          <span id="lp-home-flag"></span>
+          <button class="card-btn" data-team="home" data-action="minus">−</button>
+          <span class="red-card-count" id="lp-home-red">0 🟥</span>
+          <button class="card-btn" data-team="home" data-action="plus">+</button>
+          &nbsp;&nbsp;
+          <button class="card-btn" data-team="away" data-action="minus">−</button>
+          <span class="red-card-count" id="lp-away-red">0 🟥</span>
+          <button class="card-btn" data-team="away" data-action="plus">+</button>
+          <span id="lp-away-flag"></span>
+        </div>
+      </div>
+    </div>
+    <div id="lp-result" class="lp-result">
+      <div class="lp-result-header">
+        <span id="lp-res-home-flag"></span>
+        <span id="lp-scoreline">0 – 0</span>
+        <span id="lp-res-away-flag"></span>
+        <span id="lp-minute-badge" class="minute-badge">0'</span>
+      </div>
+      <div id="lp-bar" class="big-prob-bar mt-10">
+        <div class="bpb-home" id="lp-bpb-home" style="width:50%">50%</div>
+        <div class="bpb-draw" id="lp-bpb-draw" style="width:25%">25%</div>
+        <div class="bpb-away" id="lp-bpb-away" style="width:25%">25%</div>
+      </div>
+      <div class="lp-verdict" id="lp-verdict">Move the sliders to simulate a live match</div>
+      <div class="lp-momentum" id="lp-momentum"></div>
+    </div>`;
+
+  const state = { home: 0, away: 0, minute: 0, homeRed: 0, awayRed: 0 };
+
+  function updateLP() {
+    const hId = document.getElementById("lp-home").value;
+    const aId = document.getElementById("lp-away").value;
+    if (hId === aId) return;
+    const prob = Predictions.getInPlayProbability(hId, aId, state.home, state.away, state.minute, state.homeRed, state.awayRed);
+    const h = TEAMS.find(t => t.id === hId), a = TEAMS.find(t => t.id === aId);
+
+    document.getElementById("lp-res-home-flag").innerHTML = flagImg(h.id, 32);
+    document.getElementById("lp-res-away-flag").innerHTML = flagImg(a.id, 32);
+    document.getElementById("lp-home-flag").innerHTML = flagImg(h.id, 24);
+    document.getElementById("lp-away-flag").innerHTML = flagImg(a.id, 24);
+    document.getElementById("lp-scoreline").textContent = `${state.home} – ${state.away}`;
+    document.getElementById("lp-minute-badge").textContent = state.minute > 90 ? `${state.minute}' ET` : state.minute === 90 ? "FT" : state.minute === 45 ? "HT" : `${state.minute}'`;
+    document.getElementById("lp-verdict").textContent = prob.matchVerdict;
+    document.getElementById("lp-momentum").textContent = state.minute > 0 ? `Momentum: ${prob.momentum}` : "";
+
+    const bph = document.getElementById("lp-bpb-home");
+    const bpd = document.getElementById("lp-bpb-draw");
+    const bpa = document.getElementById("lp-bpb-away");
+    bph.style.width = prob.home + "%"; bph.textContent = `${h.name} ${prob.home}%`;
+    bpd.style.width = prob.draw + "%"; bpd.textContent = `Draw ${prob.draw}%`;
+    bpa.style.width = prob.away + "%"; bpa.textContent = `${a.name} ${prob.away}%`;
+  }
+
+  document.getElementById("lp-minute").addEventListener("input", e => {
+    state.minute = +e.target.value;
+    document.getElementById("lp-minute-val").textContent = `${state.minute}'`;
+    updateLP();
+  });
+  document.querySelectorAll(".goal-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const team = btn.dataset.team, act = btn.dataset.action;
+      if (act === "plus")  state[team] = Math.min(20, state[team] + 1);
+      if (act === "minus") state[team] = Math.max(0, state[team] - 1);
+      document.getElementById(`lp-${team}-goals`).textContent = state[team];
+      updateLP();
+    });
+  });
+  document.querySelectorAll(".card-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const team = btn.dataset.team + "Red", act = btn.dataset.action;
+      if (act === "plus")  state[team] = Math.min(3, state[team] + 1);
+      if (act === "minus") state[team] = Math.max(0, state[team] - 1);
+      document.getElementById(`lp-${btn.dataset.team}-red`).textContent = `${state[team]} 🟥`;
+      updateLP();
+    });
+  });
+  document.getElementById("lp-home").addEventListener("change", updateLP);
+  document.getElementById("lp-away").addEventListener("change", updateLP);
+  updateLP();
+}
+
+function initScrollAnimations() {
+  const obs = new IntersectionObserver(entries => entries.forEach(e => {
+    if (e.isIntersecting) e.target.classList.add("visible", "card-visible");
+  }), { threshold: 0.05 });
+  document.querySelectorAll(".card-enter, .section-fade").forEach(el => obs.observe(el));
+}
+</script>
+</body>
+</html>

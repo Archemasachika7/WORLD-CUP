@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Predictions — World Cup 2026</title>
+  <meta name="description" content="FIFA World Cup 2026 power rankings and H2H predictor — Elo + squad strength algorithm." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚽</text></svg>" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+</head>
+<body>
+
+<nav id="main-nav"></nav>
+
+<div class="page-hero" style="padding:100px 40px 40px;max-width:1200px;margin:0 auto;">
+  <span class="section-tag">Quantitative Analysis</span>
+  <h1 class="section-title" style="font-size:2.5rem;margin-top:8px">Power Rankings &amp; Predictions</h1>
+  <p class="section-desc">Formula: 40% Elo + 35% league-weighted squad strength (real 2025-26 data) + 25% FIFA ranking. Non-top-6 league players get discounted effective scores.</p>
+</div>
+
+<div id="predictions-container" style="max-width:1200px;margin:0 auto;padding:0 40px 80px;"></div>
+
+<footer id="footer"></footer>
+
+<!-- Modal -->
+<div id="modal">
+  <div id="modal-inner">
+    <button id="modal-close" aria-label="Close">✕</button>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/predictions.js"></script>
+<script src="js/shared.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  buildNav("predictions");
+  buildFooter("footer");
+  renderPredictions();
+  initScrollAnimations();
+});
+
+function renderPredictions() {
+  const container = document.getElementById("predictions-container");
+  if (!container) return;
+  const favs = Predictions.getTournamentFavourites();
+
+  container.innerHTML = `
+    <div class="favs-intro">
+      Composite score = 40% Elo + 35% weighted squad strength (real 2025-26 stats, league-discounted) + 25% FIFA ranking.
+      Non-top-5 league players have reduced weight (0.45–0.65×).
+    </div>
+    <h2 class="section-title" style="margin:32px 0 24px">🏆 Tournament Favourites — Podium</h2>
+    <div class="favs-podium">${favs.slice(0,3).map((t,i)=>`
+      <div class="podium-card p${i+1} card-enter" data-id="${t.id}" style="cursor:pointer">
+        <div class="podium-medal">${["🥇","🥈","🥉"][i]}</div>
+        <div class="podium-flag" style="font-size:0;margin:0 auto 12px;width:80px;">${flagImg(t.id, 80)}</div>
+        <div class="podium-name">${t.name}</div>
+        <div class="podium-pct">${t.titlePct}% title chance</div>
+        <div class="podium-sq">Squad score: ${t.squadScore} &bull; ${t.top5Players} top-5 players</div>
+        <div class="podium-label ${t.titleLabel.includes('Strong')?'label-green':'label-yellow'}">${t.titleLabel}</div>
+      </div>`).join("")}
+    </div>
+
+    <h2 class="section-title" style="margin:48px 0 24px">📊 Full Power Rankings (Top 16)</h2>
+    <div class="rankings-list">${favs.map((t,i)=>`
+      <div class="ranking-row card-enter" data-id="${t.id}" style="cursor:pointer">
+        <span class="rank-num">#${i+1}</span>
+        <span class="rank-flag">${flagImg(t.id, 32)}</span>
+        <span class="rank-name">${t.name}</span>
+        <div class="rank-bar-wrap">
+          <div class="rank-bar stat-bar-fill" style="width:${Math.round(t.composite*100)}%;background:var(--accent);height:100%;border-radius:inherit;"></div>
+        </div>
+        <span class="rank-pct">${Math.round(t.composite*100)}%</span>
+        <span class="rank-top5">${t.top5Players} T5</span>
+        <span class="rank-label ${t.titleLabel.includes('Strong')?'label-green':t.titleLabel.includes('Dark')?'label-yellow':'label-grey'}">${t.titleLabel}</span>
+      </div>`).join("")}
+    </div>
+
+    <div class="head2head-section" style="margin-top:60px">
+      <h2 class="section-title" style="margin-bottom:24px">⚔️ Head-to-Head Predictor</h2>
+      <p class="section-desc">Select any two teams to see probability breakdown based on Elo, squad strength, and FIFA ranking.</p>
+      <div class="h2h-selectors" style="margin-top:20px">
+        <select id="h2h-home" style="flex:1">${TEAMS.map(t=>`<option value="${t.id}">${t.name}</option>`).join("")}</select>
+        <span class="h2h-vs">VS</span>
+        <select id="h2h-away" style="flex:1">${TEAMS.map((t,i)=>`<option value="${t.id}" ${i===1?'selected':''}>${t.name}</option>`).join("")}</select>
+        <button id="h2h-btn" class="btn-primary">Predict</button>
+      </div>
+      <div id="h2h-result" style="margin-top:24px"></div>
+    </div>`;
+
+  document.getElementById("h2h-btn").addEventListener("click", () => {
+    const hId = document.getElementById("h2h-home").value;
+    const aId = document.getElementById("h2h-away").value;
+    if (hId === aId) {
+      document.getElementById("h2h-result").innerHTML = '<p class="error-text">Select two different teams.</p>';
+      return;
+    }
+    renderH2H(hId, aId);
+  });
+
+  container.querySelectorAll("[data-id]").forEach(el =>
+    el.addEventListener("click", () => openTeamModal(el.dataset.id))
+  );
+  initScrollAnimations();
+}
+
+function renderH2H(hId, aId) {
+  const prob = Predictions.getProbability(hId, aId);
+  const h = prob.homeTeam, a = prob.awayTeam;
+  const winner = prob.home > prob.away + 6 ? h.name : prob.away > prob.home + 6 ? a.name : "Likely a draw";
+  document.getElementById("h2h-result").innerHTML = `
+    <div class="h2h-result-card">
+      <div class="h2h-flags">
+        <span class="h2h-flag-lg" style="font-size:0;">${flagImg(h.id, 72)}</span>
+        <span class="h2h-divider">VS</span>
+        <span class="h2h-flag-lg" style="font-size:0;">${flagImg(a.id, 72)}</span>
+      </div>
+      <div class="h2h-names"><span>${h.name}</span><span>${a.name}</span></div>
+      <div class="big-prob-bar mt-16">
+        <div class="bpb-home" style="width:${prob.home}%">${h.name} ${prob.home}%</div>
+        <div class="bpb-draw" style="width:${prob.draw}%">Draw ${prob.draw}%</div>
+        <div class="bpb-away" style="width:${prob.away}%">${a.name} ${prob.away}%</div>
+      </div>
+      <p class="prediction-verdict mt-10">🔮 <strong>${winner}</strong>${winner.includes("draw")?"":" expected to win"}</p>
+      <div class="h2h-detail">
+        <span>Elo: ${h.elo} vs ${a.elo}</span>
+        <span>Squad: ${prob.homeSqScore} vs ${prob.awaySqScore}</span>
+        <span>Top-5 players: ${prob.homeTop5} vs ${prob.awayTop5}</span>
+        <span>Ranking: #${h.ranking} vs #${a.ranking}</span>
+      </div>
+    </div>`;
+}
+
+// ---- Team Modal ----
+function openTeamModal(teamId) {
+  const data = Predictions.getTeamAnalysis(teamId);
+  if (!data) return;
+  const { team, players, awards, squad, sq, composite, strengths, weaknesses } = data;
+  const modal = document.getElementById("modal");
+  const body  = document.getElementById("modal-body");
+
+  body.innerHTML = `
+    <div class="modal-header">
+      ${flagImg(team.id, 80)}
+      <div>
+        <h2>${team.name}</h2>
+        <p class="modal-sub">Group ${team.group} &bull; FIFA #${team.ranking} &bull; ${team.conf} &bull; Elo ${team.elo}</p>
+      </div>
+    </div>
+    <div class="modal-scores">
+      <div class="score-box"><div class="score-val">${sq.score.toFixed(2)}</div><div class="score-lbl">Squad Score</div></div>
+      <div class="score-box"><div class="score-val">${Math.round(composite*100)}%</div><div class="score-lbl">Composite</div></div>
+      <div class="score-box"><div class="score-val">${sq.top5Count}</div><div class="score-lbl">Top-5 Players</div></div>
+      <div class="score-box"><div class="score-val">${sq.awardBonus.toFixed(1)}</div><div class="score-lbl">Award Bonus</div></div>
+    </div>
+    <div class="strengths-weaknesses">
+      <div><h3 class="modal-section-title green-title">Strengths</h3><ul>${strengths.map(s=>`<li>✅ ${s}</li>`).join("")||"<li>—</li>"}</ul></div>
+      <div><h3 class="modal-section-title red-title">Concerns</h3><ul>${weaknesses.map(w=>`<li>⚠️ ${w}</li>`).join("")||"<li>—</li>"}</ul></div>
+    </div>`;
+
+  modal.classList.add("open");
+}
+
+document.addEventListener("click", e => {
+  if (e.target.id === "modal" || e.target.id === "modal-close")
+    document.getElementById("modal").classList.remove("open");
+});
+
+function initScrollAnimations() {
+  const obs = new IntersectionObserver(entries => entries.forEach(e => {
+    if (e.isIntersecting) e.target.classList.add("visible", "card-visible");
+  }), { threshold: 0.05 });
+  document.querySelectorAll(".card-enter, .section-fade").forEach(el => obs.observe(el));
+}
+</script>
+</body>
+</html>

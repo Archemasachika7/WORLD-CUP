@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Teams — World Cup 2026</title>
+  <meta name="description" content="All 48 teams at FIFA World Cup 2026 — real flags, squads, FIFA rankings, confederation filter." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚽</text></svg>" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+</head>
+<body>
+
+<nav id="main-nav"></nav>
+
+<div class="page-hero" style="padding:100px 40px 40px;max-width:1200px;margin:0 auto;">
+  <span class="section-tag">All 48 Nations</span>
+  <h1 class="section-title" style="font-size:2.5rem;margin-top:8px">The 2026 World Cup Teams</h1>
+  <p class="section-desc">Click any team for full squad, stats, and analysis. Filter by confederation or search by name.</p>
+</div>
+
+<!-- Filter bar -->
+<div style="max-width:1200px;margin:0 auto;padding:0 40px 32px;">
+  <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+    <input id="teams-search" type="text" placeholder="Search teams, group, or confederation…"
+      style="flex:1;min-width:220px;padding:10px 16px;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.9rem;" />
+    <div id="conf-filters" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+    <div style="display:flex;gap:8px;">
+      <button id="view-conf-btn" class="view-btn active">By Confederation</button>
+      <button id="view-group-btn" class="view-btn">By Group</button>
+    </div>
+  </div>
+</div>
+
+<div id="teams-grid" style="max-width:1200px;margin:0 auto;padding:0 40px 80px;"></div>
+
+<footer id="footer"></footer>
+
+<!-- Modal -->
+<div id="modal">
+  <div id="modal-inner">
+    <button id="modal-close" aria-label="Close">✕</button>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/predictions.js"></script>
+<script src="js/shared.js"></script>
+<script>
+let teamsViewMode = "conf";
+let activeConf = "ALL";
+let searchQuery = "";
+
+document.addEventListener("DOMContentLoaded", () => {
+  buildNav("teams");
+  buildFooter("footer");
+  buildConfFilters();
+  renderTeams();
+  initSearch();
+  initViewToggle();
+  initScrollAnimations();
+});
+
+function buildConfFilters() {
+  const confs = ["ALL", "UEFA", "CONMEBOL", "CONCACAF", "AFC", "CAF", "OFC"];
+  const container = document.getElementById("conf-filters");
+  container.innerHTML = confs.map(c => `
+    <button class="tab-btn conf-filter-btn ${c==='ALL'?'active':''}" data-conf="${c}">${c}</button>
+  `).join('');
+  container.querySelectorAll(".conf-filter-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      container.querySelectorAll(".conf-filter-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      activeConf = btn.dataset.conf;
+      renderTeams();
+    });
+  });
+}
+
+function initViewToggle() {
+  document.getElementById("view-conf-btn").addEventListener("click", () => {
+    teamsViewMode = "conf";
+    document.getElementById("view-conf-btn").classList.add("active");
+    document.getElementById("view-group-btn").classList.remove("active");
+    renderTeams();
+  });
+  document.getElementById("view-group-btn").addEventListener("click", () => {
+    teamsViewMode = "group";
+    document.getElementById("view-group-btn").classList.add("active");
+    document.getElementById("view-conf-btn").classList.remove("active");
+    renderTeams();
+  });
+}
+
+function initSearch() {
+  document.getElementById("teams-search").addEventListener("input", e => {
+    searchQuery = e.target.value.toLowerCase().trim();
+    renderTeams();
+  });
+}
+
+function filteredTeams() {
+  return TEAMS.filter(t => {
+    const matchConf = activeConf === "ALL" || t.conf === activeConf;
+    const matchSearch = !searchQuery ||
+      t.name.toLowerCase().includes(searchQuery) ||
+      t.conf.toLowerCase().includes(searchQuery) ||
+      ("group " + t.group.toLowerCase()).includes(searchQuery);
+    return matchConf && matchSearch;
+  });
+}
+
+function renderTeams() {
+  const container = document.getElementById("teams-grid");
+  const teams = filteredTeams();
+
+  if (teamsViewMode === "conf") {
+    renderByConf(container, teams);
+  } else {
+    renderByGroup(container, teams);
+  }
+
+  container.querySelectorAll(".team-card").forEach(c =>
+    c.addEventListener("click", () => openTeamModal(c.dataset.id))
+  );
+  initScrollAnimations();
+}
+
+function renderByConf(container, teams) {
+  const confOrder = ["UEFA","CONMEBOL","CONCACAF","AFC","CAF","OFC"];
+  const confNames = {
+    UEFA:"Europe (UEFA)", CONMEBOL:"South America (CONMEBOL)",
+    CONCACAF:"North/Central America (CONCACAF)", AFC:"Asia (AFC)",
+    CAF:"Africa (CAF)", OFC:"Oceania (OFC)"
+  };
+  let html = "";
+  confOrder.forEach(conf => {
+    const ct = teams.filter(t => t.conf === conf);
+    if (!ct.length) return;
+    html += `<div class="conf-section">
+      <h3 class="conf-title">${confNames[conf]} — ${ct.length} teams</h3>
+      <div class="teams-row">${ct.map(renderTeamCard).join("")}</div>
+    </div>`;
+  });
+  container.innerHTML = html || '<p style="color:var(--text-dim);text-align:center;padding:60px">No teams found.</p>';
+}
+
+function renderByGroup(container, teams) {
+  const groups = [...new Set(teams.map(t => t.group))].sort();
+  let html = "";
+  groups.forEach(g => {
+    const gt = teams.filter(t => t.group === g);
+    html += `<div class="conf-section">
+      <h3 class="conf-title">Group ${g}</h3>
+      <div class="group-table-view">
+        ${gt.map(t => renderGroupRow(t)).join('')}
+      </div>
+    </div>`;
+  });
+  container.innerHTML = html || '<p style="color:var(--text-dim);text-align:center;padding:60px">No teams found.</p>';
+}
+
+function renderGroupRow(t) {
+  const sq = Predictions.SQ[t.id];
+  const squad = SQUADS[t.id] || {};
+  const badge = squad.status === "ANNOUNCED" ? '✅' : squad.status === "PRELIMINARY" ? '⚠️' : '❓';
+  return `
+    <div class="team-card group-row-card" data-id="${t.id}" style="display:flex;align-items:center;gap:16px;padding:16px 20px;border-radius:10px;cursor:pointer;">
+      ${flagImg(t.id, 40)}
+      <div style="flex:1">
+        <div style="font-weight:700;font-size:1rem">${t.name}</div>
+        <div style="font-size:0.8rem;color:var(--text-dim)">${t.conf} &bull; FIFA #${t.ranking} &bull; Elo ${t.elo}</div>
+      </div>
+      <div style="text-align:right;font-size:0.8rem">
+        <span class="sq-badge ${squad.status==='ANNOUNCED'?'sq-confirmed':squad.status==='PRELIMINARY'?'sq-preliminary':'sq-pending'}">${badge} ${squad.status}</span>
+      </div>
+      ${t.isHost ? '<span class="host-badge">HOST</span>' : ''}
+    </div>`;
+}
+
+function renderTeamCard(t) {
+  const sq = Predictions.SQ[t.id];
+  const score = sq?.score || 7.5;
+  const top5 = sq?.top5Count || 0;
+  const stars = Math.min(5, Math.max(1, Math.round((score - 7.0) / 2.5 * 5)));
+  const squad = SQUADS[t.id] || {};
+  const badge = squad.status === "ANNOUNCED"
+    ? '<span class="sq-badge sq-confirmed">✓ Announced</span>'
+    : squad.status === "PRELIMINARY"
+    ? '<span class="sq-badge sq-preliminary">~ Preliminary</span>'
+    : '<span class="sq-badge sq-pending">? Unannounced</span>';
+  return `
+    <div class="team-card card-enter" data-id="${t.id}">
+      ${t.isHost ? '<span class="host-badge">HOST</span>' : ''}
+      ${t.isDebut ? '<span class="host-badge" style="background:var(--accent2)">DEBUT</span>' : ''}
+      <div class="team-flag-lg" style="font-size:0;">${flagImg(t.id, 72)}</div>
+      <div class="team-name">${t.name}</div>
+      <div class="team-group">Group ${t.group} &bull; FIFA #${t.ranking}</div>
+      <div class="team-top5">${top5} top-5 league player${top5!==1?'s':''}</div>
+      <div class="team-stars">${"★".repeat(stars)}${"☆".repeat(5-stars)}</div>
+      ${badge}
+    </div>`;
+}
+
+// ---- Team Modal ----
+function openTeamModal(teamId) {
+  const data = Predictions.getTeamAnalysis(teamId);
+  if (!data) return;
+  const { team, players, awards, squad, sq, composite, strengths, weaknesses } = data;
+  const modal = document.getElementById("modal");
+  const body  = document.getElementById("modal-body");
+
+  const squadStatusHtml = `
+    <div class="squad-status-bar ${squad.status==='ANNOUNCED'?'sq-bar-green':squad.status==='PRELIMINARY'?'sq-bar-yellow':'sq-bar-grey'}">
+      <span class="sq-status-icon">${squad.status==='ANNOUNCED'?'✅':squad.status==='PRELIMINARY'?'⚠️':'❓'}</span>
+      <div>
+        <strong>Squad: ${squad.status}</strong>${squad.date?` — ${squad.date}`:' — pending June 2 FIFA deadline'}
+        <div class="sq-note">${squad.note}</div>
+      </div>
+    </div>`;
+
+  const announcedPlayersHtml = squad.players?.length ? `
+    <h3 class="modal-section-title">Official Squad (Confirmed)</h3>
+    <div class="squad-player-grid">
+      ${squad.players.map(p => {
+        const lm = LEAGUE_META[p.league] || LEAGUE_META["Other"];
+        return `<div class="squad-player-chip ${lm.tier===1?'tier1':'tier2'}">
+          <span>${p.name}</span>
+          <small>${lm.nation} ${p.club}</small>
+          ${lm.tier>1?`<span class="weight-chip">×${lm.weight}</span>`:''}
+        </div>`;
+      }).join("")}
+    </div>` : '';
+
+  const statsHtml = players.length ? `
+    <h3 class="modal-section-title">2025-26 Season Stats</h3>
+    <div class="player-list">
+      ${players.map(p => {
+        const lm = LEAGUE_META[p.league] || LEAGUE_META["Other"];
+        const eff = (p.rating * lm.weight).toFixed(2);
+        return `<div class="player-row">
+          <span class="player-nation">${p.nation}</span>
+          <span class="player-name">${p.name}</span>
+          <span class="player-club ${lm.tier===1?'':'non-top5'}">${lm.nation} ${p.club}</span>
+          <span class="player-stats">${p.goals?`⚽ ${p.goals}G ${p.assists}A`:p.cs?`🧤 ${p.cs} CS`:`🛡️ ${p.pos}`}</span>
+          <span class="player-rating">⭐ ${p.rating} <small>(×${lm.weight}→${eff})</small></span>
+          ${p.award?`<span class="player-award">🏆 ${p.award}</span>`:''}
+        </div>`;
+      }).join("")}
+    </div>` : '<p class="muted-text">No tracked top-league players for this squad yet.</p>';
+
+  body.innerHTML = `
+    <div class="modal-header">
+      <span class="modal-flag-lg">${flagImg(team.id, 80)}</span>
+      <div>
+        <h2>${team.name}</h2>
+        <p class="modal-sub">Group ${team.group} &bull; FIFA #${team.ranking} &bull; ${team.conf} &bull; Elo ${team.elo}</p>
+      </div>
+    </div>
+    ${squadStatusHtml}
+    <div class="modal-scores">
+      <div class="score-box"><div class="score-val">${sq.score.toFixed(2)}</div><div class="score-lbl">Squad Score</div></div>
+      <div class="score-box"><div class="score-val">${Math.round(composite*100)}%</div><div class="score-lbl">Composite</div></div>
+      <div class="score-box"><div class="score-val">${sq.top5Count}</div><div class="score-lbl">Top-5 Players</div></div>
+      <div class="score-box"><div class="score-val">${sq.awardBonus.toFixed(1)}</div><div class="score-lbl">Award Bonus</div></div>
+    </div>
+    ${announcedPlayersHtml}
+    ${awards.length?`
+    <h3 class="modal-section-title">Season Honours</h3>
+    <ul class="awards-list">${awards.map(a=>`<li>🏅 <b>${a.award}</b> — ${a.winner}</li>`).join("")}</ul>`:''}
+    ${statsHtml}
+    <div class="strengths-weaknesses">
+      <div><h3 class="modal-section-title green-title">Strengths</h3><ul>${strengths.map(s=>`<li>✅ ${s}</li>`).join("")||"<li>—</li>"}</ul></div>
+      <div><h3 class="modal-section-title red-title">Concerns</h3><ul>${weaknesses.map(w=>`<li>⚠️ ${w}</li>`).join("")||"<li>—</li>"}</ul></div>
+    </div>`;
+
+  modal.classList.add("open");
+}
+
+document.addEventListener("click", e => {
+  if (e.target.id === "modal" || e.target.id === "modal-close")
+    document.getElementById("modal").classList.remove("open");
+});
+
+function initScrollAnimations() {
+  const obs = new IntersectionObserver(entries => entries.forEach(e => {
+    if (e.isIntersecting) e.target.classList.add("visible", "card-visible");
+  }), { threshold: 0.05 });
+  document.querySelectorAll(".card-enter, .section-fade").forEach(el => obs.observe(el));
+}
+</script>
+</body>
+</html>

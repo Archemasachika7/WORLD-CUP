@@ -2918,3 +2918,283 @@ button { cursor: pointer; }
   .meet-room-right  { margin-left: 0; }
   .meet-controls-bar { flex-direction: column; align-items: flex-start; }
 }
+
+/* ============================================================
+   Multi-page additions
+   ============================================================ */
+
+/* Page hero (non-index pages) */
+.page-hero {
+  padding-top: 100px;
+  padding-bottom: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Group table view */
+.group-table-view {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.group-row-card {
+  display: flex !important;
+  align-items: center !important;
+  gap: 16px !important;
+  padding: 16px 20px !important;
+  border-radius: 10px !important;
+  cursor: pointer !important;
+  text-align: left !important;
+}
+
+/* Flag images in team flags */
+.team-flag-lg .flag-img {
+  width: 72px;
+  height: auto;
+  border-radius: 4px;
+}
+
+/* Favourites preview */
+.fav-preview-card .flag-img {
+  display: block;
+  margin: 0 auto 10px;
+  border-radius: 3px;
+}
+
+/* Ranking row flag */
+.rank-flag .flag-img,
+.rank-flag {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Podium flag */
+.podium-flag .flag-img {
+  border-radius: 6px;
+}
+
+/* Match team flags */
+.match-team .flag-img {
+  border-radius: 4px;
+}
+
+/* EA card flag */
+.ea-wcteam .flag-img {
+  border-radius: 2px;
+}
+
+/* H2H flag */
+.h2h-flag-lg .flag-img {
+  border-radius: 6px;
+}
+
+/* bm-flag */
+.bm-flag .flag-img {
+  border-radius: 8px;
+}
+
+/* Modal flag */
+.modal-flag-lg .flag-img {
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+}
+
+/* Conf filter buttons */
+.conf-filter-btn {
+  font-size: 0.78rem;
+}
+
+/* Stream presets on meet page */
+#meet-page-presets {
+  margin-bottom: 8px;
+}
+
+/* Shoot team score flag */
+.shoot-team-score .flag-img {
+  border-radius: 4px;
+  display: block;
+  margin: 0 auto;
+}
+
+/* Pred team flags */
+.predictor-team-flag .flag-img {
+  border-radius: 4px;
+}
+
+/* Rank bar layout */
+.rank-bar-wrap {
+  position: relative;
+  flex: 1;
+  height: 8px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.rank-bar {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  background: var(--accent);
+  border-radius: inherit;
+}
+
+/* H2H selectors */
+.h2h-selectors {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.h2h-selectors select {
+  flex: 1;
+  min-width: 160px;
+  padding: 10px 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+/* Rankings list */
+.rankings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ranking-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 16px;
+  transition: border-color 0.2s, transform 0.2s;
+}
+
+.ranking-row:hover {
+  border-color: rgba(229,9,20,0.35);
+  transform: translateX(4px);
+}
+
+.rank-num {
+  width: 36px;
+  font-weight: 900;
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.rank-name {
+  width: 120px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.rank-pct {
+  width: 44px;
+  text-align: right;
+  font-weight: 700;
+  font-size: 0.88rem;
+  flex-shrink: 0;
+}
+
+.rank-top5 {
+  width: 44px;
+  text-align: center;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  flex-shrink: 0;
+}
+
+.rank-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.label-green { background: rgba(46,204,113,0.12); color: #2ecc71; border: 1px solid rgba(46,204,113,0.25); }
+.label-yellow { background: rgba(241,196,15,0.12); color: var(--gold); border: 1px solid rgba(241,196,15,0.25); }
+.label-grey { background: rgba(153,153,153,0.1); color: var(--text-dim); border: 1px solid rgba(153,153,153,0.2); }
+
+/* Podium cards */
+.favs-podium {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-bottom: 48px;
+}
+
+.podium-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 32px 24px;
+  text-align: center;
+  transition: transform 0.3s, border-color 0.3s;
+}
+
+.podium-card:hover { transform: translateY(-4px); border-color: var(--accent); }
+.podium-card.p1 { border-color: var(--gold); }
+
+.podium-medal { font-size: 2rem; margin-bottom: 12px; }
+.podium-flag { font-size: 3.5rem; margin-bottom: 12px; }
+.podium-name { font-size: 1.2rem; font-weight: 800; margin-bottom: 8px; }
+.podium-pct { font-size: 1.5rem; font-weight: 900; color: var(--accent); margin-bottom: 8px; }
+.podium-sq { font-size: 0.8rem; color: var(--text-dim); margin-bottom: 12px; }
+.podium-label { display: inline-block; font-size: 0.75rem; font-weight: 700; padding: 4px 12px; border-radius: 20px; }
+
+/* H2H result card */
+.h2h-result-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px;
+}
+
+.h2h-detail {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  font-size: 0.82rem;
+  color: var(--text-dim);
+}
+
+/* News grid */
+.news-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+#news-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+
+/* Favs intro */
+.favs-intro {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px 20px;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  margin-bottom: 32px;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .favs-podium { grid-template-columns: 1fr; }
+  .rankings-list .ranking-row { flex-wrap: wrap; }
+  .rank-bar-wrap { min-width: 100px; }
+}
+
+@media (max-width: 600px) {
+  .h2h-selectors { flex-direction: column; }
+  .h2h-selectors select { width: 100%; }
+  .favs-podium { grid-template-columns: 1fr; }
+}

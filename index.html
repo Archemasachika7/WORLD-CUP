@@ -7,30 +7,12 @@
   <meta name="description" content="FIFA World Cup 2026 — live stream + watch party, all 48 teams, real 2025-26 stats, in-play predictor." />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚽</text></svg>" />
   <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/animations.css" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 <body>
 
-<!-- ======================================================
-     Navigation
-     ====================================================== -->
-<nav id="main-nav">
-  <div class="nav-logo">
-    <span class="trophy">⚽</span>
-    <span>World<span class="logo-wc">Cup</span> 2026</span>
-  </div>
-  <ul class="nav-links">
-    <li><a class="nav-link" href="#watch-party-section">Watch</a></li>
-    <li><a class="nav-link" href="#teams">Teams</a></li>
-    <li><a class="nav-link" href="#matches">Matches</a></li>
-    <li><a class="nav-link" href="#stats">Stats</a></li>
-    <li><a class="nav-link" href="#predictions">Predictions</a></li>
-    <li><a class="nav-link" href="#live-predictor-section">Live</a></li>
-    <li><a class="nav-link" href="#news">News</a></li>
-    <li><a class="nav-link" href="#meet">Meet</a></li>
-  </ul>
-  <a class="nav-cta" href="#meet">🏟️ Meet Rooms</a>
-</nav>
+<nav id="main-nav"></nav>
 
 <!-- ======================================================
      Hero
@@ -38,18 +20,22 @@
 <section id="hero">
   <div class="hero-bg"></div>
   <div class="hero-grid"></div>
+
+  <!-- Floating soccer ball particles -->
+  <div class="hero-particles" id="hero-particles"></div>
+
   <div class="hero-content">
     <div class="hero-eyebrow">
       <span class="hero-live-dot"></span>
-      2026 FIFA World Cup — Live Hub
+      2026 FIFA World Cup — Official Live Hub
     </div>
     <h1 class="hero-title">
       The Greatest<br>Show on Earth<br>
       <span class="wc-year">🇺🇸 🇨🇦 🇲🇽 &nbsp;2026</span>
     </h1>
     <p class="hero-subtitle">
-      48 nations. 104 matches. Watch the stream inside this page,
-      chat with fans, real 2025-26 stats, live in-play probability.
+      48 nations. 104 matches. Real 2025-26 stats, live in-play probability,
+      meet rooms, games and streaming all in one hub.
     </p>
     <div class="hero-hosts">
       <span class="host-pill">🇺🇸 United States</span>
@@ -58,186 +44,131 @@
       <span class="host-pill">📅 June 11 – July 19, 2026</span>
     </div>
     <div class="hero-actions">
-      <a class="btn-primary" href="#watch-party-section">▶ &nbsp;Watch + Chat</a>
-      <a class="btn-secondary" href="#live-predictor-section">🔴 &nbsp;Live Predictor</a>
+      <a class="btn-primary" href="meet.html">🏟️ &nbsp;Join a Meet Room</a>
+      <a class="btn-secondary" href="matches.html">⚽ &nbsp;View Matches</a>
     </div>
     <div class="hero-stats">
       <div class="hero-stat"><div class="stat-num">48</div><div class="stat-lbl">Teams</div></div>
       <div class="hero-stat"><div class="stat-num">104</div><div class="stat-lbl">Matches</div></div>
       <div class="hero-stat"><div class="stat-num">16</div><div class="stat-lbl">Venues</div></div>
-      <div class="hero-stat"><div class="stat-num">6</div><div class="stat-lbl">Top Leagues</div></div>
+      <div class="hero-stat"><div class="stat-num">3</div><div class="stat-lbl">Host Nations</div></div>
     </div>
   </div>
+
   <div class="hero-countdown">
     <div class="countdown-label">Kicks off in</div>
-    <div id="hero-countdown">…</div>
+    <div id="hero-countdown" class="countdown-flip-wrap">…</div>
   </div>
 </section>
 
 <!-- ======================================================
-     Watch Party — Stream Embed + Chat
+     Host Cities
      ====================================================== -->
-<section id="watch-party-section">
-  <div class="wp-section-header">
-    <div>
-      <span class="section-tag">Watch Party</span>
-      <h2 class="section-title" style="margin-top:8px">Stream + Chat Together</h2>
-      <p class="section-desc">Paste any stream URL — it plays inside this page. Join the chat, support your team, and enjoy with everyone. Chat auto-clears when you close the tab unless you save it.</p>
+<section class="section section-fade" id="host-cities">
+  <div class="section-header">
+    <span class="section-tag">Three Nations, One Trophy</span>
+    <h2 class="section-title">Host Countries</h2>
+    <p class="section-desc">The first World Cup hosted across three nations — 16 iconic venues spanning North America.</p>
+  </div>
+  <div class="host-cities-grid">
+    <div class="host-city-card card-enter">
+      <div class="host-city-flag">🇺🇸</div>
+      <div class="host-city-name">United States</div>
+      <div style="color:var(--text-dim);font-size:0.85rem;margin-bottom:12px">11 Venues</div>
+      <div class="host-city-venues">11</div>
+      <div class="host-city-venues-label">Stadiums</div>
+      <p style="font-size:0.8rem;color:var(--text-dim);margin-top:12px">MetLife • AT&T • SoFi • Levi's • Hard Rock and more</p>
+    </div>
+    <div class="host-city-card card-enter">
+      <div class="host-city-flag">🇨🇦</div>
+      <div class="host-city-name">Canada</div>
+      <div style="color:var(--text-dim);font-size:0.85rem;margin-bottom:12px">3 Venues</div>
+      <div class="host-city-venues">3</div>
+      <div class="host-city-venues-label">Stadiums</div>
+      <p style="font-size:0.8rem;color:var(--text-dim);margin-top:12px">BMO Field (Toronto) • BC Place (Vancouver) • Stade de Montréal</p>
+    </div>
+    <div class="host-city-card card-enter">
+      <div class="host-city-flag">🇲🇽</div>
+      <div class="host-city-name">Mexico</div>
+      <div style="color:var(--text-dim);font-size:0.85rem;margin-bottom:12px">3 Venues</div>
+      <div class="host-city-venues">3</div>
+      <div class="host-city-venues-label">Stadiums</div>
+      <p style="font-size:0.8rem;color:var(--text-dim);margin-top:12px">Estadio Azteca (87,523 cap.) • Estadio BBVA • Estadio Akron</p>
     </div>
   </div>
-
-  <!-- Stream URL input -->
-  <div class="stream-url-bar">
-    <span class="stream-input-icon">▶</span>
-    <input id="stream-url-input" type="url" placeholder="Paste stream URL here — e.g. https://www.foxsports.com/live" autocomplete="off" spellcheck="false" />
-    <button id="stream-go-btn">Launch Stream</button>
-  </div>
-  <div id="stream-alert" class="stream-alert"></div>
-  <div class="stream-presets">
-    <button class="preset-stream" data-url="https://me.epicsports.online/">🏆 EpicSports</button>
-    <button class="preset-stream" data-url="https://www.fifa.com/fifaplus">📺 FIFA+</button>
-    <button class="preset-stream" data-url="https://www.foxsports.com">🇺🇸 Fox Sports</button>
-    <button class="preset-stream" data-url="https://www.bbc.co.uk/iplayer">🇬🇧 BBC iPlayer</button>
-    <button class="preset-stream" data-url="https://www.itv.com/watch">🇬🇧 ITV</button>
-    <button class="preset-stream" data-url="https://www.tsn.ca/live">🇨🇦 TSN</button>
-    <button class="preset-stream" data-url="https://www.tvazteca.com/aztecasiete">🇲🇽 Azteca 7</button>
-  </div>
-
-  <!-- Main watch party layout: stream left + chat right -->
-  <div id="watch-party-layout" class="watch-party-layout">
-
-    <!-- Stream frame -->
-    <div class="stream-panel">
-      <div id="stream-placeholder" class="stream-placeholder">
-        <div class="stream-ph-inner">
-          <span class="stream-ph-icon">📺</span>
-          <p>Paste a stream link above and click <strong>Launch Stream</strong></p>
-          <p class="stream-ph-note">Stream displays here inside the page. If the broadcaster blocks embedding, a direct link will open in a new tab.</p>
-        </div>
-      </div>
-      <div id="stream-iframe-wrap" class="stream-iframe-wrap hidden">
-        <iframe id="stream-iframe" src="about:blank" allowfullscreen allow="autoplay; fullscreen; picture-in-picture" frameborder="0" title="World Cup 2026 Live Stream"></iframe>
-        <div id="iframe-blocked-msg" class="iframe-blocked hidden">
-          <p>⚠️ This broadcaster blocks embedding. <a id="stream-new-tab-link" href="#" target="_blank" rel="noopener">Click here to open in a new tab →</a></p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Watch party chat panel -->
-    <div class="wp-chat-panel">
-      <div class="wp-panel-header">
-        <span class="wp-title">Watch Party</span>
-        <span id="wp-live-badge" class="wp-live-badge hidden">🔴 LIVE</span>
-        <button id="wp-expand-btn" class="wp-icon-btn">⤢ Expand</button>
-      </div>
-      <div id="wp-participant-bar" class="wp-participant-bar hidden">
-        You: <span id="wp-participant-name"></span>
-      </div>
-
-      <!-- Join form -->
-      <div id="wp-setup" class="wp-setup">
-        <p class="wp-setup-title">Join the session</p>
-        <input id="wp-nickname" type="text" placeholder="Your nickname" maxlength="24" />
-        <select id="wp-team-select">
-          <option value="⚽">⚽ Neutral</option>
-        </select>
-        <button id="wp-join-btn" class="btn-primary">Join Session</button>
-        <p class="wp-setup-note">Chat is local to your browser tabs. For real-time multi-device watch parties, a backend server is needed.</p>
-      </div>
-
-      <!-- Chat messages -->
-      <div id="wp-chat" class="wp-chat hidden">
-        <div id="wp-messages" class="wp-messages"></div>
-        <div class="wp-input-row">
-          <input id="wp-message-input" type="text" placeholder="Support your team… ⚽" maxlength="200" />
-          <button id="wp-send-btn" class="wp-send-btn">Send</button>
-        </div>
-        <div class="wp-actions">
-          <button id="wp-save-btn" class="wp-action-btn">💾 Save Chat</button>
-          <button id="wp-end-btn" class="wp-action-btn wp-end">🔴 End Session</button>
-        </div>
-      </div>
-    </div>
-
-  </div><!-- /watch-party-layout -->
 </section>
 
 <!-- ======================================================
-     Teams
+     Quick Navigation
      ====================================================== -->
-<section id="teams" class="section section-fade">
+<section class="section section-fade" id="quick-nav-section">
   <div class="section-header">
-    <span class="section-tag">All 48 Nations</span>
-    <h2 class="section-title">The 2026 World Cup Teams</h2>
-    <p class="section-desc">Click any team for the full squad list (if announced), real 2025-26 player stats weighted by league tier, season honours, and title probability. Squad statuses: ✅ Announced &bull; ⚠️ Preliminary &bull; ❓ Unannounced.</p>
+    <span class="section-tag">Explore</span>
+    <h2 class="section-title">Quick Access</h2>
+    <p class="section-desc">Everything you need for the World Cup — in one place.</p>
   </div>
-  <div class="search-wrap">
-    <input id="search-input" type="text" placeholder="Search teams, confederation, or group…" autocomplete="off" />
-  </div>
-  <div id="teams-grid"></div>
-</section>
-
-<!-- ======================================================
-     Matches
-     ====================================================== -->
-<section id="matches" class="section section-fade">
-  <div class="section-header">
-    <span class="section-tag">Full Schedule</span>
-    <h2 class="section-title">All Matches</h2>
-    <p class="section-desc">Click a match for full H2H analysis and a shortcut to the live in-play predictor.</p>
-  </div>
-  <div class="match-tabs-wrap"><div id="match-tabs"></div></div>
-  <div id="matches-list"></div>
-</section>
-
-<!-- ======================================================
-     Stats — EA FC style cards + table
-     ====================================================== -->
-<section id="stats" class="section section-fade">
-  <div class="section-header">
-    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+  <div class="quick-nav-grid">
+    <a class="quick-nav-tile card-enter" href="teams.html">
+      <div class="quick-nav-icon">👥</div>
       <div>
-        <span class="section-tag">Real 2025-26 Data</span>
-        <h2 class="section-title">Player Stats &amp; Analysis</h2>
-        <p class="section-desc">Top-5 leagues + Liga Portugal = full weight. MLS, Saudi Pro League, Liga MX etc. = discounted weight. Toggle between card and table view.</p>
+        <div class="quick-nav-title">All 48 Teams</div>
+        <div class="quick-nav-desc">Real flag images, squads, FIFA rankings, confederation filter and group view</div>
       </div>
-      <div class="view-toggle">
-        <button id="view-cards-btn" class="view-btn active">🃏 Cards</button>
-        <button id="view-table-btn" class="view-btn">📊 Table</button>
+    </a>
+    <a class="quick-nav-tile card-enter" href="matches.html">
+      <div class="quick-nav-icon">⚽</div>
+      <div>
+        <div class="quick-nav-title">Match Schedule</div>
+        <div class="quick-nav-desc">Full fixture list with animated win probability bars and H2H predictor</div>
       </div>
-    </div>
+    </a>
+    <a class="quick-nav-tile card-enter" href="stats.html">
+      <div class="quick-nav-icon">📊</div>
+      <div>
+        <div class="quick-nav-title">Player Stats</div>
+        <div class="quick-nav-desc">EA FC-style cards + table view. Real 2025-26 data from top European leagues</div>
+      </div>
+    </a>
+    <a class="quick-nav-tile card-enter" href="predictions.html">
+      <div class="quick-nav-icon">🔮</div>
+      <div>
+        <div class="quick-nav-title">Power Rankings</div>
+        <div class="quick-nav-desc">Elo + squad strength + FIFA ranking composite — plus H2H head-to-head predictor</div>
+      </div>
+    </a>
+    <a class="quick-nav-tile card-enter" href="meet.html">
+      <div class="quick-nav-icon">🏟️</div>
+      <div>
+        <div class="quick-nav-title">Meet Rooms</div>
+        <div class="quick-nav-desc">Real-time watch parties with chat, voice, video and synced streams</div>
+      </div>
+    </a>
+    <a class="quick-nav-tile card-enter" href="games.html">
+      <div class="quick-nav-icon">🎮</div>
+      <div>
+        <div class="quick-nav-title">Fun Games</div>
+        <div class="quick-nav-desc">Score predictor, World Cup quiz and penalty shootout simulator</div>
+      </div>
+    </a>
   </div>
-  <div id="stats-container"></div>
 </section>
 
 <!-- ======================================================
-     Predictions
+     Top Favourites Preview
      ====================================================== -->
-<section id="predictions" class="section section-fade">
+<section class="section section-fade" id="favourites-preview">
   <div class="section-header">
-    <span class="section-tag">Quantitative Analysis</span>
-    <h2 class="section-title">Power Rankings &amp; Predictions</h2>
-    <p class="section-desc">Formula: 40% Elo + 35% league-weighted squad strength (real 2025-26 data) + 25% FIFA ranking. Non-top-6 league players get discounted effective scores. Click any team to see full breakdown.</p>
+    <span class="section-tag">Power Rankings</span>
+    <h2 class="section-title">Tournament Favourites</h2>
+    <p class="section-desc">Algorithm: 40% Elo + 35% league-weighted squad strength + 25% FIFA ranking. <a href="predictions.html" style="color:var(--accent)">View full rankings →</a></p>
   </div>
-  <div id="predictions-container"></div>
-</section>
-
-<!-- ======================================================
-     Live In-Play Predictor
-     ====================================================== -->
-<section id="live-predictor-section" class="section section-fade">
-  <div class="section-header">
-    <span class="section-tag">🔴 Live</span>
-    <h2 class="section-title">In-Play Match Predictor</h2>
-    <p class="section-desc">Simulate or track a live match in real time. Score, minute, and red cards all shift win probability instantly.</p>
-  </div>
-  <div id="live-predictor" class="live-predictor-card"></div>
+  <div id="favs-preview-container" class="favs-preview-grid"></div>
 </section>
 
 <!-- ======================================================
      News
      ====================================================== -->
-<section id="news" class="section section-fade">
+<section class="section section-fade" id="news">
   <div class="section-header">
     <div class="news-header-row">
       <div>
@@ -255,151 +186,26 @@
 </section>
 
 <!-- ======================================================
-     Meet Rooms
+     Watch Party CTA
      ====================================================== -->
-<section id="meet" class="section section-fade">
-  <div class="section-header">
-    <span class="section-tag">🏟️ Watch Together</span>
-    <h2 class="section-title">Meet Rooms</h2>
-    <p class="section-desc">Create a room — get a shareable code. Real-time chat across all devices, live voice &amp; video, emoji spam, and synced stream for everyone in the room. No sign-up needed.</p>
+<section class="section section-fade" id="watch-cta">
+  <div style="background:linear-gradient(135deg,rgba(229,9,20,0.12),rgba(255,107,53,0.08));border:1px solid rgba(229,9,20,0.25);border-radius:var(--radius);padding:60px 40px;text-align:center;max-width:800px;margin:0 auto;">
+    <div style="font-size:3rem;margin-bottom:16px" class="trophy-bounce">🏆</div>
+    <h2 style="font-size:2rem;font-weight:900;margin-bottom:12px">Watch Together in Meet Rooms</h2>
+    <p style="color:var(--text-dim);max-width:500px;margin:0 auto 28px">Create a private room, invite friends anywhere in the world, sync a stream and chat in real time — no sign-up needed.</p>
+    <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
+      <a href="meet.html" class="btn-primary">🏟️ Create a Room →</a>
+      <a href="games.html" class="btn-secondary">🎮 Play Games</a>
+    </div>
   </div>
-
-  <div id="meet-alert" class="meet-alert"></div>
-
-  <!-- Landing -->
-  <div id="meet-landing" class="meet-landing">
-    <div class="meet-landing-grid">
-
-      <div class="meet-identity-card">
-        <h3 class="meet-card-title">👤 Your Identity</h3>
-        <input id="meet-nickname-input" type="text" placeholder="Your nickname" maxlength="24" class="meet-field" />
-        <select id="meet-team-select" class="meet-field">
-          <option value="⚽" data-id="">⚽ Neutral</option>
-        </select>
-        <p class="meet-theme-hint">Pick your team — it themes the room with their colours:</p>
-        <div id="meet-themes-row" class="meet-themes-row"></div>
-      </div>
-
-      <div class="meet-action-card">
-        <h3 class="meet-card-title">🎉 Start a Room</h3>
-        <p class="meet-card-desc">Create a private room, get a code, and share it with friends worldwide. Paste the stream URL inside and everyone watches together.</p>
-        <button id="meet-create-btn" class="btn-primary meet-big-btn">Create Room →</button>
-      </div>
-
-      <div class="meet-action-card">
-        <h3 class="meet-card-title">🔗 Join a Room</h3>
-        <p class="meet-card-desc">Got a code from a friend? Enter it below and jump straight into the action — chat, video, and the stream already loaded.</p>
-        <div class="meet-join-row">
-          <input id="meet-room-code-input" type="text" placeholder="WC-XXXXX" maxlength="10" class="meet-field meet-code-field" />
-          <button id="meet-join-btn" class="btn-primary">Join →</button>
-        </div>
-      </div>
-
-    </div>
-  </div><!-- /meet-landing -->
-
-  <!-- In-Room UI (hidden until joined) -->
-  <div id="meet-room" class="meet-room hidden">
-
-    <div class="meet-room-header">
-      <div class="meet-room-id-wrap">
-        <span class="meet-room-label">Room</span>
-        <strong id="meet-room-code-display" class="meet-code-badge"></strong>
-      </div>
-      <div class="meet-share-wrap">
-        <input id="meet-share-url" type="text" readonly class="meet-share-input" />
-        <button id="meet-copy-link-btn" class="meet-copy-btn">📋 Copy Link</button>
-      </div>
-      <div class="meet-room-right">
-        <span id="meet-user-count" class="meet-user-count">0 watching</span>
-        <button id="meet-leave-btn" class="meet-leave-btn">🚪 Leave</button>
-      </div>
-    </div>
-
-    <div id="meet-presence-bar" class="meet-presence-bar"></div>
-
-    <div class="meet-main-layout">
-
-      <!-- Left: video grid + stream -->
-      <div class="meet-left-col">
-        <div id="meet-video-grid" class="meet-video-grid">
-          <div id="meet-local-vid-wrap" class="meet-peer-video meet-local hidden">
-            <video id="meet-local-video" autoplay muted playsinline></video>
-            <div class="meet-vid-label">You</div>
-          </div>
-        </div>
-
-        <div class="meet-stream-bar">
-          <span class="meet-stream-icon">📺</span>
-          <input id="meet-stream-input" type="url" placeholder="Paste stream URL — syncs for everyone in this room instantly" class="meet-stream-url-in" />
-          <button id="meet-stream-go" class="meet-stream-go">▶ Sync</button>
-        </div>
-        <div id="meet-stream-frame-wrap" class="meet-stream-frame-wrap hidden">
-          <iframe id="meet-stream-iframe" src="about:blank" allowfullscreen allow="autoplay; fullscreen; picture-in-picture" frameborder="0" title="Room stream"></iframe>
-        </div>
-
-        <div id="meet-emoji-rain" class="meet-emoji-rain" aria-hidden="true"></div>
-      </div>
-
-      <!-- Right: chat -->
-      <div class="meet-right-col">
-        <div class="meet-chat-header">💬 Room Chat</div>
-        <div id="meet-messages" class="meet-messages"></div>
-        <div class="meet-chat-input-wrap">
-          <input id="meet-msg-input" type="text" placeholder="Say something… ⚽" maxlength="200" class="meet-msg-input" />
-          <button id="meet-send-btn" class="meet-send-btn">Send</button>
-        </div>
-      </div>
-
-    </div><!-- /meet-main-layout -->
-
-    <!-- Controls: mic + cam + emoji spam -->
-    <div class="meet-controls-bar">
-      <div class="meet-media-group">
-        <button id="meet-mic-btn" class="meet-media-btn">🔇 Muted</button>
-        <button id="meet-cam-btn" class="meet-media-btn">📷 Cam Off</button>
-      </div>
-      <div class="meet-reactions-group">
-        <button class="emoji-reaction-btn" data-emoji="⚽">⚽</button>
-        <button class="emoji-reaction-btn" data-emoji="🔥">🔥</button>
-        <button class="emoji-reaction-btn" data-emoji="❤️">❤️</button>
-        <button class="emoji-reaction-btn" data-emoji="😱">😱</button>
-        <button class="emoji-reaction-btn" data-emoji="🎉">🎉</button>
-        <button class="emoji-reaction-btn" data-emoji="👏">👏</button>
-        <button class="emoji-reaction-btn" data-emoji="🚀">🚀</button>
-        <button class="emoji-reaction-btn" data-emoji="💪">💪</button>
-        <button class="emoji-reaction-btn" data-emoji="🏆">🏆</button>
-        <button class="emoji-reaction-btn" data-emoji="😭">😭</button>
-        <button class="emoji-reaction-btn" data-emoji="🤩">🤩</button>
-        <button class="emoji-reaction-btn" data-emoji="💥">💥</button>
-      </div>
-    </div>
-
-  </div><!-- /meet-room -->
 </section>
 
 <!-- ======================================================
      Footer
      ====================================================== -->
-<footer id="footer">
-  <div class="footer-links">
-    <a href="#watch-party-section">Watch</a>
-    <a href="#teams">Teams</a>
-    <a href="#matches">Matches</a>
-    <a href="#stats">Stats</a>
-    <a href="#predictions">Predictions</a>
-    <a href="#live-predictor-section">Live</a>
-    <a href="https://www.fifa.com" target="_blank" rel="noopener">FIFA Official</a>
-  </div>
-  <p>⚽ <strong>World Cup 2026 Live Hub</strong> — USA · Canada · Mexico</p>
-  <p class="footer-disclaimer">
-    Fan-built. Stats: PlanetFootball, ESPN, Tribuna.com, Sky Sports (May 2026). Squads: FIFA.com, ESPN, England FA. Italy did not qualify (lost to Bosnia in play-offs). Win probabilities are algorithmic estimates for entertainment only. Always use licensed streams.
-  </p>
-</footer>
+<footer id="footer"></footer>
 
-<!-- ======================================================
-     Modal
-     ====================================================== -->
+<!-- Modal -->
 <div id="modal">
   <div id="modal-inner">
     <button id="modal-close" aria-label="Close">✕</button>
@@ -410,9 +216,114 @@
 <script src="js/data.js"></script>
 <script src="js/predictions.js"></script>
 <script src="js/api.js"></script>
-<script src="js/watchparty.js"></script>
-<script src="js/supabase-client.js"></script>
-<script src="js/meet.js"></script>
-<script src="js/app.js"></script>
+<script src="js/shared.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  buildNav("home");
+  buildFooter("footer");
+  initHeroCountdown();
+  initHeroParticles();
+  initFavsPreview();
+  API.startNewsAutoRefresh(renderNews);
+  initScrollAnimations();
+});
+
+// ---- Flip countdown ----
+function initHeroCountdown() {
+  const el = document.getElementById("hero-countdown");
+  if (!el) return;
+  let prev = {};
+
+  function tick() {
+    const diff = new Date("2026-06-11T20:00:00") - new Date();
+    if (diff <= 0) {
+      el.innerHTML = '<span style="color:var(--accent);font-size:1.5rem;font-weight:900">🔴 THE TOURNAMENT IS LIVE!</span>';
+      return;
+    }
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor((diff % 86400000) / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+
+    const units = [
+      { val: d, label: "Days" },
+      { val: h, label: "Hours" },
+      { val: m, label: "Mins" },
+      { val: s, label: "Secs" },
+    ];
+
+    el.innerHTML = units.map((u, i) => {
+      const flip = (prev[i] !== undefined && prev[i] !== u.val) ? ' flipping' : '';
+      prev[i] = u.val;
+      return `<div class="flip-unit">
+        <div class="flip-digit${flip}">${String(u.val).padStart(2,'0')}</div>
+        <div class="flip-label">${u.label}</div>
+      </div>${i < 3 ? '<span class="flip-sep">:</span>' : ''}`;
+    }).join('');
+  }
+  tick();
+  setInterval(tick, 1000);
+}
+
+// ---- Hero particles ----
+function initHeroParticles() {
+  const container = document.getElementById("hero-particles");
+  if (!container) return;
+  for (let i = 0; i < 12; i++) {
+    const p = document.createElement("span");
+    p.className = "hero-particle";
+    p.textContent = "⚽";
+    p.style.setProperty("--x", Math.random() * 100 + "%");
+    p.style.setProperty("--dur", (10 + Math.random() * 10) + "s");
+    p.style.setProperty("--delay", (Math.random() * 10) + "s");
+    container.appendChild(p);
+  }
+}
+
+// ---- Favourites preview ----
+function initFavsPreview() {
+  const container = document.getElementById("favs-preview-container");
+  if (!container) return;
+  const favs = Predictions.getTournamentFavourites().slice(0, 5);
+  container.innerHTML = favs.map((t, i) => `
+    <div class="fav-preview-card card-enter">
+      <div class="fav-rank">#${i+1}</div>
+      <div style="margin:0 auto 10px;width:48px;height:32px;display:flex;align-items:center;justify-content:center;">
+        ${flagImg(t.id, 48)}
+      </div>
+      <div class="fav-name">${t.name}</div>
+      <div class="fav-pct">${t.titlePct}%</div>
+      <div style="font-size:0.72rem;color:var(--text-dim)">title chance</div>
+    </div>`).join('');
+}
+
+// ---- News ----
+function renderNews(articles) {
+  const container = document.getElementById("news-grid");
+  if (!container) return;
+  const lu = document.getElementById("news-last-update");
+  if (lu) lu.textContent = "Updated " + new Date().toLocaleTimeString();
+  container.innerHTML = articles.slice(0, 3).map((a, i) => `
+    <div class="news-card ${i===0?'news-featured':''}">
+      ${a.image ? `<div class="news-img" style="background-image:url('${a.image}')"></div>` : `<div class="news-img-placeholder"><span>⚽</span></div>`}
+      <div class="news-body">
+        ${a.tag ? `<span class="news-tag">${a.tag}</span>` : ''}
+        <h4 class="news-title">${a.title}</h4>
+        <p class="news-desc">${a.description||''}</p>
+        <div class="news-meta">
+          <span>${a.source?.name||'Sports News'}</span>
+          ${a.url && a.url !== '#' ? `<a href="${a.url}" target="_blank" rel="noopener" class="news-read">Read →</a>` : ''}
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function initScrollAnimations() {
+  const obs = new IntersectionObserver(entries => entries.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add("visible", "card-visible"); }
+  }), { threshold: 0.06 });
+  document.querySelectorAll(".section-fade, .card-enter").forEach(el => obs.observe(el));
+}
+</script>
 </body>
 </html>

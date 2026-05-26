@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Player Stats — World Cup 2026</title>
+  <meta name="description" content="Real 2025-26 player stats for FIFA World Cup 2026 — EA FC-style cards and table view." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚽</text></svg>" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+</head>
+<body>
+
+<nav id="main-nav"></nav>
+
+<div class="page-hero" style="padding:100px 40px 40px;max-width:1200px;margin:0 auto;">
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+    <div>
+      <span class="section-tag">Real 2025-26 Data</span>
+      <h1 class="section-title" style="font-size:2.5rem;margin-top:8px">Player Stats &amp; Analysis</h1>
+      <p class="section-desc">Top-5 leagues + Liga Portugal = full weight. MLS, Saudi Pro, Liga MX = discounted. Toggle between EA FC card and table view.</p>
+    </div>
+    <div class="view-toggle" style="margin-top:40px;">
+      <button id="view-cards-btn" class="view-btn active">🃏 Cards</button>
+      <button id="view-table-btn" class="view-btn">📊 Table</button>
+    </div>
+  </div>
+</div>
+
+<!-- Sort controls -->
+<div style="max-width:1200px;margin:0 auto;padding:0 40px 20px;display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+  <span style="color:var(--text-dim);font-size:0.85rem;">Sort by:</span>
+  <button class="tab-btn active" data-sort="eff">Effective Score</button>
+  <button class="tab-btn" data-sort="goals">Goals</button>
+  <button class="tab-btn" data-sort="assists">Assists</button>
+  <button class="tab-btn" data-sort="rating">Rating</button>
+</div>
+
+<div id="stats-container" style="max-width:1200px;margin:0 auto;padding:0 40px 80px;"></div>
+
+<footer id="footer"></footer>
+
+<script src="js/data.js"></script>
+<script src="js/predictions.js"></script>
+<script src="js/shared.js"></script>
+<script>
+let statsView = "cards";
+let statsSort = "eff";
+
+document.addEventListener("DOMContentLoaded", () => {
+  buildNav("stats");
+  buildFooter("footer");
+  renderStats();
+  initStatsViewToggle();
+  initSortButtons();
+  initScrollAnimations();
+});
+
+function initStatsViewToggle() {
+  document.getElementById("view-cards-btn").addEventListener("click", () => {
+    statsView = "cards";
+    document.getElementById("view-cards-btn").classList.add("active");
+    document.getElementById("view-table-btn").classList.remove("active");
+    renderStats();
+  });
+  document.getElementById("view-table-btn").addEventListener("click", () => {
+    statsView = "table";
+    document.getElementById("view-table-btn").classList.add("active");
+    document.getElementById("view-cards-btn").classList.remove("active");
+    renderStats();
+  });
+}
+
+function initSortButtons() {
+  document.querySelectorAll("[data-sort]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("[data-sort]").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      statsSort = btn.dataset.sort;
+      renderStats();
+    });
+  });
+}
+
+function sortPlayers(players) {
+  return [...players].filter(p => p.teamId).sort((a, b) => {
+    const wa = (LEAGUE_META[a.league]||{weight:0.45}).weight;
+    const wb = (LEAGUE_META[b.league]||{weight:0.45}).weight;
+    if (statsSort === "eff")     return (b.rating * wb) - (a.rating * wa);
+    if (statsSort === "goals")   return (b.goals||0) - (a.goals||0);
+    if (statsSort === "assists") return (b.assists||0) - (a.assists||0);
+    if (statsSort === "rating")  return b.rating - a.rating;
+    return 0;
+  });
+}
+
+function renderStats() {
+  const container = document.getElementById("stats-container");
+  if (!container) return;
+
+  let html = `<div class="awards-banner"><h3>🏆 2025-26 Season Honours</h3><div class="awards-scroll">
+    ${AWARDS.map(a => `<div class="award-chip">
+      <span class="award-nation">${a.nation}</span>
+      <div><strong>${a.winner}</strong><br><small>${a.award}</small></div>
+    </div>`).join("")}
+  </div></div>`;
+
+  if (statsView === "cards") {
+    const sorted = sortPlayers(PLAYERS);
+    html += `<div class="cards-league-section">
+      <h3 class="league-title">⭐ Top Performers — EA FC Style <span class="weight-tag">Effective Score = Rating × League Weight</span></h3>
+      <div class="ea-cards-grid">${sorted.map(renderEaCard).join("")}</div>
+    </div>`;
+  } else {
+    const tier1 = PLAYERS.filter(p => (LEAGUE_META[p.league]||{}).tier === 1 && p.teamId);
+    const tier2 = PLAYERS.filter(p => (LEAGUE_META[p.league]||{}).tier !== 1 && p.teamId);
+    const byLeague = {};
+    tier1.forEach(p => { (byLeague[p.league] = byLeague[p.league] || []).push(p); });
+    Object.entries(byLeague).forEach(([league, players]) => {
+      const lm = LEAGUE_META[league] || {};
+      html += `<div class="league-section">
+        <h3 class="league-title">${lm.nation} ${lm.name} <span class="weight-tag">Weight: ${lm.weight}</span></h3>
+        ${playerTable(players)}
+      </div>`;
+    });
+    if (tier2.length) {
+      html += `<div class="league-section">
+        <h3 class="league-title">🌍 Other Leagues <span class="weight-tag weight-discounted">Discounted (0.45–0.65×)</span></h3>
+        ${playerTable(tier2)}
+      </div>`;
+    }
+  }
+
+  container.innerHTML = html;
+  initScrollAnimations();
+}
+
+function renderEaCard(p) {
+  const lm  = LEAGUE_META[p.league] || LEAGUE_META["Other"];
+  const ovr = Math.round(p.rating * 10);
+  const eff = (p.rating * lm.weight).toFixed(1);
+  const wct = p.teamId ? TEAMS.find(t => t.id === p.teamId) : null;
+  const tier = ovr >= 90 ? "gold" : ovr >= 85 ? "silver" : "bronze";
+  const posIcon = p.pos === "GK" ? "🧤" : p.pos === "DF" ? "🛡️" : p.pos === "MF" ? "⚙️" : "⚽";
+  const stat1lbl = p.pos === "GK" ? "CS"  : p.pos === "DF" ? "GA"  : "GOL";
+  const stat1val = p.pos === "GK" ? p.cs  : p.pos === "DF" ? p.ga  : p.goals;
+  const stat2lbl = p.pos === "GK" ? "RTG" : "AST";
+  const stat2val = p.pos === "GK" ? p.rating : p.assists;
+  return `
+    <div class="ea-card ea-${tier} card-enter" title="${p.name} — ${p.club}">
+      <div class="ea-top">
+        <div class="ea-ovr">${ovr}</div>
+        <div class="ea-pos">${p.pos}</div>
+        <div class="ea-nation">${p.nation}</div>
+        ${wct ? `<div class="ea-wcteam" style="font-size:0;">${flagImg(wct.id, 20)}</div>` : ''}
+      </div>
+      <div class="ea-silhouette">${posIcon}</div>
+      <div class="ea-name">${p.name.toUpperCase().split(" ").pop()}</div>
+      <div class="ea-fullname">${p.name}</div>
+      <div class="ea-club">${lm.nation} ${p.club}</div>
+      <div class="ea-stats">
+        <div class="ea-stat"><span class="ea-sv">${stat1val||"—"}</span><span class="ea-sl">${stat1lbl}</span></div>
+        <div class="ea-stat"><span class="ea-sv">${stat2val||"—"}</span><span class="ea-sl">${stat2lbl}</span></div>
+        <div class="ea-stat"><span class="ea-sv ea-eff">${eff}</span><span class="ea-sl">EFF</span></div>
+      </div>
+      ${p.award ? `<div class="ea-award">🏆</div>` : ''}
+      ${lm.tier > 1 ? `<div class="ea-discount-label">×${lm.weight}</div>` : ''}
+    </div>`;
+}
+
+function playerTable(players) {
+  const sorted = [...players].sort((a, b) => {
+    const wa = (LEAGUE_META[a.league]||{weight:0.45}).weight;
+    const wb = (LEAGUE_META[b.league]||{weight:0.45}).weight;
+    if (statsSort === "eff")     return (b.rating * wb) - (a.rating * wa);
+    if (statsSort === "goals")   return (b.goals||0) - (a.goals||0);
+    if (statsSort === "assists") return (b.assists||0) - (a.assists||0);
+    return b.rating - a.rating;
+  });
+  return `<div class="stats-table-wrap"><table class="stats-table">
+    <thead><tr><th>Player</th><th>Club</th><th>Nat.</th><th>WC Team</th><th>G</th><th>A</th><th>CS/GA</th><th>Rating</th><th>Eff.</th></tr></thead>
+    <tbody>${sorted.map(p => {
+      const lm  = LEAGUE_META[p.league] || LEAGUE_META["Other"];
+      const eff = (p.rating * lm.weight).toFixed(2);
+      const wct = p.teamId ? TEAMS.find(t => t.id === p.teamId) : null;
+      return `<tr class="${p.award?'award-row':''}">
+        <td><strong>${p.name}</strong>${p.award?' 🏆':''}</td>
+        <td><span class="league-pill ${lm.tier===1?'tier1-pill':'tier2-pill'}">${lm.nation}</span> ${p.club}</td>
+        <td>${p.nation}</td>
+        <td>${wct ? flagImg(wct.id, 24) : '—'}</td>
+        <td>${p.goals||'—'}</td>
+        <td>${p.assists||'—'}</td>
+        <td>${p.cs?`🧤${p.cs}`:p.ga?`🛡️${p.ga}`:'—'}</td>
+        <td><span class="rating-badge">${p.rating}</span></td>
+        <td><span class="eff-badge ${lm.tier===1?'eff-full':'eff-disc'}">${eff}</span></td>
+      </tr>`;
+    }).join("")}</tbody>
+  </table></div>`;
+}
+
+function initScrollAnimations() {
+  const obs = new IntersectionObserver(entries => entries.forEach(e => {
+    if (e.isIntersecting) e.target.classList.add("visible", "card-visible");
+  }), { threshold: 0.04 });
+  document.querySelectorAll(".card-enter, .section-fade").forEach(el => obs.observe(el));
+}
+</script>
+</body>
+</html>
