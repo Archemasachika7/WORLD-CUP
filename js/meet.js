@@ -45,6 +45,7 @@ const MeetSystem = (() => {
   };
   let sbCh = null;
   let localStream = null;
+  let screenStream = null;
   let peers = {};
   let _lastSyncedUrl = "";
   let _syncDebounceT = null;
@@ -390,15 +391,80 @@ const MeetSystem = (() => {
   function updateLocalVid() {
     const wrap = document.getElementById("meet-local-vid-wrap");
     const vid  = document.getElementById("meet-local-video");
-    if (vid && localStream) { vid.srcObject = localStream; vid.muted = true; vid.play().catch(()=>{}); }
-    wrap?.classList.toggle("hidden", !st.camOn);
+    const src  = screenStream || localStream;
+    if (vid && src) { vid.srcObject = src; vid.muted = true; vid.play().catch(()=>{}); }
+    wrap?.classList.toggle("hidden", !(screenStream || st.camOn));
   }
 
   function updateBtns() {
     const m = document.getElementById("meet-mic-btn");
     const c = document.getElementById("meet-cam-btn");
+    const s = document.getElementById("meet-screen-btn");
     if (m) { m.textContent = st.micOn ? "🎙️ Mic On" : "🔇 Muted"; m.classList.toggle("media-active", st.micOn); }
     if (c) { c.textContent = st.camOn ? "📹 Cam On" : "📷 Cam Off"; c.classList.toggle("media-active", st.camOn); }
+    if (s) {
+      const sharing = !!screenStream;
+      s.textContent = sharing ? "🖥️ Stop Sharing" : "🖥️ Share Screen";
+      s.classList.toggle("media-active", sharing);
+    }
+  }
+
+  // ── Screen Share ───────────────────────────────────────
+  async function toggleScreenShare() {
+    if (screenStream) { stopScreenShare(); return; }
+    try {
+      screenStream = await navigator.mediaDevices.getDisplayMedia({ video: { cursor: "always" }, audio: true });
+    } catch (e) {
+      if (e.name !== "NotAllowedError") alert2("Screen share failed — " + e.message);
+      screenStream = null;
+      return;
+    }
+
+    const videoTrack = screenStream.getVideoTracks()[0];
+    if (!videoTrack) { screenStream = null; return; }
+
+    // When the user clicks "Stop sharing" in the browser's native controls
+    videoTrack.addEventListener("ended", stopScreenShare);
+
+    // Push screen track into every open peer connection
+    Object.values(peers).forEach(({ pc }) => {
+      const videoSender = pc.getSenders().find(s => s.track?.kind === "video");
+      if (videoSender) {
+        videoSender.replaceTrack(videoTrack).catch(() => {});
+      } else {
+        pc.addTrack(videoTrack, screenStream);
+      }
+      // Add screen audio track if captured
+      screenStream.getAudioTracks().forEach(at => {
+        if (!pc.getSenders().find(s => s.track === at)) pc.addTrack(at, screenStream);
+      });
+    });
+
+    updateLocalVid();
+    updateBtns();
+    sysMsg(`${st.teamFlag} ${st.nickname} started screen sharing — all users now see your screen via WebRTC`);
+    sbCh?.send({ type:"broadcast", event:"chat", payload:{
+      room_id: st.roomId, nickname: "📺 System", team_flag: "🖥️",
+      text: `${st.nickname} started screen sharing`, type:"msg",
+      created_at: new Date().toISOString(),
+    }});
+  }
+
+  function stopScreenShare() {
+    if (!screenStream) return;
+    screenStream.getTracks().forEach(t => t.stop());
+    screenStream = null;
+
+    // Restore camera video track (or null) in all senders
+    const camTrack = localStream?.getVideoTracks()[0] || null;
+    Object.values(peers).forEach(({ pc }) => {
+      const videoSender = pc.getSenders().find(s => s.track?.kind === "video");
+      if (videoSender) videoSender.replaceTrack(camTrack).catch(() => {});
+    });
+
+    updateLocalVid();
+    updateBtns();
+    sysMsg("Screen share ended");
   }
 
   function mkPeer(peerId) {
@@ -439,7 +505,17 @@ const MeetSystem = (() => {
       }
     };
 
-    if (localStream) localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
+    // If screen sharing is active, send screen video; otherwise send camera
+    if (screenStream) {
+      screenStream.getTracks().forEach(t => pc.addTrack(t, screenStream));
+    }
+    if (localStream) {
+      localStream.getTracks().forEach(t => {
+        // Skip video if already covered by screenStream
+        if (screenStream && t.kind === "video") return;
+        if (!pc.getSenders().find(s => s.track === t)) pc.addTrack(t, localStream);
+      });
+    }
     return pc;
   }
 
@@ -508,6 +584,8 @@ const MeetSystem = (() => {
     await sbCh?.untrack();
     await sbCh?.unsubscribe();
     sbCh = null;
+    screenStream?.getTracks().forEach(t => t.stop());
+    screenStream = null;
     localStream?.getTracks().forEach(t => t.stop());
     localStream = null;
     Object.values(peers).forEach(p => p.pc.close());
@@ -552,6 +630,7 @@ const MeetSystem = (() => {
     document.getElementById("meet-copy-link-btn")?.addEventListener("click", copyLink);
     document.getElementById("meet-mic-btn")?.addEventListener("click", toggleMic);
     document.getElementById("meet-cam-btn")?.addEventListener("click", toggleCam);
+    document.getElementById("meet-screen-btn")?.addEventListener("click", toggleScreenShare);
     document.getElementById("meet-stream-go")?.addEventListener("click", async () => {
       const url = (document.getElementById("meet-stream-input")?.value || "").trim();
       if (url) await loadStream(url, true);
@@ -640,5 +719,5 @@ const MeetSystem = (() => {
     return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
   }
 
-  return { init, previewTheme, checkUrlRoom };
+  return { init, previewTheme, checkUrlRoom, toggleScreenShare };
 })();
