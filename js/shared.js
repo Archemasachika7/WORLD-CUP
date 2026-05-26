@@ -94,8 +94,23 @@ const STREAM_PRESETS = [
 
 // ── Cinematic player background cycler ─────────────────
 const BG_PLAYERS = [
-  "Lionel Messi", "Kylian Mbappé", "Cristiano Ronaldo", "Vinicius Junior",
-  "Jude Bellingham", "Rodri", "Lamine Yamal", "Erling Haaland",
+  // Portugal first — Ronaldo leads, then squad
+  "Cristiano Ronaldo",
+  "Bruno Fernandes",
+  "Rafael Leão",
+  "Bernardo Silva",
+  "Rúben Dias",
+  "João Félix",
+  "Diogo Costa",
+  "Pedro Neto",
+  // World stars
+  "Lionel Messi",
+  "Kylian Mbappé",
+  "Vinicius Junior",
+  "Jude Bellingham",
+  "Rodri",
+  "Lamine Yamal",
+  "Erling Haaland",
 ];
 
 function _makeBgLayer() {
