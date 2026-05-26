@@ -315,12 +315,33 @@ const MeetSystem = (() => {
   function mkPeer(peerId) {
     if (peers[peerId]?.pc) return peers[peerId].pc;
     const pc = new RTCPeerConnection({ iceServers: STUN });
-    peers[peerId] = { pc };
+    peers[peerId] = { pc, makingOffer: false };
+
+    // onnegotiationneeded fires whenever addTrack is called on a stable connection
+    // (e.g. when either peer enables mic/cam after the initial handshake).
+    // Without this, tracks added after the first offer/answer are never sent.
+    pc.onnegotiationneeded = async () => {
+      if (peers[peerId]?.makingOffer) return;
+      peers[peerId].makingOffer = true;
+      try {
+        const offer = await pc.createOffer();
+        if (pc.signalingState !== "stable") return;
+        await pc.setLocalDescription(offer);
+        sbCh?.send({ type:"broadcast", event:"rtc_offer",
+          payload:{ from: st.peerId, to: peerId, sdp:{ type: offer.type, sdp: offer.sdp } } });
+      } catch(e) { console.warn("onneg:", e); }
+      finally { if (peers[peerId]) peers[peerId].makingOffer = false; }
+    };
+
     pc.onicecandidate = e => {
-      if (e.candidate) sbCh?.send({ type:"broadcast", event:"rtc_ice",
+      if (e.candidate && sbCh) sbCh.send({ type:"broadcast", event:"rtc_ice",
         payload:{ from: st.peerId, to: peerId, candidate: e.candidate.toJSON() } });
     };
-    pc.ontrack = e => renderRemote(peerId, e.streams[0]);
+
+    pc.ontrack = e => {
+      if (e.streams?.[0]) renderRemote(peerId, e.streams[0]);
+    };
+
     pc.onconnectionstatechange = () => {
       if (["disconnected","failed","closed"].includes(pc.connectionState)) {
         document.getElementById(`peer-${peerId}`)?.remove();
@@ -328,30 +349,45 @@ const MeetSystem = (() => {
         delete peers[peerId];
       }
     };
+
     if (localStream) localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
     return pc;
   }
 
   async function sendOffer(targetId) {
     const pc = mkPeer(targetId);
-    const offer = await pc.createOffer();
-    await pc.setLocalDescription(offer);
-    sbCh?.send({ type:"broadcast", event:"rtc_offer",
-      payload:{ from: st.peerId, to: targetId, sdp:{ type: offer.type, sdp: offer.sdp } } });
+    // Pre-declare sendrecv transceivers so the remote side can also send tracks
+    // even before either user has enabled mic/cam.
+    if (pc.getTransceivers().length === 0) {
+      pc.addTransceiver("audio", { direction: "sendrecv" });
+      pc.addTransceiver("video", { direction: "sendrecv" });
+    }
+    try {
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+      sbCh?.send({ type:"broadcast", event:"rtc_offer",
+        payload:{ from: st.peerId, to: targetId, sdp:{ type: offer.type, sdp: offer.sdp } } });
+    } catch(e) { console.warn("sendOffer:", e); }
   }
 
   async function handleOffer({ from, sdp }) {
-    const pc = mkPeer(from);
-    await pc.setRemoteDescription(new RTCSessionDescription(sdp));
-    const answer = await pc.createAnswer();
-    await pc.setLocalDescription(answer);
-    sbCh?.send({ type:"broadcast", event:"rtc_answer",
-      payload:{ from: st.peerId, to: from, sdp:{ type: answer.type, sdp: answer.sdp } } });
+    const pc = peers[from]?.pc || mkPeer(from);
+    try {
+      // Collision: if we're mid-offer ourselves, roll back before applying theirs
+      if (pc.signalingState === "have-local-offer") {
+        await pc.setLocalDescription({ type: "rollback" });
+      }
+      await pc.setRemoteDescription(new RTCSessionDescription(sdp));
+      const answer = await pc.createAnswer();
+      await pc.setLocalDescription(answer);
+      sbCh?.send({ type:"broadcast", event:"rtc_answer",
+        payload:{ from: st.peerId, to: from, sdp:{ type: answer.type, sdp: answer.sdp } } });
+    } catch(e) { console.warn("handleOffer:", e); }
   }
 
   async function handleAnswer({ from, sdp }) {
     const pc = peers[from]?.pc;
-    if (pc && pc.signalingState !== "stable")
+    if (pc && pc.signalingState === "have-local-offer")
       await pc.setRemoteDescription(new RTCSessionDescription(sdp)).catch(()=>{});
   }
 
