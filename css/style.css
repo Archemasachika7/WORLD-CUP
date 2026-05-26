@@ -1253,3 +1253,525 @@ button { cursor: pointer; }
   #stream-banner { padding: 40px 20px; }
   .teams-row { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
 }
+
+/* ============================================================
+   Stream Section
+   ============================================================ */
+.stream-wrap {
+  background: linear-gradient(135deg, #0f0008 0%, #1a0010 50%, #0a000a 100%);
+  border-top: 1px solid rgba(229,9,20,0.2);
+  border-bottom: 1px solid rgba(229,9,20,0.2);
+  padding: 64px 40px;
+}
+
+.stream-inner {
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.stream-title {
+  font-size: 2rem;
+  font-weight: 900;
+  margin-bottom: 8px;
+}
+
+.stream-title span { color: var(--accent); }
+
+.stream-subtitle {
+  color: var(--text-dim);
+  margin-bottom: 28px;
+  font-size: 0.95rem;
+}
+
+.stream-input-bar {
+  display: flex;
+  align-items: center;
+  background: rgba(255,255,255,0.05);
+  border: 2px solid rgba(229,9,20,0.4);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 12px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.stream-input-bar:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(229,9,20,0.15);
+}
+
+.stream-input-icon {
+  padding: 0 16px;
+  font-size: 1.2rem;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+#stream-url-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 16px 8px;
+  font-size: 1rem;
+  color: var(--text);
+  outline: none;
+  min-width: 0;
+}
+
+#stream-url-input::placeholder { color: var(--text-dim); }
+
+#stream-go-btn {
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 16px 28px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+
+#stream-go-btn:hover { background: #b20710; }
+
+.stream-alert {
+  height: 24px;
+  font-size: 0.82rem;
+  color: var(--accent);
+  opacity: 0;
+  transition: opacity 0.3s;
+  margin-bottom: 8px;
+}
+
+.stream-alert.visible { opacity: 1; }
+
+.stream-presets {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.preset-stream {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: var(--text);
+  padding: 9px 18px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.preset-stream:hover {
+  background: rgba(229,9,20,0.12);
+  border-color: rgba(229,9,20,0.3);
+}
+
+.stream-note {
+  font-size: 0.76rem;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+
+/* ============================================================
+   Team Card — updated (flags larger)
+   ============================================================ */
+.team-flag-lg { font-size: 3rem; margin-bottom: 8px; display: block; }
+.team-top5 { font-size: 0.7rem; color: var(--text-dim); margin-bottom: 4px; }
+
+.sq-badge {
+  display: inline-block;
+  border-radius: 3px;
+  padding: 2px 8px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 6px;
+}
+
+.sq-confirmed   { background: rgba(46,204,113,0.15); color: var(--green);    border: 1px solid rgba(46,204,113,0.3); }
+.sq-preliminary { background: rgba(241,196,15,0.15); color: var(--yellow);   border: 1px solid rgba(241,196,15,0.3); }
+.sq-pending     { background: rgba(255,255,255,0.06); color: var(--text-dim); border: 1px solid var(--border); }
+
+/* ============================================================
+   Match Card — flags prominent
+   ============================================================ */
+.mflag-lg { font-size: 2.4rem; display: block; margin-bottom: 4px; }
+.mname-sm { font-size: 0.72rem; color: var(--text-dim); text-align: center; max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ============================================================
+   Squad Status Bar (in modal)
+   ============================================================ */
+.squad-status-bar {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 20px;
+  font-size: 0.88rem;
+}
+
+.sq-bar-green  { background: rgba(46,204,113,0.08); border: 1px solid rgba(46,204,113,0.2); }
+.sq-bar-yellow { background: rgba(241,196,15,0.08); border: 1px solid rgba(241,196,15,0.2); }
+.sq-bar-grey   { background: rgba(255,255,255,0.04); border: 1px solid var(--border); }
+
+.sq-status-icon { font-size: 1.3rem; flex-shrink: 0; }
+.sq-note { font-size: 0.78rem; color: var(--text-dim); margin-top: 2px; line-height: 1.4; }
+
+/* Squad player grid */
+.squad-player-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.squad-player-chip {
+  background: var(--bg-dark);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 0.8rem;
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.squad-player-chip.tier1 { border-color: rgba(229,9,20,0.25); }
+.squad-player-chip.tier2 { border-color: rgba(255,215,0,0.2); opacity: 0.85; }
+.squad-player-chip small { font-size: 0.68rem; color: var(--text-dim); }
+
+.weight-chip {
+  display: inline-block;
+  background: rgba(255,215,0,0.12);
+  color: var(--gold);
+  border-radius: 3px;
+  padding: 1px 5px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  width: fit-content;
+}
+
+/* League split bar */
+.league-split-bar {
+  display: flex;
+  gap: 20px;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.league-split-bar strong { color: var(--text); }
+
+/* Player row extended */
+.player-club { font-size: 0.76rem; color: var(--text-dim); }
+.player-club.non-top5 { color: var(--gold); }
+.league-label { font-style: italic; font-size: 0.7rem; }
+.player-note  { font-size: 0.72rem; color: var(--text-dim); font-style: italic; grid-column: 1 / -1; }
+
+/* ============================================================
+   Stats Table — league labels & effective score
+   ============================================================ */
+.league-note {
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+  font-style: italic;
+}
+
+.weight-tag {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--green);
+  margin-left: 8px;
+}
+
+.weight-discounted { color: var(--yellow) !important; }
+
+.league-pill {
+  display: inline-block;
+  font-size: 1rem;
+  margin-right: 4px;
+}
+
+.tier1-pill { /* flag emoji already shows */ }
+.tier2-pill { opacity: 0.75; }
+
+.eff-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 0.78rem;
+}
+
+.eff-full { background: rgba(46,204,113,0.15); color: var(--green); border: 1px solid rgba(46,204,113,0.2); }
+.eff-disc { background: rgba(255,215,0,0.12);  color: var(--yellow); border: 1px solid rgba(255,215,0,0.2); }
+
+/* ============================================================
+   Rankings — top5 count chip
+   ============================================================ */
+.rank-top5 {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  width: 36px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   Live In-Play Predictor
+   ============================================================ */
+.live-predictor-card {
+  background: var(--bg-card);
+  border: 1px solid rgba(229,9,20,0.2);
+  border-radius: 16px;
+  padding: 32px;
+}
+
+.lp-teams {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+
+.lp-teams select {
+  flex: 1;
+  min-width: 180px;
+  background: var(--bg-dark);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 0.95rem;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.lp-teams select:focus { border-color: var(--accent); }
+.lp-vs { font-weight: 900; font-size: 1.1rem; color: var(--text-dim); }
+
+.lp-controls {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 24px;
+  align-items: start;
+  margin-bottom: 28px;
+}
+
+.lp-score-wrap label,
+.lp-minute-wrap label,
+.lp-cards-wrap label {
+  display: block;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+
+.lp-score-inputs {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.lp-goals {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-dark);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 10px;
+}
+
+.lp-goals span {
+  font-size: 1.6rem;
+  font-weight: 900;
+  min-width: 32px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.lp-score-dash { font-size: 1.2rem; color: var(--text-dim); }
+
+.goal-btn {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--border);
+  color: var(--text);
+  width: 30px; height: 30px;
+  border-radius: 6px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.goal-btn:hover { background: var(--accent); border-color: var(--accent); }
+
+.lp-minute-wrap input[type=range] {
+  width: 100%;
+  accent-color: var(--accent);
+  cursor: pointer;
+  height: 6px;
+  margin: 6px 0;
+}
+
+.lp-minute-marks {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.68rem;
+  color: var(--text-dim);
+  margin-top: 4px;
+}
+
+.lp-cards {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.card-btn {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  color: var(--text);
+  width: 26px; height: 26px;
+  border-radius: 5px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.card-btn:hover { background: rgba(231,76,60,0.2); border-color: var(--red); }
+
+.red-card-count { font-size: 0.82rem; font-weight: 700; min-width: 28px; text-align: center; }
+
+/* Result display */
+.lp-result {
+  background: var(--bg-dark);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.lp-result-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 16px;
+  font-size: 2rem;
+}
+
+#lp-scoreline {
+  font-size: 2.2rem;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  color: var(--gold);
+}
+
+.minute-badge {
+  background: var(--accent);
+  color: white;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-variant-numeric: tabular-nums;
+  min-width: 44px;
+  text-align: center;
+}
+
+.lp-verdict {
+  text-align: center;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-top: 12px;
+}
+
+.lp-momentum {
+  text-align: center;
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  margin-top: 6px;
+}
+
+/* ============================================================
+   H2H flags
+   ============================================================ */
+.h2h-flags {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 8px;
+}
+
+.h2h-flag-lg { font-size: 3rem; }
+.h2h-divider { font-weight: 900; color: var(--text-dim); font-size: 1.2rem; }
+
+.h2h-names {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-dim);
+  margin-bottom: 4px;
+}
+
+/* ============================================================
+   Quick live link (in match modal)
+   ============================================================ */
+.quick-live-link { margin-top: 18px; text-align: center; }
+
+.btn-sm {
+  display: inline-block;
+  background: rgba(229,9,20,0.12);
+  border: 1px solid rgba(229,9,20,0.3);
+  color: var(--accent);
+  padding: 8px 18px;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-sm:hover { background: rgba(229,9,20,0.22); }
+
+/* ============================================================
+   Modal — flag size update
+   ============================================================ */
+.modal-flag-lg { font-size: 3.5rem; }
+
+/* Responsive — live predictor */
+@media (max-width: 768px) {
+  .lp-controls { grid-template-columns: 1fr; }
+  .stream-wrap  { padding: 40px 20px; }
+  .stream-input-bar { flex-direction: column; border-radius: 10px; }
+  .stream-input-icon { padding: 10px 0 0; }
+  #stream-url-input { width: 100%; padding: 12px 16px; }
+  #stream-go-btn { width: 100%; border-radius: 0 0 8px 8px; }
+  .favs-podium { grid-template-columns: 1fr; }
+  .modal-scores { grid-template-columns: repeat(2,1fr); }
+  .lp-result-header { font-size: 1.4rem; }
+  #lp-scoreline { font-size: 1.6rem; }
+}

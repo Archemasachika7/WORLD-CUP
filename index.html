@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>World Cup 2026 — Live Hub</title>
-  <meta name="description" content="Your all-in-one World Cup 2026 destination — live streams, all 48 teams, match schedule, player stats, and AI win probability predictions." />
+  <meta name="description" content="FIFA World Cup 2026 — live stream link, all 48 teams, real 2025-26 player stats, in-play win probability predictor, and auto-refreshing news." />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚽</text></svg>" />
   <link rel="stylesheet" href="css/style.css" />
 </head>
@@ -19,13 +19,15 @@
     <span>World<span class="logo-wc">Cup</span> 2026</span>
   </div>
   <ul class="nav-links">
+    <li><a class="nav-link" href="#stream-section">Watch</a></li>
     <li><a class="nav-link" href="#teams">Teams</a></li>
     <li><a class="nav-link" href="#matches">Matches</a></li>
     <li><a class="nav-link" href="#stats">Stats</a></li>
     <li><a class="nav-link" href="#predictions">Predictions</a></li>
+    <li><a class="nav-link" href="#live-predictor-section">Live Predictor</a></li>
     <li><a class="nav-link" href="#news">News</a></li>
   </ul>
-  <a class="nav-cta" href="#live-stream">▶ Watch Live</a>
+  <a class="nav-cta" href="#stream-section">▶ Watch Live</a>
 </nav>
 
 <!-- ============================================================
@@ -39,50 +41,31 @@
       <span class="hero-live-dot"></span>
       2026 FIFA World Cup — Live Hub
     </div>
-
     <h1 class="hero-title">
-      The Greatest<br>
-      Show on Earth<br>
-      <span class="wc-year">USA · CAN · MEX 2026</span>
+      The Greatest<br>Show on Earth<br>
+      <span class="wc-year">🇺🇸 🇨🇦 🇲🇽 &nbsp;2026</span>
     </h1>
-
     <p class="hero-subtitle">
-      48 nations. 104 matches. One trophy. Get live streams, AI win probabilities,
-      real player stats from all top 5 leagues, and round-the-clock news updates.
+      48 nations. 104 matches. Real 2025-26 player data. Live in-play win probability.
+      Paste your stream link below and hit play.
     </p>
-
     <div class="hero-hosts">
       <span class="host-pill">🇺🇸 United States</span>
       <span class="host-pill">🇨🇦 Canada</span>
       <span class="host-pill">🇲🇽 Mexico</span>
       <span class="host-pill">📅 June 11 – July 19, 2026</span>
     </div>
-
     <div class="hero-actions">
-      <a class="btn-primary" href="#live-stream">▶ &nbsp;Watch Live Stream</a>
-      <a class="btn-secondary" href="#predictions">🔮 &nbsp;Predictions Engine</a>
+      <a class="btn-primary" href="#stream-section">▶ &nbsp;Watch Stream</a>
+      <a class="btn-secondary" href="#live-predictor-section">🔴 &nbsp;Live Predictor</a>
     </div>
-
     <div class="hero-stats">
-      <div class="hero-stat">
-        <div class="stat-num">48</div>
-        <div class="stat-lbl">Teams</div>
-      </div>
-      <div class="hero-stat">
-        <div class="stat-num">104</div>
-        <div class="stat-lbl">Matches</div>
-      </div>
-      <div class="hero-stat">
-        <div class="stat-num">16</div>
-        <div class="stat-lbl">Venues</div>
-      </div>
-      <div class="hero-stat">
-        <div class="stat-num">6</div>
-        <div class="stat-lbl">Confederations</div>
-      </div>
+      <div class="hero-stat"><div class="stat-num">48</div><div class="stat-lbl">Teams</div></div>
+      <div class="hero-stat"><div class="stat-num">104</div><div class="stat-lbl">Matches</div></div>
+      <div class="hero-stat"><div class="stat-num">16</div><div class="stat-lbl">Venues</div></div>
+      <div class="hero-stat"><div class="stat-num">5+</div><div class="stat-lbl">Leagues Tracked</div></div>
     </div>
   </div>
-
   <div class="hero-countdown">
     <div class="countdown-label">Kicks off in</div>
     <div id="hero-countdown">…</div>
@@ -90,49 +73,46 @@
 </section>
 
 <!-- ============================================================
-     Live Stream Banner
+     Stream Section — User-Paste Stream Bar
      ============================================================ -->
-<section id="live-stream">
-  <div id="stream-banner">
-    <div class="stream-banner-inner">
+<section id="stream-section">
+  <div class="stream-wrap">
+    <div class="stream-inner">
       <h2 class="stream-title">Watch <span>World Cup 2026</span> Live</h2>
-      <p class="stream-desc">
-        All 104 matches available via official broadcasters. Select your region below
-        or use a free legal stream. Replace these links with your actual stream URLs.
-      </p>
-      <div class="stream-links">
-        <a class="stream-link-btn" href="#" target="_blank" rel="noopener">
-          ▶ &nbsp;Official FIFA+ Stream
-        </a>
-        <a class="stream-link-btn alt" href="#" target="_blank" rel="noopener">
-          📺 &nbsp;Fox Sports (USA)
-        </a>
-        <a class="stream-link-btn alt" href="#" target="_blank" rel="noopener">
-          📡 &nbsp;BBC / ITV (UK)
-        </a>
-        <a class="stream-link-btn alt" href="#" target="_blank" rel="noopener">
-          🌍 &nbsp;Other Regions
-        </a>
+      <p class="stream-subtitle">Paste any official stream URL below, or pick a broadcaster</p>
+
+      <!-- Main stream input bar -->
+      <div class="stream-input-bar">
+        <span class="stream-input-icon">▶</span>
+        <input id="stream-url-input" type="url" placeholder="Paste your stream link here… e.g. https://www.foxsports.com/live" autocomplete="off" spellcheck="false" />
+        <button id="stream-go-btn">Watch Now</button>
       </div>
-      <p class="stream-note">
-        Links open official broadcaster pages. For a full rights list visit
-        <a href="https://www.fifa.com" target="_blank" rel="noopener">fifa.com</a>.
-        Always use licensed streams.
-      </p>
+      <div id="stream-alert" class="stream-alert"></div>
+
+      <!-- Broadcaster presets -->
+      <div class="stream-presets">
+        <button class="preset-stream" data-url="https://www.fifa.com/fifaplus" title="FIFA+">📺 FIFA+</button>
+        <button class="preset-stream" data-url="https://www.foxsports.com" title="Fox Sports (USA)">🇺🇸 Fox Sports</button>
+        <button class="preset-stream" data-url="https://www.bbc.co.uk/iplayer" title="BBC iPlayer (UK)">🇬🇧 BBC iPlayer</button>
+        <button class="preset-stream" data-url="https://www.itv.com/watch" title="ITV Hub (UK)">🇬🇧 ITV</button>
+        <button class="preset-stream" data-url="https://www.tsn.ca/live" title="TSN (Canada)">🇨🇦 TSN</button>
+        <button class="preset-stream" data-url="https://www.tvazteca.com/aztecasiete" title="Azteca 7 (Mexico)">🇲🇽 Azteca 7</button>
+      </div>
+      <p class="stream-note">Preset buttons open official broadcaster pages in a new tab. Always use licensed streams. Stream link is saved in your browser locally.</p>
     </div>
   </div>
 </section>
 
 <!-- ============================================================
-     Teams Section
+     Teams
      ============================================================ -->
 <section id="teams" class="section section-fade">
   <div class="section-header">
     <span class="section-tag">All 48 Nations</span>
     <h2 class="section-title">The 2026 World Cup Teams</h2>
     <p class="section-desc">
-      Click any team card to see their squad strength analysis, key players from top 5 leagues,
-      season honours, and tournament title probability.
+      Click any team for squad status, real 2025-26 player stats (weighted by league tier),
+      season honours, and title probability. Squads marked as Announced, Preliminary, or Unannounced.
     </p>
   </div>
   <div class="search-wrap">
@@ -142,16 +122,13 @@
 </section>
 
 <!-- ============================================================
-     Matches Section
+     Matches
      ============================================================ -->
 <section id="matches" class="section section-fade">
   <div class="section-header">
     <span class="section-tag">Full Schedule</span>
     <h2 class="section-title">All Matches</h2>
-    <p class="section-desc">
-      Every group stage fixture with venue, date, live win probability bars.
-      Click a match for a full head-to-head breakdown.
-    </p>
+    <p class="section-desc">Flags-first display. Click a match for a full H2H breakdown and a shortcut to the live in-play predictor.</p>
   </div>
   <div class="match-tabs-wrap">
     <div id="match-tabs"></div>
@@ -160,39 +137,49 @@
 </section>
 
 <!-- ============================================================
-     Stats Section
+     Stats
      ============================================================ -->
 <section id="stats" class="section section-fade">
   <div class="section-header">
-    <span class="section-tag">2024/25 Season Data</span>
+    <span class="section-tag">Real 2025-26 Data</span>
     <h2 class="section-title">Player Stats &amp; Analysis</h2>
     <p class="section-desc">
-      Top performers from all five major European leagues — EPL, La Liga, Bundesliga,
-      Serie A, and Ligue 1 — mapped to their World Cup squads. Awards, goal returns,
-      defensive records, and ratings all factored into our team power scores.
+      Real stats from all major leagues — top-5 (full weight) and others like MLS, Saudi Pro League, Liga MX (discounted weight).
+      Effective score = rating × league weight. Non-top-5 players still count — they just rank below top-5 peers.
     </p>
   </div>
   <div id="stats-container"></div>
 </section>
 
 <!-- ============================================================
-     Predictions Section
+     Predictions
      ============================================================ -->
 <section id="predictions" class="section section-fade">
   <div class="section-header">
-    <span class="section-tag">AI Predictions</span>
-    <h2 class="section-title">Tournament Predictions &amp; Ratings</h2>
-    <p class="section-desc">
-      Composite scores built from Elo ratings, FIFA world rankings, squad strength
-      (real 2024/25 club data), and season award bonuses. Use the head-to-head
-      predictor to simulate any match.
-    </p>
+    <span class="section-tag">Tournament Predictions</span>
+    <h2 class="section-title">Power Rankings &amp; H2H</h2>
+    <p class="section-desc">Composite of Elo, FIFA ranking, and league-weighted squad strength from real 2025-26 club data.</p>
   </div>
   <div id="predictions-container"></div>
 </section>
 
 <!-- ============================================================
-     News Section
+     Live In-Play Predictor
+     ============================================================ -->
+<section id="live-predictor-section" class="section section-fade">
+  <div class="section-header">
+    <span class="section-tag">🔴 Live</span>
+    <h2 class="section-title">In-Play Match Predictor</h2>
+    <p class="section-desc">
+      Simulate or track a live match. As the scoreline and minute change, win probabilities update in real time.
+      Red cards shift momentum. Based on our Elo + squad strength baseline + in-game state model.
+    </p>
+  </div>
+  <div id="live-predictor" class="live-predictor-card"></div>
+</section>
+
+<!-- ============================================================
+     News
      ============================================================ -->
 <section id="news" class="section section-fade">
   <div class="section-header">
@@ -201,15 +188,14 @@
         <span class="section-tag">Auto-Refresh Every 6 Hours</span>
         <h2 class="section-title">Latest World Cup News</h2>
       </div>
-      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:12px;">
         <span id="news-last-update"></span>
-        <button class="news-refresh-btn" onclick="API.startNewsAutoRefresh(renderNews)">↻ Refresh Now</button>
+        <button class="news-refresh-btn" onclick="API.startNewsAutoRefresh(renderNews)">↻ Refresh</button>
       </div>
     </div>
     <p class="section-desc">
-      News refreshes automatically every 6 hours and is cached locally.
-      Add your free <a href="https://gnews.io" target="_blank" rel="noopener" style="color:var(--accent)">GNews API key</a>
-      in <code>js/api.js</code> to get live headlines.
+      Add a free <a href="https://gnews.io" target="_blank" rel="noopener" style="color:var(--accent)">GNews API key</a>
+      in <code>js/api.js</code> → <code>GNEWS_KEY</code> to get live headlines. Without a key, curated fallback stories are shown.
     </p>
   </div>
   <div id="news-grid"></div>
@@ -220,24 +206,24 @@
      ============================================================ -->
 <footer id="footer">
   <div class="footer-links">
+    <a href="#stream-section">Watch</a>
     <a href="#teams">Teams</a>
     <a href="#matches">Matches</a>
     <a href="#stats">Stats</a>
     <a href="#predictions">Predictions</a>
-    <a href="#news">News</a>
+    <a href="#live-predictor-section">Live Predictor</a>
     <a href="https://www.fifa.com" target="_blank" rel="noopener">FIFA Official</a>
   </div>
   <p>⚽ <strong>World Cup 2026 Live Hub</strong> — USA · Canada · Mexico</p>
   <p class="footer-disclaimer">
-    This site is a fan-built resource. All win probabilities are algorithmic estimates
-    based on publicly available statistics and are for entertainment only. Stream links
-    point to official broadcaster pages — always use licensed streams.
-    Player stats reflect 2024/25 club season data.
+    Fan-built resource. Player stats sourced from PlanetFootball, ESPN, Tribuna.com, Sky Sports (May 2026).
+    Squad info from FIFA.com, ESPN, Sky Sports. Win probabilities are algorithmic estimates for entertainment.
+    Stream links open official broadcaster pages — always use licensed streams.
   </p>
 </footer>
 
 <!-- ============================================================
-     Modal (shared for teams + matches)
+     Modal
      ============================================================ -->
 <div id="modal">
   <div id="modal-inner">
@@ -246,11 +232,9 @@
   </div>
 </div>
 
-<!-- Scripts (order matters: data → predictions → api → app) -->
 <script src="js/data.js"></script>
 <script src="js/predictions.js"></script>
 <script src="js/api.js"></script>
 <script src="js/app.js"></script>
-
 </body>
 </html>
