@@ -8,6 +8,7 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚽</text></svg>" />
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/animations.css" />
+<style>#bestxi-modal{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;z-index:10001;padding:30px}#bestxi-modal.open{display:block}#bestxi-close{position:absolute;right:16px;top:16px;background:transparent;color:#fff;border:0;font-size:20px;cursor:pointer}@keyframes playerIn{to{transform:translate(-50%,-50%) scale(1);}}</style>
 </head>
 <body>
 
@@ -32,7 +33,16 @@
   </div>
 </div>
 
-<div id="teams-grid" style="max-width:1200px;margin:0 auto;padding:0 40px 80px;"></div>
+<div id="teams-grid" style="max-width:1200px;margin:0 auto;padding:0 40px 40px;"></div>
+
+<section style="max-width:1200px;margin:0 auto 80px;padding:0 40px;">
+  <div class="stat-card" style="padding:24px;position:relative;overflow:hidden;">
+    <h3 style="margin:0 0 8px;">Performance Best XI (Animated Pitch)</h3>
+    <p style="color:var(--text-dim);margin:0 0 12px;">Latest form XI snapshot. Click to open animated lineup view.</p>
+    <a href="#" id="open-bestxi" class="tab-btn active" style="display:inline-block;text-decoration:none;">Open Best XI View</a>
+    <div id="bestxi-inline" style="margin-top:14px;color:var(--text-dim);font-size:0.9rem;">Updated: <span id="bestxi-date"></span></div>
+  </div>
+</section>
 
 <footer id="footer"></footer>
 
@@ -215,7 +225,7 @@ function openTeamModal(teamId) {
     <div class="squad-status-bar ${squad.status==='ANNOUNCED'?'sq-bar-green':squad.status==='PRELIMINARY'?'sq-bar-yellow':'sq-bar-grey'}">
       <span class="sq-status-icon">${squad.status==='ANNOUNCED'?'✅':squad.status==='PRELIMINARY'?'⚠️':'❓'}</span>
       <div>
-        <strong>Squad: ${squad.status}</strong>${squad.date?` — ${squad.date}`:' — pending June 2 FIFA deadline'}
+        <strong>Squad: ${squad.status}</strong>${squad.date?` — ${squad.date}`:' — pending June 2 FIFA deadline'}${squad.squadSize?` • ${squad.squadSize} players`:' • 26/27 players (TBD)'}
         <div class="sq-note">${squad.note}</div>
       </div>
     </div>`;
@@ -289,6 +299,31 @@ function initScrollAnimations() {
   }), { threshold: 0.05 });
   document.querySelectorAll(".card-enter, .section-fade").forEach(el => obs.observe(el));
 }
+
+
+const bestxiModal = document.createElement("div");
+bestxiModal.id = "bestxi-modal";
+bestxiModal.innerHTML = `<div id="modal-inner"><button id="bestxi-close">✕</button><div id="bestxi-body"></div></div>`;
+document.body.appendChild(bestxiModal);
+document.getElementById("bestxi-date").textContent = BEST_XI.asOf;
+document.getElementById("open-bestxi").addEventListener("click", (e) => {
+  e.preventDefault();
+  renderBestXI();
+  bestxiModal.classList.add("open");
+});
+document.getElementById("bestxi-close").addEventListener("click", ()=> bestxiModal.classList.remove("open"));
+
+function renderBestXI(){
+  const pitch = `
+  <div style="position:relative;height:560px;border-radius:16px;background:linear-gradient(180deg,#2a7d3a,#1f5f2d);border:2px solid rgba(255,255,255,.3);overflow:hidden;">
+    <div style="position:absolute;inset:12px;border:2px solid rgba(255,255,255,.4);border-radius:8px;"></div>
+    <div style="position:absolute;left:50%;top:12px;bottom:12px;width:2px;background:rgba(255,255,255,.35);"></div>
+    ${BEST_XI.players.map((p,i)=>`<div style="position:absolute;left:${p.x}%;top:${p.y}%;transform:translate(-50%,-50%) scale(.3);animation:playerIn .55s ease forwards ${i*80}ms;background:rgba(9,20,29,.75);border:1px solid rgba(255,255,255,.4);padding:8px 10px;border-radius:999px;white-space:nowrap;font-size:.78rem;"><b>${p.pos}</b> ${p.name}</div>`).join('')}
+  </div>`;
+  document.getElementById("bestxi-body").innerHTML = `<h2 style="margin:0 0 8px;">Best XI • ${BEST_XI.formation}</h2><p style="margin:0 0 12px;color:var(--text-dim)">Auto-built from current season performance chart.</p>${pitch}`;
+}
+
+
 </script>
 </body>
 </html>
