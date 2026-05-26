@@ -18,8 +18,8 @@ function buildNav(activePage) {
 
   container.innerHTML = `
     <div class="nav-logo">
-      <span class="trophy">⚽</span>
-      <span>World<span class="logo-wc">Cup</span> 2026</span>
+      <img src="https://upload.wikimedia.org/wikipedia/en/thumb/8/86/2026_FIFA_World_Cup_logo.svg/120px-2026_FIFA_World_Cup_logo.svg.png" alt="FIFA World Cup 2026 logo" style="height:40px;width:auto;border-radius:6px" loading="lazy" />
+      <span>FIFA World Cup <span class="logo-wc">2026</span></span>
     </div>
     <button class="nav-hamburger" id="nav-hamburger" aria-label="Menu">☰</button>
     <ul class="nav-links" id="nav-links-list">

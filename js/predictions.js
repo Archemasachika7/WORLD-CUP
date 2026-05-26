@@ -19,7 +19,7 @@ const Predictions = (() => {
       scores[p.teamId].formBoost     += ((p.goals||0) + 0.7*(p.assists||0)) * 0.01 * w;
       if (lm.tier === 1) scores[p.teamId].top5Count++;
       else               scores[p.teamId].nonTop5Count++;
-    });
+    }).filter(Boolean);
 
     AWARDS.forEach(a => {
       if (a.teamId && scores[a.teamId]) {
@@ -159,10 +159,12 @@ const Predictions = (() => {
   function buildProbableXI(teamId) {
     const squad = SQUADS[teamId] || { players: [] };
     const tracked = new Map(PLAYERS.filter(p => p.teamId === teamId).map(p => [p.name.toLowerCase(), p]));
+    const announced = squad.status === "ANNOUNCED";
     const candidates = (squad.players || []).map(sp => {
       const tp = tracked.get(sp.name.toLowerCase());
       const lm = LEAGUE_META[sp.league] || LEAGUE_META["Other"];
-      const rating = tp?.rating || 6.5;
+      if (announced && !tp) return null;
+      const rating = tp?.rating || 6.2;
       const score = rating * (lm.weight || 0.5) + ((tp?.goals||0)*0.03 + (tp?.assists||0)*0.02);
       return { ...sp, rating, selectScore: score, goals: tp?.goals||0, assists: tp?.assists||0 };
     });
