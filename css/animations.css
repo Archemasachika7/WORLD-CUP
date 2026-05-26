@@ -2,6 +2,13 @@
    World Cup 2026 — Animations
    ============================================================ */
 
+/* ---- 0. Cinematic background slow-zoom ---- */
+@keyframes slowZoom {
+  0%   { transform: scale(1.08); }
+  50%  { transform: scale(1.18); }
+  100% { transform: scale(1.08); }
+}
+
 /* ---- 1. Page Fade-In — instant snap ---- */
 body {
   opacity: 0;

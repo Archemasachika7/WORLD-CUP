@@ -92,7 +92,59 @@ const STREAM_PRESETS = [
   { label: "⚡ beIN Sports", url: "https://www.beinsports.com" },
 ];
 
+// ── Cinematic player background cycler ─────────────────
+const BG_PLAYERS = [
+  "Lionel Messi", "Kylian Mbappé", "Cristiano Ronaldo", "Vinicius Junior",
+  "Jude Bellingham", "Rodri", "Lamine Yamal", "Erling Haaland",
+];
+
+function _makeBgLayer() {
+  const el = document.createElement("div");
+  el.setAttribute("aria-hidden", "true");
+  Object.assign(el.style, {
+    position:           "fixed",
+    inset:              "0",
+    backgroundSize:     "cover",
+    backgroundPosition: "center 20%",
+    backgroundRepeat:   "no-repeat",
+    filter:             "blur(14px) brightness(0.28)",
+    transform:          "scale(1.08)",
+    zIndex:             "-1",
+    opacity:            "0",
+    transition:         "opacity 2.5s ease-in-out",
+    animation:          "slowZoom 40s ease-in-out infinite",
+    pointerEvents:      "none",
+  });
+  document.body.prepend(el);
+  return el;
+}
+
+function startBgCycler() {
+  if (typeof getPlayerPhoto !== "function") return;
+  const layerA = _makeBgLayer();
+  const layerB = _makeBgLayer();
+  let active = layerA, idle = layerB, idx = 0;
+
+  async function tick() {
+    const name = BG_PLAYERS[idx % BG_PLAYERS.length];
+    idx++;
+    try {
+      const url = await getPlayerPhoto(name);
+      if (!url || (typeof _photoPlaceholder !== "undefined" && url === _photoPlaceholder)) return;
+      idle.style.backgroundImage = `url('${url}')`;
+      void idle.offsetHeight; // force reflow so transition fires
+      idle.style.opacity  = "0.75";
+      active.style.opacity = "0";
+      [active, idle] = [idle, active];
+    } catch {}
+  }
+
+  tick();
+  setInterval(tick, 12000);
+}
+
 // Page fade-in on load
 document.addEventListener("DOMContentLoaded", () => {
   document.body.classList.add("page-loaded");
+  startBgCycler();
 });
