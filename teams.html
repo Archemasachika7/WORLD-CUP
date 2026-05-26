@@ -97,6 +97,15 @@
 .tier-silver   { background:linear-gradient(150deg,#1a1a1a,#555,#a0a0a0,#d8d8d8);   border:2px solid #aaa; }
 .tier-bronze   { background:linear-gradient(150deg,#1c0a00,#6b3a1f,#a0703f,#d4a060); border:2px solid #a0703f; }
 
+/* Squad confirmed/projected badge */
+.fc-squad-badge {
+  position:absolute; top:5px; right:6px; z-index:6;
+  font-size:.5rem; font-weight:900; padding:1px 4px;
+  border-radius:3px; letter-spacing:.5px; line-height:1.4;
+}
+.fc-squad-badge.confirmed { background:rgba(46,204,113,.9); color:#fff; }
+.fc-squad-badge.projected  { background:rgba(255,193,7,.85); color:#000; }
+
 .fc-card-shine {
   position:absolute; inset:0;
   background:linear-gradient(135deg,rgba(255,255,255,.18) 0%,transparent 50%,rgba(255,255,255,.06) 100%);
@@ -767,45 +776,72 @@ function initScrollAnimations() {
 let _fcTeam   = null;
 let _fcLineup = [];
 
-/* Build the best probable XI from the squad call-up list.
-   Falls back to tracked PLAYERS if squad not yet announced. */
+/* Squad-first probable XI builder:
+   1. Start with official squad call-up list (SQUADS)
+   2. Enrich each player with tracked season stats (PLAYERS)
+   3. Estimate rating for squad players without tracked data — no league penalty
+   4. Pick best XI by raw rating */
 function _buildFCLineup(teamId) {
   const squad      = SQUADS[teamId] || { status:'UNANNOUNCED', players:[] };
   const trackedArr = PLAYERS.filter(p => p.teamId === teamId);
   const trackedMap = new Map(trackedArr.map(p => [p.name.toLowerCase(), p]));
 
-  const lgW = lg  => (LEAGUE_META[lg]  || LEAGUE_META['Other']).weight;
-  const est = lg  => 6.5 + lgW(lg) * 1.8;
+  // Honest baseline for squad players not in our stats database
+  // No league weight penalty — Saudi/MLS players aren't worse humans
+  function baselineRating(league) {
+    const lm = LEAGUE_META[league] || LEAGUE_META['Other'];
+    if (lm.tier === 1 && lm.weight >= 0.95) return 7.8; // Top-5 European league
+    if (lm.tier === 1)                       return 7.5; // Liga Portugal, etc.
+    if (lm.tier === 2)                       return 7.2; // Saudi Pro, MLS, Jupiler
+    return 6.8;                                          // Other leagues
+  }
 
   let pool = [];
 
   if (squad.players && squad.players.length > 0) {
+    // PRIMARY PATH: use official squad call-up
     pool = squad.players.map(sp => {
       const tp     = trackedMap.get(sp.name.toLowerCase());
-      const rating = tp ? tp.rating : est(sp.league);
+      const rating = tp ? tp.rating : baselineRating(sp.league);
       return {
-        name:sp.name, pos:sp.pos, club:sp.club, league:sp.league, rating,
-        goals:tp?.goals||0, assists:tp?.assists||0, cs:tp?.cs||0,
-        nation:tp?.nation||'🌍', selectScore: rating * lgW(sp.league)
+        name:    sp.name,
+        pos:     sp.pos,
+        club:    sp.club,      // club from squad call-up (most accurate)
+        league:  sp.league,
+        rating,
+        goals:   tp?.goals   || 0,
+        assists: tp?.assists  || 0,
+        cs:      tp?.cs       || 0,
+        nation:  tp?.nation   || '🌍',
+        tracked: !!tp,         // true = has real season stats
+        inSquad: true,
       };
     });
   } else {
-    pool = trackedArr.map(p => ({ ...p, selectScore: p.rating * lgW(p.league) }));
+    // FALLBACK: squad not announced — use tracked players only
+    pool = trackedArr.map(p => ({
+      ...p,
+      inSquad: false,
+      tracked: true,
+    }));
   }
 
+  // Pick XI purely by raw rating (no discounting)
   const byPos = { GK:[], DF:[], MF:[], FW:[] };
   pool.forEach(p => { if (byPos[p.pos]) byPos[p.pos].push(p); });
-  // Sort by raw rating — league weight is for squad strength scoring, not XI selection
-  Object.values(byPos).forEach(a => a.sort((a,b) => b.rating - a.rating));
+  Object.values(byPos).forEach(a => a.sort((a, b) => b.rating - a.rating));
 
   let xi = [
-    ...byPos.GK.slice(0,1), ...byPos.DF.slice(0,4),
-    ...byPos.MF.slice(0,3), ...byPos.FW.slice(0,3)
+    ...byPos.GK.slice(0, 1),
+    ...byPos.DF.slice(0, 4),
+    ...byPos.MF.slice(0, 3),
+    ...byPos.FW.slice(0, 3),
   ];
 
+  // Fill if short (e.g. squad has few players of a position)
   if (xi.length < 11) {
     const used  = new Set(xi.map(p => p.name));
-    const extra = pool.filter(p => !used.has(p.name)).sort((a,b) => b.selectScore - a.selectScore);
+    const extra = pool.filter(p => !used.has(p.name)).sort((a, b) => b.rating - a.rating);
     xi = [...xi, ...extra].slice(0, 11);
   }
   return xi;
@@ -855,6 +891,13 @@ function _buildAndRevealCards(players) {
     card.className = 'fc-card';
     card.dataset.idx = i;
     card.style.animationDelay = `${i * 0.09}s`;
+    const squadBadge = p.inSquad
+      ? `<span class="fc-squad-badge confirmed" title="Official squad call-up">✓</span>`
+      : `<span class="fc-squad-badge projected" title="Projected — squad unannounced">~</span>`;
+    const statLine = p.tracked
+      ? (p.goals ? `⚽${p.goals} 🅰${p.assists}` : p.cs ? `🧤${p.cs} CS` : p.pos)
+      : `${p.pos} · ${(p.club||'').split(' ').slice(0,2).join(' ')}`;
+
     card.innerHTML = `
       <div class="fc-card-inner">
         <div class="fc-card-back">
@@ -863,6 +906,7 @@ function _buildAndRevealCards(players) {
         </div>
         <div class="fc-card-front tier-${tier}">
           <div class="fc-card-shine"></div>
+          ${squadBadge}
           <div class="fc-card-top">
             <div class="fc-card-rating">${rStr}</div>
             <div class="fc-card-pos">${p.pos}</div>
@@ -875,11 +919,7 @@ function _buildAndRevealCards(players) {
           <div class="fc-card-info">
             <div class="fc-card-name">${_fcShort(p.name)}</div>
             <div class="fc-card-club">${(p.club||'').split(' ').slice(0,2).join(' ')}</div>
-            <div class="fc-card-stats">
-              ${p.goals   ? `<span>⚽${p.goals}</span>`   : ''}
-              ${p.assists ? `<span>🅰${p.assists}</span>` : ''}
-              ${p.cs      ? `<span>🧤${p.cs}</span>`      : ''}
-            </div>
+            <div class="fc-card-stats">${statLine}</div>
           </div>
         </div>
       </div>`;
