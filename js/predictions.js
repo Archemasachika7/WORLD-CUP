@@ -19,7 +19,7 @@ const Predictions = (() => {
       scores[p.teamId].formBoost     += ((p.goals||0) + 0.7*(p.assists||0)) * 0.01 * w;
       if (lm.tier === 1) scores[p.teamId].top5Count++;
       else               scores[p.teamId].nonTop5Count++;
-    }).filter(Boolean);
+    });
 
     AWARDS.forEach(a => {
       if (a.teamId && scores[a.teamId]) {
