@@ -8,7 +8,7 @@ const Predictions = (() => {
   // Top-5 league players count fully; non-top-5 discounted
   function buildSquadStrengths() {
     const scores = {};
-    TEAMS.forEach(t => { scores[t.id] = { weightedSum: 0, weightTotal: 0, awardBonus: 0, top5Count: 0, nonTop5Count: 0 }; });
+    TEAMS.forEach(t => { scores[t.id] = { weightedSum: 0, weightTotal: 0, awardBonus: 0, top5Count: 0, nonTop5Count: 0, formBoost: 0 }; });
 
     PLAYERS.forEach(p => {
       if (!p.teamId || !scores[p.teamId]) return;
@@ -16,9 +16,10 @@ const Predictions = (() => {
       const w  = lm.weight;
       scores[p.teamId].weightedSum   += p.rating * w;
       scores[p.teamId].weightTotal   += w;
+      scores[p.teamId].formBoost     += ((p.goals||0) + 0.7*(p.assists||0)) * 0.01 * w;
       if (lm.tier === 1) scores[p.teamId].top5Count++;
       else               scores[p.teamId].nonTop5Count++;
-    });
+    }).filter(Boolean);
 
     AWARDS.forEach(a => {
       if (a.teamId && scores[a.teamId]) {
@@ -32,10 +33,11 @@ const Predictions = (() => {
       const s = scores[t.id];
       const base = s.weightTotal > 0 ? s.weightedSum / s.weightTotal : 7.5;
       result[t.id] = {
-        score: base + s.awardBonus,
+        score: base + s.awardBonus + Math.min(0.6, s.formBoost),
         top5Count: s.top5Count,
         nonTop5Count: s.nonTop5Count,
         awardBonus: s.awardBonus,
+        formBoost: Math.min(0.6, s.formBoost),
       };
     });
     return result;
@@ -152,7 +154,29 @@ const Predictions = (() => {
     return "Tight encounter — any team can win";
   }
 
-  function getTournamentFavourites() {
+  
+
+  function buildProbableXI(teamId) {
+    const squad = SQUADS[teamId] || { players: [] };
+    const tracked = new Map(PLAYERS.filter(p => p.teamId === teamId).map(p => [p.name.toLowerCase(), p]));
+    const announced = squad.status === "ANNOUNCED";
+    const candidates = (squad.players || []).map(sp => {
+      const tp = tracked.get(sp.name.toLowerCase());
+      const lm = LEAGUE_META[sp.league] || LEAGUE_META["Other"];
+      if (announced && !tp) return null;
+      const rating = tp?.rating || 6.2;
+      const score = rating * (lm.weight || 0.5) + ((tp?.goals||0)*0.03 + (tp?.assists||0)*0.02);
+      return { ...sp, rating, selectScore: score, goals: tp?.goals||0, assists: tp?.assists||0 };
+    });
+    const pick = (pos, n) => candidates.filter(c=>c.pos===pos).sort((a,b)=>b.selectScore-a.selectScore).slice(0,n);
+    const gk = pick("GK",1);
+    const df = pick("DF",4);
+    const mf = pick("MF",3);
+    const fw = pick("FW",3);
+    const xi = [...gk,...df,...mf,...fw];
+    return { formation:"4-3-3", players: xi.sort((a,b)=>b.selectScore-a.selectScore), complete: xi.length===11 };
+  }
+function getTournamentFavourites() {
     return TEAMS
       .map(t => {
         const comp = compositeScore(t);
@@ -196,8 +220,10 @@ const Predictions = (() => {
     if (team.ranking > 50)   weaknesses.push("Low FIFA ranking may lead to tough group draw exit");
     if (squad.status === "UNANNOUNCED") weaknesses.push("Squad not yet announced — analysis based on past tournaments");
 
-    return { team, players, awards, squad, sq, composite: comp, strengths, weaknesses };
+    const probableXI = buildProbableXI(teamId);
+    if (probableXI.complete) strengths.push("Probable XI available (rating-based selection model)");
+    return { team, players, awards, squad, sq, probableXI, composite: comp, strengths, weaknesses };
   }
 
-  return { getProbability, getInPlayProbability, getTournamentFavourites, getTeamAnalysis, SQ };
+  return { getProbability, getInPlayProbability, getTournamentFavourites, getTeamAnalysis, SQ, buildProbableXI };
 })();

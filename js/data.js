@@ -220,7 +220,7 @@ const AWARDS = [
   { award:"Saudi Pro Top Scorer",          winner:"Cristiano Ronaldo",nation:"🇵🇹",club:"Al-Nassr",         league:"SaudiPro",  teamId:"por" },
   { award:"Ballon d'Or 2024",              winner:"Rodri",           nation:"🇪🇸", club:"Man City",         league:"EPL",       teamId:"esp" },
   { award:"Copa América 2024",             winner:"Argentina",       nation:"🇦🇷", club:"National Team",    league:"—",         teamId:"arg" },
-  { award:"UEFA Nations League 2025",      winner:"Spain",           nation:"🇪🇸", club:"National Team",    league:"—",         teamId:"esp" },
+  { award:"UEFA Nations League 2025",      winner:"Portugal",        nation:"🇵🇹", club:"National Team",    league:"—",         teamId:"por", score:"2-2 aet (5-3 pens vs Spain)" },
   { award:"AFCON 2025",                    winner:"Morocco",         nation:"🇲🇦", club:"National Team",    league:"—",         teamId:"mar" },
 ];
 
@@ -229,7 +229,7 @@ const SQUADS = {
 
   // ── England (ANNOUNCED May 22) ────────────────────────────
   eng: {
-    status: "ANNOUNCED", date: "2026-05-22",
+    status: "ANNOUNCED", date: "2026-05-22", squadSize: 26,
     note: "Ruthless Tuchel drops Foden, Palmer, TAA, Maguire. Kane captains at 3rd World Cup.",
     players: [
       // GK
@@ -266,7 +266,7 @@ const SQUADS = {
 
   // ── Germany (ANNOUNCED May 21) ────────────────────────────
   ger: {
-    status: "ANNOUNCED", date: "2026-05-21",
+    status: "ANNOUNCED", date: "2026-05-21", squadSize: 26,
     note: "Nagelsmann names strong squad. Wirtz and Musiala the creative engine.",
     players: [
       // GK
@@ -303,7 +303,7 @@ const SQUADS = {
 
   // ── Brazil (ANNOUNCED May 18) ─────────────────────────────
   bra: {
-    status: "ANNOUNCED", date: "2026-05-18",
+    status: "ANNOUNCED", date: "2026-05-18", squadSize: 26,
     note: "Carlo Ancelotti's Brazil. Neymar controversially recalled, now at Santos. Vini Jr leads attack.",
     players: [
       // DF
@@ -338,7 +338,7 @@ const SQUADS = {
 
   // ── France (ANNOUNCED May 14) ─────────────────────────────
   fra: {
-    status: "ANNOUNCED", date: "2026-05-14",
+    status: "ANNOUNCED", date: "2026-05-14", squadSize: 26,
     note: "Mbappé leads at 3rd World Cup. Deschamps names attacking powerhouse. Camavinga misses out.",
     players: [
       // GK
@@ -371,8 +371,8 @@ const SQUADS = {
 
   // ── Spain (ANNOUNCED May 25) ──────────────────────────────
   esp: {
-    status: "ANNOUNCED", date: "2026-05-25",
-    note: "Defending UEFA Nations League champions. Yamal-Nico Williams flank among most feared in world.",
+    status: "ANNOUNCED", date: "2026-05-25", squadSize: 26,
+    note: "Yamal-Nico Williams flank among most feared in world.",
     players: [
       // GK
       { name:"David Raya",            pos:"GK", club:"Arsenal",            league:"EPL"        },
@@ -423,7 +423,7 @@ const SQUADS = {
 
   // ── Portugal (ANNOUNCED May 19) ───────────────────────────
   por: {
-    status: "ANNOUNCED", date: "2026-05-19",
+    status: "ANNOUNCED", date: "2026-05-19", squadSize: 26,
     note: "Ronaldo at his 6th World Cup — a world record. 41 years old. 28 goals in Saudi Pro League this season.",
     players: [
       // GK
@@ -450,7 +450,7 @@ const SQUADS = {
 
   // ── Switzerland (ANNOUNCED May 20) ───────────────────────
   sui: {
-    status: "ANNOUNCED", date: "2026-05-20",
+    status: "ANNOUNCED", date: "2026-05-20", squadSize: 26,
     note: "Switzerland quietly steady. Xhaka the general in midfield.",
     players: [
       { name:"Yann Sommer",       pos:"GK", club:"Inter Milan",       league:"SerieA"     },
@@ -469,7 +469,7 @@ const SQUADS = {
 
   // ── United States (ANNOUNCED May 26) ──────────────────────
   usa: {
-    status: "ANNOUNCED", date: "2026-05-26",
+    status: "ANNOUNCED", date: "2026-05-26", squadSize: 26,
     note: "Host nation. Pulisic the star. Reyna finally fit for a major tournament.",
     players: [
       // GK
@@ -495,45 +495,45 @@ const SQUADS = {
   },
 
   // ── All other teams: pending June 2 deadline ──────────────
-  mex: { status:"UNANNOUNCED", date:null, note:"Squad pending FIFA June 2 deadline.", players:[] },
-  can: { status:"UNANNOUNCED", date:null, note:"Squad pending FIFA June 2 deadline.", players:[] },
-  bih: { status:"UNANNOUNCED", date:null, note:"Squad pending FIFA June 2 deadline.", players:[] },
-  qat: { status:"UNANNOUNCED", date:null, note:"Squad pending FIFA June 2 deadline.", players:[] },
-  mar: { status:"UNANNOUNCED", date:null, note:"Squad pending FIFA June 2 deadline.", players:[] },
-  hai: { status:"UNANNOUNCED", date:null, note:"Squad pending FIFA June 2 deadline.", players:[] },
-  sco: { status:"UNANNOUNCED", date:null, note:"Squad pending FIFA June 2 deadline.", players:[] },
-  par: { status:"UNANNOUNCED", date:null, note:"Squad pending FIFA June 2 deadline.", players:[] },
-  aus: { status:"UNANNOUNCED", date:null, note:"Squad pending FIFA June 2 deadline.", players:[] },
-  tur: { status:"UNANNOUNCED", date:null, note:"Squad pending FIFA June 2 deadline.", players:[] },
-  cuw: { status:"UNANNOUNCED", date:null, note:"Squad pending FIFA June 2 deadline.", players:[] },
-  civ: { status:"UNANNOUNCED", date:null, note:"Squad pending FIFA June 2 deadline.", players:[] },
-  ecu: { status:"UNANNOUNCED", date:null, note:"Squad pending FIFA June 2 deadline.", players:[] },
-  ned: { status:"UNANNOUNCED", date:null, note:"Squad pending FIFA June 2 deadline.", players:[] },
-  jpn: { status:"UNANNOUNCED", date:null, note:"Squad pending FIFA June 2 deadline.", players:[] },
-  swe: { status:"UNANNOUNCED", date:null, note:"Squad pending FIFA June 2 deadline.", players:[] },
-  tun: { status:"UNANNOUNCED", date:null, note:"Squad pending FIFA June 2 deadline.", players:[] },
-  bel: { status:"UNANNOUNCED", date:null, note:"Squad pending FIFA June 2 deadline.", players:[] },
-  egy: { status:"UNANNOUNCED", date:null, note:"Squad pending FIFA June 2 deadline.", players:[] },
-  irn: { status:"UNANNOUNCED", date:null, note:"Squad pending FIFA June 2 deadline.", players:[] },
-  nzl: { status:"UNANNOUNCED", date:null, note:"Squad pending FIFA June 2 deadline.", players:[] },
-  cpv: { status:"UNANNOUNCED", date:null, note:"Squad pending FIFA June 2 deadline.", players:[] },
-  sau: { status:"UNANNOUNCED", date:null, note:"Squad pending FIFA June 2 deadline.", players:[] },
-  uru: { status:"UNANNOUNCED", date:null, note:"Squad pending FIFA June 2 deadline.", players:[] },
-  sen: { status:"UNANNOUNCED", date:null, note:"Squad pending FIFA June 2 deadline.", players:[] },
-  irq: { status:"UNANNOUNCED", date:null, note:"Squad pending FIFA June 2 deadline.", players:[] },
-  nor: { status:"UNANNOUNCED", date:null, note:"Squad pending FIFA June 2 deadline.", players:[] },
-  dza: { status:"UNANNOUNCED", date:null, note:"Squad pending FIFA June 2 deadline.", players:[] },
-  aut: { status:"UNANNOUNCED", date:null, note:"Squad pending FIFA June 2 deadline.", players:[] },
-  jor: { status:"UNANNOUNCED", date:null, note:"Squad pending FIFA June 2 deadline.", players:[] },
-  cod: { status:"UNANNOUNCED", date:null, note:"Squad pending FIFA June 2 deadline.", players:[] },
-  uzb: { status:"UNANNOUNCED", date:null, note:"Squad pending FIFA June 2 deadline.", players:[] },
-  col: { status:"UNANNOUNCED", date:null, note:"Squad pending FIFA June 2 deadline.", players:[] },
-  cro: { status:"UNANNOUNCED", date:null, note:"Squad pending FIFA June 2 deadline.", players:[] },
-  gha: { status:"UNANNOUNCED", date:null, note:"Squad pending FIFA June 2 deadline.", players:[] },
-  pan: { status:"UNANNOUNCED", date:null, note:"Squad pending FIFA June 2 deadline.", players:[] },
-  zaf: { status:"UNANNOUNCED", date:null, note:"Squad pending FIFA June 2 deadline.", players:[] },
-  kor: { status:"UNANNOUNCED", date:null, note:"Squad pending FIFA June 2 deadline.", players:[] },
-  cze: { status:"UNANNOUNCED", date:null, note:"Squad pending FIFA June 2 deadline.", players:[] },
+  mex: { status:"UNANNOUNCED", date:null, squadSize:null, note:"Squad pending FIFA June 2 deadline (expected 26 or 27 by federation rules/dispensation).", players:[] },
+  can: { status:"UNANNOUNCED", date:null, squadSize:null, note:"Squad pending FIFA June 2 deadline (expected 26 or 27 by federation rules/dispensation).", players:[] },
+  bih: { status:"UNANNOUNCED", date:null, squadSize:null, note:"Squad pending FIFA June 2 deadline (expected 26 or 27 by federation rules/dispensation).", players:[] },
+  qat: { status:"UNANNOUNCED", date:null, squadSize:null, note:"Squad pending FIFA June 2 deadline (expected 26 or 27 by federation rules/dispensation).", players:[] },
+  mar: { status:"UNANNOUNCED", date:null, squadSize:null, note:"Squad pending FIFA June 2 deadline (expected 26 or 27 by federation rules/dispensation).", players:[] },
+  hai: { status:"UNANNOUNCED", date:null, squadSize:null, note:"Squad pending FIFA June 2 deadline (expected 26 or 27 by federation rules/dispensation).", players:[] },
+  sco: { status:"UNANNOUNCED", date:null, squadSize:null, note:"Squad pending FIFA June 2 deadline (expected 26 or 27 by federation rules/dispensation).", players:[] },
+  par: { status:"UNANNOUNCED", date:null, squadSize:null, note:"Squad pending FIFA June 2 deadline (expected 26 or 27 by federation rules/dispensation).", players:[] },
+  aus: { status:"UNANNOUNCED", date:null, squadSize:null, note:"Squad pending FIFA June 2 deadline (expected 26 or 27 by federation rules/dispensation).", players:[] },
+  tur: { status:"UNANNOUNCED", date:null, squadSize:null, note:"Squad pending FIFA June 2 deadline (expected 26 or 27 by federation rules/dispensation).", players:[] },
+  cuw: { status:"UNANNOUNCED", date:null, squadSize:null, note:"Squad pending FIFA June 2 deadline (expected 26 or 27 by federation rules/dispensation).", players:[] },
+  civ: { status:"UNANNOUNCED", date:null, squadSize:null, note:"Squad pending FIFA June 2 deadline (expected 26 or 27 by federation rules/dispensation).", players:[] },
+  ecu: { status:"UNANNOUNCED", date:null, squadSize:null, note:"Squad pending FIFA June 2 deadline (expected 26 or 27 by federation rules/dispensation).", players:[] },
+  ned: { status:"UNANNOUNCED", date:null, squadSize:null, note:"Squad pending FIFA June 2 deadline (expected 26 or 27 by federation rules/dispensation).", players:[] },
+  jpn: { status:"UNANNOUNCED", date:null, squadSize:null, note:"Squad pending FIFA June 2 deadline (expected 26 or 27 by federation rules/dispensation).", players:[] },
+  swe: { status:"UNANNOUNCED", date:null, squadSize:null, note:"Squad pending FIFA June 2 deadline (expected 26 or 27 by federation rules/dispensation).", players:[] },
+  tun: { status:"UNANNOUNCED", date:null, squadSize:null, note:"Squad pending FIFA June 2 deadline (expected 26 or 27 by federation rules/dispensation).", players:[] },
+  bel: { status:"UNANNOUNCED", date:null, squadSize:null, note:"Squad pending FIFA June 2 deadline (expected 26 or 27 by federation rules/dispensation).", players:[] },
+  egy: { status:"UNANNOUNCED", date:null, squadSize:null, note:"Squad pending FIFA June 2 deadline (expected 26 or 27 by federation rules/dispensation).", players:[] },
+  irn: { status:"UNANNOUNCED", date:null, squadSize:null, note:"Squad pending FIFA June 2 deadline (expected 26 or 27 by federation rules/dispensation).", players:[] },
+  nzl: { status:"UNANNOUNCED", date:null, squadSize:null, note:"Squad pending FIFA June 2 deadline (expected 26 or 27 by federation rules/dispensation).", players:[] },
+  cpv: { status:"UNANNOUNCED", date:null, squadSize:null, note:"Squad pending FIFA June 2 deadline (expected 26 or 27 by federation rules/dispensation).", players:[] },
+  sau: { status:"UNANNOUNCED", date:null, squadSize:null, note:"Squad pending FIFA June 2 deadline (expected 26 or 27 by federation rules/dispensation).", players:[] },
+  uru: { status:"UNANNOUNCED", date:null, squadSize:null, note:"Squad pending FIFA June 2 deadline (expected 26 or 27 by federation rules/dispensation).", players:[] },
+  sen: { status:"UNANNOUNCED", date:null, squadSize:null, note:"Squad pending FIFA June 2 deadline (expected 26 or 27 by federation rules/dispensation).", players:[] },
+  irq: { status:"UNANNOUNCED", date:null, squadSize:null, note:"Squad pending FIFA June 2 deadline (expected 26 or 27 by federation rules/dispensation).", players:[] },
+  nor: { status:"UNANNOUNCED", date:null, squadSize:null, note:"Squad pending FIFA June 2 deadline (expected 26 or 27 by federation rules/dispensation).", players:[] },
+  dza: { status:"UNANNOUNCED", date:null, squadSize:null, note:"Squad pending FIFA June 2 deadline (expected 26 or 27 by federation rules/dispensation).", players:[] },
+  aut: { status:"UNANNOUNCED", date:null, squadSize:null, note:"Squad pending FIFA June 2 deadline (expected 26 or 27 by federation rules/dispensation).", players:[] },
+  jor: { status:"UNANNOUNCED", date:null, squadSize:null, note:"Squad pending FIFA June 2 deadline (expected 26 or 27 by federation rules/dispensation).", players:[] },
+  cod: { status:"UNANNOUNCED", date:null, squadSize:null, note:"Squad pending FIFA June 2 deadline (expected 26 or 27 by federation rules/dispensation).", players:[] },
+  uzb: { status:"UNANNOUNCED", date:null, squadSize:null, note:"Squad pending FIFA June 2 deadline (expected 26 or 27 by federation rules/dispensation).", players:[] },
+  col: { status:"UNANNOUNCED", date:null, squadSize:null, note:"Squad pending FIFA June 2 deadline (expected 26 or 27 by federation rules/dispensation).", players:[] },
+  cro: { status:"UNANNOUNCED", date:null, squadSize:null, note:"Squad pending FIFA June 2 deadline (expected 26 or 27 by federation rules/dispensation).", players:[] },
+  gha: { status:"UNANNOUNCED", date:null, squadSize:null, note:"Squad pending FIFA June 2 deadline (expected 26 or 27 by federation rules/dispensation).", players:[] },
+  pan: { status:"UNANNOUNCED", date:null, squadSize:null, note:"Squad pending FIFA June 2 deadline (expected 26 or 27 by federation rules/dispensation).", players:[] },
+  zaf: { status:"UNANNOUNCED", date:null, squadSize:null, note:"Squad pending FIFA June 2 deadline (expected 26 or 27 by federation rules/dispensation).", players:[] },
+  kor: { status:"UNANNOUNCED", date:null, squadSize:null, note:"Squad pending FIFA June 2 deadline (expected 26 or 27 by federation rules/dispensation).", players:[] },
+  cze: { status:"UNANNOUNCED", date:null, squadSize:null, note:"Squad pending FIFA June 2 deadline (expected 26 or 27 by federation rules/dispensation).", players:[] },
 };
 
 // ---- Match Schedule (opening 24 group fixtures) ----
