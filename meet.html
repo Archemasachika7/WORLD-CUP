@@ -106,7 +106,9 @@
         <!-- Stream action bar — always visible once a stream is loaded -->
         <div id="meet-stream-actions" style="display:none;align-items:center;gap:8px;padding:6px 8px;flex-wrap:wrap;border-bottom:1px solid var(--border);">
           <a id="meet-stream-open-link" href="#" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;background:var(--accent);color:#fff;font-weight:700;font-size:0.78rem;text-decoration:none;">↗ Open Stream</a>
-          <button id="meet-stream-expand-btn" style="padding:5px 12px;background:var(--bg-hover);border:1px solid var(--border);color:var(--text);font-size:0.78rem;font-weight:700;cursor:pointer;" title="Fullscreen view">⛶ Expand</button>
+          <button id="meet-stream-theater-btn" style="padding:5px 12px;background:var(--bg-hover);border:1px solid var(--border);color:var(--text);font-size:0.78rem;font-weight:700;cursor:pointer;" title="Theater mode — enlarge the stream in-page">🔳 Theater</button>
+          <button id="meet-stream-fs-btn" style="padding:5px 12px;background:var(--bg-hover);border:1px solid var(--border);color:var(--text);font-size:0.78rem;font-weight:700;cursor:pointer;" title="Fullscreen the stream / shared screen">⛶ Fullscreen</button>
+          <button id="meet-stream-expand-btn" style="padding:5px 12px;background:var(--bg-hover);border:1px solid var(--border);color:var(--text);font-size:0.78rem;font-weight:700;cursor:pointer;" title="Open in tab-share overlay">📺 Tab Share</button>
           <button id="meet-stream-share-focused-btn" style="padding:5px 12px;background:#7c3aed;border:none;color:#fff;font-size:0.78rem;font-weight:700;cursor:pointer;" title="Share just this stream with room via WebRTC">📤 Share Stream</button>
           <span id="meet-stream-status" style="font-size:0.75rem;color:#f97316;flex:1;"></span>
         </div>
@@ -115,8 +117,10 @@
         <div class="stream-presets" id="room-stream-presets" style="padding:6px 0;"></div>
 
         <div id="meet-stream-frame-wrap" class="meet-stream-frame-wrap hidden">
+          <!-- Who's sharing badge -->
+          <div id="meet-screen-badge" style="display:none;position:absolute;top:10px;left:10px;z-index:5;align-items:center;gap:6px;padding:5px 12px;background:rgba(124,58,237,0.92);color:#fff;font-size:0.78rem;font-weight:700;border-radius:20px;backdrop-filter:blur(4px);box-shadow:0 2px 10px rgba(0,0,0,0.4);"></div>
           <!-- Peer screen share video (shown instead of iframe when someone shares screen) -->
-          <video id="meet-peer-screen-video" autoplay playsinline style="display:none;width:100%;background:#000;"></video>
+          <video id="meet-peer-screen-video" autoplay playsinline style="display:none;width:100%;height:100%;object-fit:contain;background:#000;"></video>
           <iframe id="meet-stream-iframe" src="about:blank" allowfullscreen allow="autoplay; fullscreen; picture-in-picture" frameborder="0" title="Room stream"></iframe>
         </div>
 

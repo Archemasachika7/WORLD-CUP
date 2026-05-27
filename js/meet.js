@@ -47,7 +47,7 @@ const MeetSystem = (() => {
   let localStream = null;
   let screenStream = null;
   let peers = {};
-  const screenSharers = new Set(); // peerIds currently sharing screen
+  const screenSharers = new Map(); // peerId -> { n, f } currently sharing screen
   let _lastSyncedUrl = "";
   let _syncDebounceT = null;
 
@@ -134,7 +134,7 @@ const MeetSystem = (() => {
     sbCh
       .on("presence", { event: "sync" }, () => renderPresence(sbCh.presenceState()))
       .on("broadcast", { event: "chat"        }, ({ payload }) => appendMsg(payload))
-      .on("broadcast", { event: "emoji_pop"   }, ({ payload }) => rain(payload.e))
+      .on("broadcast", { event: "emoji_pop"   }, ({ payload }) => rain(payload.e, payload.f))
       .on("broadcast", { event: "stream_sync" }, ({ payload }) => {
         if (!payload?.url) return;
         if (payload.url === _lastSyncedUrl) return;
@@ -144,12 +144,16 @@ const MeetSystem = (() => {
       })
       .on("broadcast", { event: "rtc_screen_start" }, ({ payload }) => {
         if (!payload?.p) return;
-        screenSharers.add(payload.p);
+        screenSharers.set(payload.p, { n: payload.n, f: payload.f });
+        sysMsg(`${payload.f || ""} ${payload.n || "Someone"} is sharing their screen`.trim());
         // If the track already arrived before this signal, re-route it now
         const peerEl = document.getElementById(`peer-${payload.p}`);
         if (peerEl) {
           const existingVid = peerEl.querySelector("video");
-          if (existingVid?.srcObject) { renderScreenInContainer(existingVid.srcObject); peerEl.remove(); }
+          if (existingVid?.srcObject) {
+            renderScreenInContainer(existingVid.srcObject, `${payload.f || ""} ${payload.n || "Someone"} is sharing`.trim());
+            peerEl.remove();
+          }
         }
       })
       .on("broadcast", { event: "rtc_screen_stop" }, ({ payload }) => {
@@ -241,27 +245,42 @@ const MeetSystem = (() => {
       </div>`).join("");
   }
 
-  // ── Emoji Reactions ────────────────────────────────────
+  // ── Emoji Reactions (Zoom/Meet-style floating overlay) ──
   function sendEmoji(e) {
-    rain(e);
-    sbCh?.send({ type:"broadcast", event:"emoji_pop", payload:{ e } });
+    rain(e, st.teamFlag, true);
+    sbCh?.send({ type:"broadcast", event:"emoji_pop", payload:{ e, f: st.teamFlag, n: st.nickname } });
   }
 
-  function rain(emoji) {
+  function rain(emoji, flag, self = false) {
     const container = document.getElementById("meet-emoji-rain");
     if (!container) return;
-    const count = 4 + Math.floor(Math.random() * 4);
+
+    // A labelled "burst" pill rises from a random spot near the bottom —
+    // shows who reacted, Google-Meet style.
+    const lane = 8 + Math.random() * 78; // % from left
+    if (flag) {
+      const pill = document.createElement("span");
+      pill.className = "emoji-pill" + (self ? " emoji-pill-self" : "");
+      pill.innerHTML = `<span class="emoji-pill-flag">${flag}</span><span class="emoji-pill-emoji">${emoji}</span>`;
+      pill.style.left = lane + "%";
+      pill.style.animationDuration = (2 + Math.random() * 0.8) + "s";
+      container.appendChild(pill);
+      pill.addEventListener("animationend", () => pill.remove());
+    }
+
+    // Trailing cluster of the emoji itself for a lively, celebratory feel
+    const count = 5 + Math.floor(Math.random() * 4);
     for (let i = 0; i < count; i++) {
       setTimeout(() => {
         const el = document.createElement("span");
         el.className = "emoji-float";
         el.textContent = emoji;
-        el.style.left = (5 + Math.random() * 90) + "%";
-        el.style.fontSize = (1.4 + Math.random() * 1.4) + "rem";
-        el.style.animationDuration = (1.2 + Math.random() * 1) + "s";
+        el.style.left = (lane - 6 + Math.random() * 18) + "%";
+        el.style.fontSize = (1.4 + Math.random() * 1.6) + "rem";
+        el.style.animationDuration = (1.3 + Math.random() * 1) + "s";
         container.appendChild(el);
         el.addEventListener("animationend", () => el.remove());
-      }, i * 100);
+      }, i * 90);
     }
   }
 
@@ -409,9 +428,10 @@ const MeetSystem = (() => {
   function updateLocalVid() {
     const wrap = document.getElementById("meet-local-vid-wrap");
     const vid  = document.getElementById("meet-local-video");
-    const src  = screenStream || localStream;
-    if (vid && src) { vid.srcObject = src; vid.muted = true; vid.play().catch(()=>{}); }
-    wrap?.classList.toggle("hidden", !(screenStream || st.camOn));
+    // Local camera tile ALWAYS shows the camera — never the screen share.
+    // The shared screen is rendered in the dedicated stream container instead.
+    if (vid && localStream) { vid.srcObject = localStream; vid.muted = true; vid.play().catch(()=>{}); }
+    wrap?.classList.toggle("hidden", !st.camOn);
   }
 
   function updateBtns() {
@@ -460,8 +480,10 @@ const MeetSystem = (() => {
 
     updateLocalVid();
     updateBtns();
+    // Show MY screen in the stream container locally too (preview, muted to avoid echo)
+    renderScreenInContainer(screenStream, `${st.teamFlag} You are sharing`, true);
     // Signal all peers: incoming video from me is a screen share, show it in stream container
-    sbCh?.send({ type:"broadcast", event:"rtc_screen_start", payload:{ p: st.peerId } });
+    sbCh?.send({ type:"broadcast", event:"rtc_screen_start", payload:{ p: st.peerId, n: st.nickname, f: st.teamFlag } });
     sysMsg(`${st.teamFlag} ${st.nickname} started screen sharing — showing in stream area for all users`);
   }
 
@@ -511,6 +533,24 @@ const MeetSystem = (() => {
     openFullscreenStream();
   }
 
+  // ── Enlarge: in-page theater mode + native fullscreen ──
+  function toggleTheater() {
+    const room = document.getElementById("meet-room");
+    const on = room?.classList.toggle("meet-theater");
+    const btn = document.getElementById("meet-stream-theater-btn");
+    if (btn) btn.textContent = on ? "🔲 Exit Theater" : "🔳 Theater";
+  }
+
+  function toggleStreamFullscreen() {
+    const wrap = document.getElementById("meet-stream-frame-wrap");
+    if (!wrap) return;
+    if (document.fullscreenElement) {
+      document.exitFullscreen?.();
+    } else {
+      (wrap.requestFullscreen || wrap.webkitRequestFullscreen)?.call(wrap);
+    }
+  }
+
   function openFullscreenStream() {
     const src = document.getElementById("meet-stream-iframe")?.src;
     if (!src || src === "about:blank") { alert2("Load a stream first."); return; }
@@ -541,6 +581,7 @@ const MeetSystem = (() => {
 
     updateLocalVid();
     updateBtns();
+    clearScreenContainer();
     sbCh?.send({ type:"broadcast", event:"rtc_screen_stop", payload:{ p: st.peerId } });
     sysMsg("Screen share ended");
   }
@@ -639,30 +680,37 @@ const MeetSystem = (() => {
     if (pc && candidate) try { await pc.addIceCandidate(new RTCIceCandidate(candidate)); } catch {}
   }
 
-  function renderScreenInContainer(stream) {
+  function renderScreenInContainer(stream, label, isLocal = false) {
     const screenVid = document.getElementById("meet-peer-screen-video");
     const iframe    = document.getElementById("meet-stream-iframe");
     const wrap      = document.getElementById("meet-stream-frame-wrap");
     const actBar    = document.getElementById("meet-stream-actions");
-    if (screenVid) { screenVid.srcObject = stream; screenVid.style.display = "block"; }
+    const badge     = document.getElementById("meet-screen-badge");
+    if (screenVid) {
+      screenVid.srcObject = stream;
+      screenVid.style.display = "block";
+      screenVid.muted = isLocal; // mute own preview to avoid echo
+    }
     if (iframe)    iframe.style.display = "none";
     if (actBar)    actBar.style.display = "flex";
+    if (badge && label) { badge.textContent = "🖥️ " + label; badge.style.display = "flex"; }
     wrap?.classList.remove("hidden");
-    sysMsg("A participant is sharing their screen — shown in the stream area below");
   }
 
   function clearScreenContainer() {
     const screenVid = document.getElementById("meet-peer-screen-video");
     const iframe    = document.getElementById("meet-stream-iframe");
+    const badge     = document.getElementById("meet-screen-badge");
     if (screenVid) { screenVid.srcObject = null; screenVid.style.display = "none"; }
     if (iframe)    iframe.style.display = "";
-    sysMsg("Screen share ended");
+    if (badge)     badge.style.display = "none";
   }
 
   function renderRemote(peerId, stream) {
     // Screen share tracks go to the stream container, not the camera grid
     if (screenSharers.has(peerId)) {
-      renderScreenInContainer(stream);
+      const info = screenSharers.get(peerId) || {};
+      renderScreenInContainer(stream, `${info.f || ""} ${info.n || "Someone"} is sharing`.trim());
       return;
     }
     const grid = document.getElementById("meet-video-grid");
@@ -740,6 +788,8 @@ const MeetSystem = (() => {
     document.getElementById("meet-screen-btn")?.addEventListener("click", toggleScreenShare);
     document.getElementById("meet-stream-share-focused-btn")?.addEventListener("click", shareStreamFocused);
     document.getElementById("meet-stream-expand-btn")?.addEventListener("click", openFullscreenStream);
+    document.getElementById("meet-stream-theater-btn")?.addEventListener("click", toggleTheater);
+    document.getElementById("meet-stream-fs-btn")?.addEventListener("click", toggleStreamFullscreen);
     document.getElementById("meet-fs-close-btn")?.addEventListener("click", closeFullscreenStream);
     document.getElementById("meet-fs-share-btn")?.addEventListener("click", () => {
       closeFullscreenStream();
