@@ -18,6 +18,14 @@
 
 <nav id="main-nav"></nav>
 
+<!-- Live news ticker -->
+<div id="news-ticker" class="news-ticker" aria-label="Latest World Cup headlines">
+  <span class="news-ticker-tag">🔴 LIVE</span>
+  <div class="news-ticker-viewport">
+    <div id="news-ticker-track" class="news-ticker-track"></div>
+  </div>
+</div>
+
 <!-- ======================================================
      Hero
      ====================================================== -->
@@ -184,7 +192,7 @@
         <button class="news-refresh-btn" onclick="API.startNewsAutoRefresh(renderNews)">↻ Refresh</button>
       </div>
     </div>
-    <p class="section-desc">Add a free <a href="https://gnews.io" target="_blank" rel="noopener" style="color:var(--accent)">GNews API key</a> to <code>js/api.js</code> → <code>GNEWS_KEY</code> for live headlines.</p>
+    <p class="section-desc">Set a <a href="https://gnews.io" target="_blank" rel="noopener" style="color:var(--accent)">GNews API key</a> as the <code>GNEWS_KEY</code> environment variable in Vercel for live headlines — fetched securely via <code>/api/news</code>.</p>
   </div>
   <div id="news-grid"></div>
 </section>
@@ -318,7 +326,18 @@ function renderNewsSkeleton() {
     </div>`).join('');
 }
 
+function renderNewsTicker(articles) {
+  const track = document.getElementById("news-ticker-track");
+  if (!track || !articles?.length) return;
+  const items = articles.map(a =>
+    `<span class="news-ticker-item">${a.title}</span>`
+  ).join('<span class="news-ticker-sep">•</span>');
+  // Duplicate the run so the marquee loops seamlessly
+  track.innerHTML = items + '<span class="news-ticker-sep">•</span>' + items;
+}
+
 function renderNews(articles) {
+  renderNewsTicker(articles);
   const container = document.getElementById("news-grid");
   if (!container) return;
   const lu = document.getElementById("news-last-update");
