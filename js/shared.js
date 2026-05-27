@@ -219,9 +219,73 @@ function initScrollProgress() {
   update();
 }
 
+// Site anthem — floating play/pause button. "A Triangle of Fire".
+// Browser autoplay policy needs a user gesture, so playback starts on first click.
+// Play state + position persist across pages via sessionStorage for seamless nav.
+const ANTHEM_SRC   = "audio/triangle-of-fire.mp3";
+const ANTHEM_STATE = "wc26_anthem_playing";
+const ANTHEM_TIME  = "wc26_anthem_time";
+
+function initAnthem() {
+  if (document.getElementById("anthem-toggle")) return;
+  if (window.location.pathname.includes("meet")) return;  // don't clash with call audio
+
+  const audio = new Audio(ANTHEM_SRC);
+  audio.loop = true;
+  audio.preload = "none";
+  audio.volume = 0.55;
+
+  // Resume from where the last page left off
+  const savedTime = parseFloat(sessionStorage.getItem(ANTHEM_TIME) || "0");
+  if (savedTime > 0) audio.currentTime = savedTime;
+
+  const btn = document.createElement("button");
+  btn.id = "anthem-toggle";
+  btn.className = "anthem-toggle";
+  btn.setAttribute("aria-label", "Play World Cup anthem");
+  btn.title = "A Triangle of Fire — World Cup 2026 anthem";
+  btn.innerHTML = `<span class="anthem-icon">♪</span><span class="anthem-eq"><i></i><i></i><i></i><i></i></span>`;
+  document.body.appendChild(btn);
+
+  function setPlaying(on) {
+    btn.classList.toggle("playing", on);
+    btn.setAttribute("aria-label", on ? "Pause World Cup anthem" : "Play World Cup anthem");
+    sessionStorage.setItem(ANTHEM_STATE, on ? "1" : "0");
+  }
+
+  btn.addEventListener("click", () => {
+    if (audio.paused) {
+      audio.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
+    } else {
+      audio.pause();
+      setPlaying(false);
+    }
+  });
+
+  // Persist position so the next page resumes smoothly
+  setInterval(() => {
+    if (!audio.paused) sessionStorage.setItem(ANTHEM_TIME, String(audio.currentTime));
+  }, 1000);
+  window.addEventListener("pagehide", () => {
+    sessionStorage.setItem(ANTHEM_TIME, String(audio.currentTime));
+  });
+
+  // Continue playing across navigations if it was on (after first gesture this page)
+  if (sessionStorage.getItem(ANTHEM_STATE) === "1") {
+    const resume = () => {
+      audio.play().then(() => setPlaying(true)).catch(() => {});
+      document.removeEventListener("click", resume);
+      document.removeEventListener("keydown", resume);
+    };
+    document.addEventListener("click", resume, { once: true });
+    document.addEventListener("keydown", resume, { once: true });
+  }
+}
+
 // Page fade-in on load
 document.addEventListener("DOMContentLoaded", () => {
   document.body.classList.add("page-loaded");
   startBgCycler();
   initScrollProgress();
+  initAnthem();
 });

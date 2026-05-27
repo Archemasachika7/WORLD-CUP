@@ -1157,6 +1157,71 @@ button { cursor: pointer; }
   pointer-events: none;
 }
 
+/* ── Floating anthem player ───────────────────── */
+.anthem-toggle {
+  position: fixed;
+  bottom: 22px;
+  left: 22px;
+  z-index: 250;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 48px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  background: linear-gradient(135deg, var(--accent), var(--accent2, #c0392b));
+  color: #fff;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.anthem-toggle:hover { transform: translateY(-2px) scale(1.04); box-shadow: 0 10px 26px rgba(0,0,0,0.45); }
+.anthem-toggle:active { transform: scale(0.97); }
+
+.anthem-icon {
+  font-size: 1.3rem;
+  line-height: 1;
+}
+.anthem-toggle.playing .anthem-icon { display: none; }
+
+/* Equalizer bars — only visible while playing */
+.anthem-eq {
+  display: none;
+  align-items: flex-end;
+  gap: 3px;
+  height: 18px;
+}
+.anthem-toggle.playing .anthem-eq { display: flex; }
+.anthem-eq i {
+  display: block;
+  width: 3px;
+  background: #fff;
+  border-radius: 2px;
+  animation: anthemEq 0.9s ease-in-out infinite;
+}
+.anthem-eq i:nth-child(1) { animation-delay: 0s;    height: 8px;  }
+.anthem-eq i:nth-child(2) { animation-delay: 0.2s;  height: 16px; }
+.anthem-eq i:nth-child(3) { animation-delay: 0.4s;  height: 11px; }
+.anthem-eq i:nth-child(4) { animation-delay: 0.1s;  height: 14px; }
+@keyframes anthemEq {
+  0%, 100% { transform: scaleY(0.4); }
+  50%       { transform: scaleY(1); }
+}
+.anthem-toggle::after {
+  content: "Anthem";
+  font-family: var(--font-label, sans-serif);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.anthem-toggle.playing::after { content: "Playing"; }
+@media (max-width: 600px) {
+  .anthem-toggle::after { display: none; }
+  .anthem-toggle { padding: 0 13px; }
+}
+
 /* Next Match Spotlight */
 .next-match-card {
   background: var(--bg-card);
