@@ -61,6 +61,7 @@
 <script src="js/data.js"></script>
 <script src="js/predictions.js"></script>
 <script src="js/shared.js"></script>
+<script src="js/live.js"></script>
 <script>
 document.addEventListener("DOMContentLoaded", () => {
   buildNav("matches");
@@ -69,6 +70,7 @@ document.addEventListener("DOMContentLoaded", () => {
   renderStandings();
   renderLivePredictor();
   initScrollAnimations();
+  initLiveData();   // start API-Football polling
 });
 
 // ---- Group standings (computed live from match results) ----
@@ -159,9 +161,11 @@ function displayMatches(group) {
             <span class="mname-sm">${home.name}</span>
           </div>
           <div class="match-center">
-            ${m.homeScore !== null
-              ? `<span class="final-score">${m.homeScore}–${m.awayScore}</span>`
-              : `<span class="vs-badge">VS</span>`}
+            ${m.isLive
+              ? `<span class="live-score-badge"><span class="live-dot"></span>${m.homeScore}–${m.awayScore}<br><small class="live-elapsed">${m.status === "HT" ? "HT" : (m.elapsed ? m.elapsed + "'" : "LIVE")}</small></span>`
+              : m.homeScore !== null
+                ? `<span class="final-score">${m.homeScore}–${m.awayScore}${m.penHome !== null ? `<br><small class="pen-note">(${m.penHome}–${m.penAway} pens)</small>` : ""}</span>`
+                : `<span class="vs-badge">VS</span>`}
           </div>
           <div class="match-team">
             ${flagImg(away.id, 48)}
@@ -196,7 +200,11 @@ function openMatchModal(match) {
   const k    = formatKickoffLocal(match.date, match.time);
   body.innerHTML = `
     <div class="match-modal-header">
-      <h2>${match.stage}</h2><p>${k.date} &bull; ${k.time} ${k.tz} (your time)</p><p>📍 ${match.venue}</p>
+      <h2>${match.stage}</h2>
+      <p>${k.date} &bull; ${k.time} ${k.tz} (your time)</p>
+      <p>📍 ${match.venue}</p>
+      ${match.isLive ? `<p class="modal-live-badge"><span class="live-dot"></span> LIVE &mdash; ${match.status === "HT" ? "Half Time" : match.elapsed ? match.elapsed + "' played" : "In Progress"}</p>` : ""}
+      ${match.isFinished && match.homeScore !== null ? `<p class="modal-result">Full Time: <strong>${home.name} ${match.homeScore}–${match.awayScore} ${away.name}</strong>${match.penHome !== null ? ` (${match.penHome}–${match.penAway} pens)` : ""}</p>` : ""}
     </div>
     <div class="big-matchup">
       <div class="bm-team">${flagImg(home.id, 80)}<br><strong>${home.name}</strong><br><small>FIFA #${home.ranking} &bull; Elo ${home.elo}</small></div>

@@ -240,6 +240,7 @@
 <script src="js/predictions.js"></script>
 <script src="js/api.js"></script>
 <script src="js/shared.js"></script>
+<script src="js/live.js"></script>
 <script>
 document.addEventListener("DOMContentLoaded", () => {
   buildNav("home");
@@ -251,6 +252,7 @@ document.addEventListener("DOMContentLoaded", () => {
   renderNewsSkeleton();
   API.startNewsAutoRefresh(renderNews);
   initScrollAnimations();
+  initLiveData();   // start API-Football polling for Next Match spotlight
 });
 
 // ---- Flip countdown ----

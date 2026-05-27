@@ -671,6 +671,52 @@ button { cursor: pointer; }
   font-size: 1.2rem;
   font-weight: 900;
   color: var(--gold);
+  text-align: center;
+  line-height: 1.2;
+}
+.pen-note { font-size: 0.65rem; color: var(--text-dim); font-weight: 400; }
+
+/* ── Live score badge (in-play matches) ────── */
+.live-score-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font-size: 1.2rem;
+  font-weight: 900;
+  color: #ff4444;
+  line-height: 1.1;
+  text-align: center;
+}
+.live-elapsed { font-size: 0.65rem; font-weight: 700; color: #ff8888; letter-spacing: 0.05em; }
+
+/* Pulsing red dot (reused for live indicators) */
+.live-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ff3333;
+  margin-right: 5px;
+  animation: livePulse 1s ease-in-out infinite;
+  vertical-align: middle;
+}
+@keyframes livePulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.4; transform: scale(0.7); }
+}
+
+/* Modal live / result lines */
+.modal-live-badge {
+  margin: 4px 0 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #ff4444;
+}
+.modal-result {
+  margin: 4px 0 0;
+  font-size: 0.9rem;
+  color: var(--gold);
 }
 
 .prob-bar {
