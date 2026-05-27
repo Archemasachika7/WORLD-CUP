@@ -4269,6 +4269,71 @@ button { cursor: pointer; }
 .standings-table tr.playoff { background: rgba(255,215,0,0.07); }
 .standings-table tr.playoff td:first-child { box-shadow: inset 3px 0 0 var(--gold); }
 
+/* ── Tournament Leaders (live goals/assists) ── */
+.leaders-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 20px;
+}
+.leaders-col {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--accent);
+}
+.leaders-col-title {
+  margin: 0;
+  padding: 12px 16px;
+  font-family: var(--font-head);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 1rem;
+  background: var(--bg-hover);
+  border-bottom: 1px solid var(--border);
+}
+.leaders-list { padding: 6px 0; }
+.leader-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s ease;
+}
+.leader-row:last-child { border-bottom: none; }
+.leader-row:hover { background: var(--bg-hover); }
+.leader-rank {
+  flex-shrink: 0;
+  width: 22px;
+  text-align: center;
+  font-family: var(--font-head);
+  font-weight: 900;
+  color: var(--text-dim);
+}
+.leader-row:nth-child(1) .leader-rank { color: var(--gold); }
+.leader-photo {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--bg-hover);
+  border: 2px solid var(--border);
+}
+.leader-info { flex: 1; min-width: 0; line-height: 1.25; }
+.leader-info strong { display: block; font-size: 0.92rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.leader-info small { color: var(--text-dim); font-size: 0.72rem; }
+.leader-val {
+  flex-shrink: 0;
+  font-family: var(--font-head);
+  font-weight: 900;
+  font-size: 1.4rem;
+  color: var(--accent);
+  min-width: 28px;
+  text-align: right;
+}
+.leaders-empty { padding: 20px 16px; color: var(--text-dim); font-size: 0.85rem; }
+
 /* ── Pack Opening ── */
 .packs-store {
   display: grid;

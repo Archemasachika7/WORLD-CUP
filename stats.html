@@ -40,6 +40,25 @@
   <button class="tab-btn" data-sort="rating">Rating</button>
 </div>
 
+<!-- Live tournament leaders (populates once WC 2026 kicks off via API-Football) -->
+<section id="tourney-leaders" class="section section-fade" style="max-width:1200px;margin:0 auto;padding:0 40px 40px;display:none;">
+  <div class="section-header">
+    <span class="section-tag">🔴 Live · World Cup 2026</span>
+    <h2 class="section-title">Tournament Leaders</h2>
+    <p class="section-desc">Live goals &amp; assists from the tournament — updates automatically as matches are played.</p>
+  </div>
+  <div class="leaders-grid">
+    <div class="leaders-col">
+      <h3 class="leaders-col-title">⚽ Top Scorers</h3>
+      <div id="lead-scorers" class="leaders-list"></div>
+    </div>
+    <div class="leaders-col">
+      <h3 class="leaders-col-title">🅰️ Top Assists</h3>
+      <div id="lead-assists" class="leaders-list"></div>
+    </div>
+  </div>
+</section>
+
 <div id="stats-container" style="max-width:1200px;margin:0 auto;padding:0 40px 80px;"></div>
 
 <footer id="footer"></footer>
@@ -58,7 +77,56 @@ document.addEventListener("DOMContentLoaded", () => {
   initStatsViewToggle();
   initSortButtons();
   initScrollAnimations();
+  loadTourneyLeaders();
 });
+
+// ---- Live tournament leaders (goals + assists) from /api/stats ----
+async function loadTourneyLeaders() {
+  const section = document.getElementById("tourney-leaders");
+  if (!section) return;
+  try {
+    const [scRes, asRes] = await Promise.all([
+      fetch("/api/stats?type=scorers"),
+      fetch("/api/stats?type=assists"),
+    ]);
+    const sc = await scRes.json();
+    const as = await asRes.json();
+
+    const scorers = (sc.data || []).filter(p => p.value > 0);
+    const assists = (as.data || []).filter(p => p.value > 0);
+
+    // Nothing to show yet (tournament not started or no key) — keep hidden
+    if (!scorers.length && !assists.length) return;
+
+    document.getElementById("lead-scorers").innerHTML =
+      scorers.length ? scorers.slice(0, 10).map((p, i) => leaderRow(p, i, "goals")).join("")
+                     : `<p class="leaders-empty">No goals yet.</p>`;
+    document.getElementById("lead-assists").innerHTML =
+      assists.length ? assists.slice(0, 10).map((p, i) => leaderRow(p, i, "assists")).join("")
+                     : `<p class="leaders-empty">No assists yet.</p>`;
+
+    section.style.display = "";
+    document.querySelectorAll("#tourney-leaders .card-enter").forEach(el => el.classList.add("visible"));
+  } catch (_) {
+    // Network/API error — silently leave section hidden, static stats remain
+  }
+}
+
+function leaderRow(p, i, stat) {
+  const val = stat === "goals" ? p.goals : p.assists;
+  const sub = stat === "goals" ? `${p.assists} ast` : `${p.goals} gls`;
+  return `
+    <div class="leader-row card-enter">
+      <span class="leader-rank">${i + 1}</span>
+      <img class="leader-photo" src="${p.photo || ''}" alt="${p.name || ''}" loading="lazy"
+           onerror="this.style.visibility='hidden'" />
+      <div class="leader-info">
+        <strong>${p.name || '—'}</strong>
+        <small>${p.team || ''} · ${p.appearances} apps · ${sub}</small>
+      </div>
+      <span class="leader-val">${val}</span>
+    </div>`;
+}
 
 function initStatsViewToggle() {
   document.getElementById("view-cards-btn").addEventListener("click", () => {
