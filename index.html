@@ -228,6 +228,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initHeroCountdown();
   initHeroParticles();
   initFavsPreview();
+  renderNewsSkeleton();
   API.startNewsAutoRefresh(renderNews);
   initScrollAnimations();
 });
@@ -302,6 +303,21 @@ function initFavsPreview() {
 }
 
 // ---- News ----
+function renderNewsSkeleton() {
+  const container = document.getElementById("news-grid");
+  if (!container) return;
+  container.innerHTML = Array.from({ length: 3 }, (_, i) => `
+    <div class="news-card news-skeleton ${i===0?'news-featured':''}">
+      <div class="news-img skeleton-box"></div>
+      <div class="news-body">
+        <span class="skeleton-line skeleton-tag"></span>
+        <span class="skeleton-line skeleton-title"></span>
+        <span class="skeleton-line"></span>
+        <span class="skeleton-line skeleton-short"></span>
+      </div>
+    </div>`).join('');
+}
+
 function renderNews(articles) {
   const container = document.getElementById("news-grid");
   if (!container) return;
