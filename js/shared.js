@@ -157,6 +157,7 @@ const BG_PLAYERS = [
 function _makeBgLayer() {
   const el = document.createElement("div");
   el.setAttribute("aria-hidden", "true");
+  el.className = "wc-bg-layer";
   Object.assign(el.style, {
     position:           "fixed",
     inset:              "0",

@@ -41,6 +41,11 @@
   --border:   #d6dae1;
   --shadow:   0 8px 0px rgba(255,0,0,0.10), 0 0 40px rgba(0,0,0,0.08);
 }
+/* Lighten the cinematic background layers in light mode (opacity drives the
+   crossfade; filter brightness is independent so the fade still works). */
+:root[data-theme="light"] .wc-bg-layer {
+  filter: blur(16px) brightness(1.55) grayscale(0.25) !important;
+}
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
