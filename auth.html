@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign In — World Cup 2026 Hub</title>
+  <meta name="description" content="Sign in to your World Cup 2026 Hub account." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚽</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Teko:wght@400;500;600;700&family=Syncopate:wght@400;700&display=swap" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+</head>
+<body>
+
+<nav id="main-nav"></nav>
+
+<div class="auth-page">
+  <div class="auth-card card-enter" id="auth-card">
+
+    <!-- ── Logo / heading ─────────────────────────── -->
+    <div class="auth-header">
+      <div class="auth-badge">⚽</div>
+      <h1 class="auth-title">World Cup 2026 Hub</h1>
+      <p class="auth-subtitle">Sign in with a magic link — no password needed.</p>
+    </div>
+
+    <!-- ── Magic-link form ────────────────────────── -->
+    <div id="auth-form-wrap">
+      <div class="auth-field">
+        <label for="auth-email" class="auth-label">Email address</label>
+        <input id="auth-email" type="email" class="auth-input" placeholder="you@example.com" autocomplete="email" />
+      </div>
+      <button id="auth-send-btn" class="auth-btn">Send Magic Link</button>
+      <p id="auth-msg" class="auth-msg" aria-live="polite"></p>
+    </div>
+
+    <!-- ── Already-logged-in state ────────────────── -->
+    <div id="auth-logged-in" style="display:none; text-align:center;">
+      <div class="auth-avatar-large" id="auth-avatar-large"></div>
+      <p class="auth-welcome" id="auth-welcome-name"></p>
+      <div class="auth-actions">
+        <a href="profile.html" class="auth-btn">View Profile</a>
+        <button id="auth-signout-btn" class="auth-btn auth-btn-ghost">Sign Out</button>
+      </div>
+    </div>
+
+    <!-- ── Divider + social proof ─────────────────── -->
+    <div class="auth-footer-note">
+      Your predictions, Meet Room name, and lineup are tied to your account.
+      <br>No tracking beyond what you choose to share.
+    </div>
+  </div>
+</div>
+
+<footer id="footer"></footer>
+
+<script src="js/data.js"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/shared.js"></script>
+<script src="js/auth.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  buildNav("auth");
+
+  // Listen for auth state
+  WCAuth.onChange((user, profile) => {
+    const formWrap = document.getElementById("auth-form-wrap");
+    const loggedIn = document.getElementById("auth-logged-in");
+    if (user) {
+      formWrap.style.display = "none";
+      loggedIn.style.display = "block";
+      const display = profile?.display_name || user.email?.split("@")[0] || "Fan";
+      document.getElementById("auth-welcome-name").textContent = `Welcome back, ${display}!`;
+      const avatarEl = document.getElementById("auth-avatar-large");
+      avatarEl.innerHTML = profile?.avatar_url
+        ? `<img src="${profile.avatar_url}" alt="${display}" />`
+        : `<span class="initials-big">${display.slice(0,2).toUpperCase()}</span>`;
+      // Auto-redirect after 1.5 s unless they came from profile
+      const from = new URLSearchParams(location.search).get("from");
+      if (!from) setTimeout(() => location.href = "profile.html", 1500);
+    } else {
+      formWrap.style.display = "block";
+      loggedIn.style.display = "none";
+    }
+  });
+
+  // Magic-link send
+  document.getElementById("auth-send-btn").addEventListener("click", sendMagicLink);
+  document.getElementById("auth-email").addEventListener("keydown", e => {
+    if (e.key === "Enter") sendMagicLink();
+  });
+  document.getElementById("auth-signout-btn").addEventListener("click", () => WCAuth.signOut());
+});
+
+async function sendMagicLink() {
+  const email = document.getElementById("auth-email").value.trim();
+  const msg   = document.getElementById("auth-msg");
+  const btn   = document.getElementById("auth-send-btn");
+
+  if (!email || !email.includes("@")) {
+    msg.textContent = "Enter a valid email address.";
+    msg.className = "auth-msg error";
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = "Sending…";
+  msg.textContent = "";
+  msg.className = "auth-msg";
+
+  const { error } = await _sb.auth.signInWithOtp({
+    email,
+    options: { emailRedirectTo: location.origin + "/profile.html" },
+  });
+
+  btn.disabled = false;
+  btn.textContent = "Send Magic Link";
+
+  if (error) {
+    msg.textContent = "Error: " + error.message;
+    msg.className = "auth-msg error";
+  } else {
+    msg.textContent = "✅ Magic link sent! Check your inbox and click to sign in.";
+    msg.className = "auth-msg success";
+  }
+}
+</script>
+</body>
+</html>

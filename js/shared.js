@@ -10,6 +10,7 @@ const NAV_PAGES = [
   { id: "predictions", href: "predictions.html",  icon: "🔮", label: "Predictions" },
   { id: "meet",        href: "meet.html",         icon: "🏟️", label: "Meet"        },
   { id: "games",       href: "games.html",        icon: "🎮", label: "Games"       },
+  { id: "profile",     href: "profile.html",      icon: "👤", label: "Profile",    navOnly: true },
 ];
 
 // ── Dark / light theme (system-detected, user-overridable) ──
@@ -71,6 +72,7 @@ function buildNav(activePage) {
       `).join("")}
     </ul>
     <button class="nav-theme-toggle" id="nav-theme-toggle" aria-label="Toggle dark/light mode" title="Toggle dark/light mode">🌙</button>
+    <a class="nav-user-btn nav-avatar-guest" id="nav-user-btn" href="auth.html" title="Sign in"><span class="nav-avatar-initials">👤</span><span class="nav-avatar-name">Sign In</span></a>
     <a class="nav-cta" href="meet.html">🏟️ Meet Rooms</a>
   `;
   setColorScheme(document.documentElement.getAttribute("data-theme") || preferredColorScheme());
