@@ -30,6 +30,46 @@ const LineupBuilder = (() => {
       { role:"MF", x:22, y:40 }, { role:"MF", x:50, y:38 }, { role:"MF", x:78, y:40 },
       { role:"FW", x:50, y:18 },
     ],
+    "3-4-3": [
+      { role:"GK", x:50, y:92 },
+      { role:"DF", x:28, y:77 }, { role:"DF", x:50, y:80 }, { role:"DF", x:72, y:77 },
+      { role:"MF", x:16, y:54 }, { role:"MF", x:38, y:56 }, { role:"MF", x:62, y:56 }, { role:"MF", x:84, y:54 },
+      { role:"FW", x:22, y:24 }, { role:"FW", x:50, y:20 }, { role:"FW", x:78, y:24 },
+    ],
+    "4-1-4-1": [
+      { role:"GK", x:50, y:92 },
+      { role:"DF", x:18, y:77 }, { role:"DF", x:39, y:80 }, { role:"DF", x:61, y:80 }, { role:"DF", x:82, y:77 },
+      { role:"MF", x:50, y:62 },
+      { role:"MF", x:18, y:42 }, { role:"MF", x:39, y:44 }, { role:"MF", x:61, y:44 }, { role:"MF", x:82, y:42 },
+      { role:"FW", x:50, y:20 },
+    ],
+    "5-3-2": [
+      { role:"GK", x:50, y:92 },
+      { role:"DF", x:12, y:74 }, { role:"DF", x:31, y:78 }, { role:"DF", x:50, y:80 }, { role:"DF", x:69, y:78 }, { role:"DF", x:88, y:74 },
+      { role:"MF", x:30, y:52 }, { role:"MF", x:50, y:55 }, { role:"MF", x:70, y:52 },
+      { role:"FW", x:38, y:24 }, { role:"FW", x:62, y:24 },
+    ],
+    "4-3-2-1": [
+      { role:"GK", x:50, y:92 },
+      { role:"DF", x:18, y:76 }, { role:"DF", x:39, y:79 }, { role:"DF", x:61, y:79 }, { role:"DF", x:82, y:76 },
+      { role:"MF", x:30, y:56 }, { role:"MF", x:50, y:58 }, { role:"MF", x:70, y:56 },
+      { role:"FW", x:38, y:36 }, { role:"FW", x:62, y:36 },
+      { role:"FW", x:50, y:18 },
+    ],
+    "3-4-2-1": [
+      { role:"GK", x:50, y:92 },
+      { role:"DF", x:28, y:78 }, { role:"DF", x:50, y:80 }, { role:"DF", x:72, y:78 },
+      { role:"MF", x:16, y:56 }, { role:"MF", x:38, y:58 }, { role:"MF", x:62, y:58 }, { role:"MF", x:84, y:56 },
+      { role:"FW", x:38, y:34 }, { role:"FW", x:62, y:34 },
+      { role:"FW", x:50, y:16 },
+    ],
+    "4-4-1-1": [
+      { role:"GK", x:50, y:92 },
+      { role:"DF", x:18, y:76 }, { role:"DF", x:39, y:79 }, { role:"DF", x:61, y:79 }, { role:"DF", x:82, y:76 },
+      { role:"MF", x:18, y:54 }, { role:"MF", x:39, y:56 }, { role:"MF", x:61, y:56 }, { role:"MF", x:82, y:54 },
+      { role:"FW", x:50, y:34 },
+      { role:"FW", x:50, y:16 },
+    ],
   };
 
   let teamId = null;

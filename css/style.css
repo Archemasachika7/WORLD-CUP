@@ -4117,6 +4117,47 @@ button { cursor: pointer; }
 .lineup-pick-item.used { opacity: 0.45; }
 .lineup-pick-remove { color: var(--accent); font-weight: 700; justify-content: center; }
 
+/* ── Group standings / points tables ── */
+.standings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+  gap: 16px;
+}
+.standings-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--accent);
+  overflow: hidden;
+}
+.standings-head {
+  padding: 10px 14px;
+  font-family: var(--font-head);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 0.95rem;
+  background: var(--bg-hover);
+  border-bottom: 1px solid var(--border);
+}
+.standings-table { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
+.standings-table th {
+  text-align: center;
+  padding: 8px 4px;
+  color: var(--text-dim);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+}
+.standings-table th:nth-child(2) { text-align: left; }
+.standings-table td { text-align: center; padding: 8px 4px; border-bottom: 1px solid var(--border); }
+.standings-table tbody tr:last-child td { border-bottom: none; }
+.st-team { text-align: left !important; display: flex; align-items: center; gap: 8px; font-weight: 600; }
+.st-pts { font-weight: 800; color: var(--text); }
+.standings-table tr.qualify { background: rgba(0,166,80,0.10); }
+.standings-table tr.qualify td:first-child { box-shadow: inset 3px 0 0 var(--accent2); }
+.standings-table tr.playoff { background: rgba(255,215,0,0.07); }
+.standings-table tr.playoff td:first-child { box-shadow: inset 3px 0 0 var(--gold); }
+
 /* ── Pack Opening ── */
 .packs-store {
   display: grid;
