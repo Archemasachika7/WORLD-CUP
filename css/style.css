@@ -31,6 +31,17 @@
   --font-geo:   'Syncopate', 'Arial', sans-serif;
 }
 
+/* Light theme — overrides the structural colour variables */
+:root[data-theme="light"] {
+  --bg-dark:  #f3f4f7;
+  --bg-card:  #ffffff;
+  --bg-hover: #e7eaef;
+  --text:     #14141c;
+  --text-dim: #5b6470;
+  --border:   #d6dae1;
+  --shadow:   0 8px 0px rgba(255,0,0,0.10), 0 0 40px rgba(0,0,0,0.08);
+}
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html { scroll-behavior: smooth; }
@@ -137,6 +148,22 @@ button { cursor: pointer; }
 }
 
 .nav-cta:hover { background: #cc0000; }
+
+.nav-theme-toggle {
+  background: var(--bg-hover);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 1.1rem;
+  line-height: 1;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: border-color 0.15s, transform 0.15s;
+}
+.nav-theme-toggle:hover { border-color: var(--accent); transform: scale(1.08); }
 
 /* ============================================================
    Hero Section — FIFA 2026 Brutalist

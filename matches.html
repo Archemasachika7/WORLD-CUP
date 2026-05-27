@@ -87,12 +87,11 @@ function displayMatches(group) {
     const away = TEAMS.find(t => t.id === m.away);
     if (!home || !away) return "";
     const prob = Predictions.getProbability(m.home, m.away);
-    const dt   = new Date(m.date + "T" + m.time);
-    const ds   = dt.toLocaleDateString("en-US", {weekday:"short", month:"short", day:"numeric"});
+    const k    = formatKickoffLocal(m.date, m.time);
     return `
       <div class="match-card card-enter" data-match="${m.id}">
         <div class="match-stage">${m.stage}</div>
-        <div class="match-date">${ds} ${m.time} &bull; ${m.venue}</div>
+        <div class="match-date">${k.date} ${k.time} ${k.tz} &bull; ${m.venue}</div>
         <div class="match-teams">
           <div class="match-team">
             ${flagImg(home.id, 48)}
@@ -133,10 +132,10 @@ function openMatchModal(match) {
   const away = TEAMS.find(t => t.id === match.away);
   const prob = Predictions.getProbability(match.home, match.away);
   const body = document.getElementById("modal-body");
-  const dt   = new Date(match.date + "T" + match.time).toLocaleDateString("en-US",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
+  const k    = formatKickoffLocal(match.date, match.time);
   body.innerHTML = `
     <div class="match-modal-header">
-      <h2>${match.stage}</h2><p>${dt} &bull; ${match.time}</p><p>📍 ${match.venue}</p>
+      <h2>${match.stage}</h2><p>${k.date} &bull; ${k.time} ${k.tz} (your time)</p><p>📍 ${match.venue}</p>
     </div>
     <div class="big-matchup">
       <div class="bm-team">${flagImg(home.id, 80)}<br><strong>${home.name}</strong><br><small>FIFA #${home.ranking} &bull; Elo ${home.elo}</small></div>

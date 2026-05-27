@@ -12,6 +12,44 @@ const NAV_PAGES = [
   { id: "games",       href: "games.html",        icon: "🎮", label: "Games"       },
 ];
 
+// ── Dark / light theme (system-detected, user-overridable) ──
+const THEME_KEY = "wc26_theme";
+
+function preferredColorScheme() {
+  const saved = localStorage.getItem(THEME_KEY);
+  if (saved === "light" || saved === "dark") return saved;
+  return window.matchMedia?.("(prefers-color-scheme: light)").matches ? "light" : "dark";
+}
+
+function setColorScheme(theme) {
+  document.documentElement.setAttribute("data-theme", theme);
+  const btn = document.getElementById("nav-theme-toggle");
+  if (btn) { btn.textContent = theme === "light" ? "☀️" : "🌙"; }
+}
+
+function toggleColorScheme() {
+  const next = document.documentElement.getAttribute("data-theme") === "light" ? "dark" : "light";
+  localStorage.setItem(THEME_KEY, next);
+  setColorScheme(next);
+}
+
+// Apply immediately (before nav builds) to minimise flash
+setColorScheme(preferredColorScheme());
+
+// ── UTC → local kickoff time helper ──
+// Match data stores date ("2026-06-11") + time ("20:00") as UTC.
+// Returns the kickoff rendered in the viewer's own browser timezone.
+function formatKickoffLocal(dateStr, timeStr) {
+  if (!dateStr || !timeStr) return { date: "TBD", time: "", tz: "" };
+  const d = new Date(`${dateStr}T${timeStr}:00Z`);
+  if (isNaN(d.getTime())) return { date: dateStr, time: timeStr, tz: "UTC" };
+  const date = d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+  const time = d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+  const tz = new Intl.DateTimeFormat(undefined, { timeZoneName: "short" })
+    .formatToParts(d).find(p => p.type === "timeZoneName")?.value || "";
+  return { date, time, tz };
+}
+
 function buildNav(activePage) {
   const container = document.getElementById("main-nav");
   if (!container) return;
@@ -32,8 +70,11 @@ function buildNav(activePage) {
         </li>
       `).join("")}
     </ul>
+    <button class="nav-theme-toggle" id="nav-theme-toggle" aria-label="Toggle dark/light mode" title="Toggle dark/light mode">🌙</button>
     <a class="nav-cta" href="meet.html">🏟️ Meet Rooms</a>
   `;
+  setColorScheme(document.documentElement.getAttribute("data-theme") || preferredColorScheme());
+  document.getElementById("nav-theme-toggle")?.addEventListener("click", toggleColorScheme);
 
   // Scroll effect
   window.addEventListener("scroll", () => {
