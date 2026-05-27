@@ -65,6 +65,8 @@
 <script>
 document.addEventListener("DOMContentLoaded", () => {
   buildNav("auth");
+  // Force card-enter elements visible immediately (no scroll observer on this page)
+  document.querySelectorAll(".card-enter").forEach(el => el.classList.add("card-visible"));
 
   // Listen for auth state
   WCAuth.onChange((user, profile) => {

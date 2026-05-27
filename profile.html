@@ -135,6 +135,8 @@
 document.addEventListener("DOMContentLoaded", () => {
   buildNav("profile");
   buildTeamPicker();
+  // Immediately mark any already-visible card-enter elements (above the fold)
+  document.querySelectorAll(".card-enter").forEach(el => el.classList.add("card-visible"));
 
   WCAuth.onChange((user, profile) => {
     if (!user) {
