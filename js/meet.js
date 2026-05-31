@@ -1,10 +1,8 @@
 // ============================================================
-// Meet Rooms — Supabase Realtime chat + presence + WebRTC
+// Meet Rooms — Zoom-style UI + Supabase Realtime + WebRTC
 // ============================================================
 
 const MeetSystem = (() => {
-
-  const EMOJI_LIST = ["⚽","🔥","❤️","😱","🎉","👏","🚀","💪","🏆","😭","🤩","💥"];
 
   const TEAM_THEMES = {
     esp: { accent:"#c60b1e", bg:"rgba(198,11,30,0.09)",  badge:"#ffc400" },
@@ -23,7 +21,6 @@ const MeetSystem = (() => {
     jpn: { accent:"#bc002d", bg:"rgba(188,0,45,0.08)",   badge:"#ffffff" },
     kor: { accent:"#cd2e3a", bg:"rgba(205,46,58,0.08)",  badge:"#003478" },
     mar: { accent:"#c1272d", bg:"rgba(193,39,45,0.08)",  badge:"#006233" },
-    ned: { accent:"#ff6600", bg:"rgba(255,102,0,0.09)",  badge:"#003da5" },
     tur: { accent:"#e30a17", bg:"rgba(227,10,23,0.08)",  badge:"#ffffff" },
     sen: { accent:"#00853f", bg:"rgba(0,133,63,0.08)",   badge:"#fdef42" },
     aut: { accent:"#ed2939", bg:"rgba(237,41,57,0.08)",  badge:"#ffffff" },
@@ -46,6 +43,8 @@ const MeetSystem = (() => {
   let sbCh = null;
   let localStream = null;
   let peers = {};
+  let _timerStart = null;
+  let _timerInterval = null;
 
   // ── Init ───────────────────────────────────────────────
   function init() {
@@ -74,12 +73,10 @@ const MeetSystem = (() => {
   async function createRoom() {
     if (!readIdentity()) return;
     const roomId = genId();
-    // Try to register the room — non-fatal if table doesn't exist or RLS blocks it
     try {
       const { error } = await _sb.from("rooms").insert({ id: roomId });
       if (error && error.code !== "23505") {
         console.warn("rooms table insert failed (non-fatal):", error.code, error.message);
-        // Continue anyway — Realtime channels work without this table
       }
     } catch (e) { console.warn("rooms insert exception (non-fatal):", e); }
     await enter(roomId);
@@ -108,10 +105,43 @@ const MeetSystem = (() => {
     applyTheme(st.teamId);
     showRoom(roomId);
     bindRoom();
+    startTimer();
     await subscribe(roomId);
     await loadHistory(roomId);
     sysMsg(`You joined as ${st.teamFlag} ${st.nickname}`);
+    // Set local tile
+    setLocalTileInfo();
   }
+
+  function setLocalTileInfo() {
+    const initials = document.getElementById("zroom-local-initials");
+    const nameEl   = document.getElementById("zroom-local-name");
+    if (initials) initials.textContent = (st.nickname || "?")[0].toUpperCase();
+    if (nameEl)   nameEl.textContent   = `${st.teamFlag} ${st.nickname} (you)`;
+  }
+
+  // ── Timer ──────────────────────────────────────────────
+  function startTimer() {
+    _timerStart = Date.now();
+    _timerInterval = setInterval(() => {
+      const el = document.getElementById("zroom-timer");
+      if (!el) return;
+      const s = Math.floor((Date.now() - _timerStart) / 1000);
+      const h = Math.floor(s / 3600);
+      const m = Math.floor((s % 3600) / 60);
+      const sec = s % 60;
+      el.textContent = h > 0
+        ? `${pad(h)}:${pad(m)}:${pad(sec)}`
+        : `${pad(m)}:${pad(sec)}`;
+    }, 1000);
+  }
+
+  function stopTimer() {
+    clearInterval(_timerInterval);
+    _timerInterval = null;
+  }
+
+  function pad(n) { return String(n).padStart(2, "0"); }
 
   // ── Supabase Realtime ──────────────────────────────────
   async function subscribe(roomId) {
@@ -121,7 +151,7 @@ const MeetSystem = (() => {
 
     sbCh
       .on("presence", { event: "sync" }, () => renderPresence(sbCh.presenceState()))
-      .on("broadcast", { event: "chat"        }, ({ payload }) => appendMsg(payload))
+      .on("broadcast", { event: "chat"        }, ({ payload }) => { appendMsg(payload); if (typeof window._onNewMsg === "function") window._onNewMsg(); })
       .on("broadcast", { event: "emoji_pop"   }, ({ payload }) => rain(payload.e))
       .on("broadcast", { event: "stream_sync" }, ({ payload }) => loadStream(payload.url, false))
       .on("broadcast", { event: "rtc_hello"   }, ({ payload }) => { if (payload.p !== st.peerId) sendOffer(payload.p); })
@@ -158,7 +188,6 @@ const MeetSystem = (() => {
 
     appendMsg(payload, false, true);
     sbCh?.send({ type:"broadcast", event:"chat", payload });
-    // Persist — non-fatal if messages table not set up yet
     try {
       const { error } = await _sb.from("messages").insert({
         room_id: payload.room_id, nickname: payload.nickname,
@@ -196,16 +225,31 @@ const MeetSystem = (() => {
 
   // ── Presence ───────────────────────────────────────────
   function renderPresence(ps) {
-    const bar   = document.getElementById("meet-presence-bar");
-    const count = document.getElementById("meet-user-count");
-    const users = Object.values(ps).flat();
-    if (count) count.textContent = users.length + " watching";
-    if (!bar)  return;
-    bar.innerHTML = users.map(u => `
-      <div class="meet-user-chip${u.p === st.peerId ? " meet-user-me" : ""}">
-        <span>${u.f}</span>
-        <span>${esc(u.n)}${u.p === st.peerId ? " (you)" : ""}</span>
-      </div>`).join("");
+    const strip   = document.getElementById("meet-presence-bar");
+    const countEl = document.getElementById("zroom-count-num");
+    const users   = Object.values(ps).flat();
+
+    if (countEl) countEl.textContent = users.length;
+
+    // Presence chips at top of gallery
+    if (strip) {
+      strip.innerHTML = users.map(u => `
+        <div class="meet-user-chip${u.p === st.peerId ? " meet-user-me" : ""}">
+          <span>${u.f}</span>
+          <span>${esc(u.n)}${u.p === st.peerId ? " (you)" : ""}</span>
+        </div>`).join("");
+    }
+
+    // People panel list
+    const peopleList = document.getElementById("zroom-people-list");
+    if (peopleList) {
+      peopleList.innerHTML = users.map(u => `
+        <div class="zroom-person-row">
+          <div class="zroom-person-avatar">${u.n[0]?.toUpperCase() || "?"}</div>
+          <span class="zroom-person-name">${esc(u.n)}${u.p === st.peerId ? " (you)" : ""}</span>
+          <span class="zroom-person-flag">${u.f}</span>
+        </div>`).join("");
+    }
   }
 
   // ── Emoji Reactions ────────────────────────────────────
@@ -274,7 +318,7 @@ const MeetSystem = (() => {
       vt.enabled = !vt.enabled;
       st.camOn = vt.enabled;
     }
-    updateLocalVid();
+    updateLocalTile();
     updateBtns();
   }
 
@@ -289,7 +333,7 @@ const MeetSystem = (() => {
         st.micOn = true; st.camOn = false;
       } catch { alert2("Mic/camera access denied — check browser permissions."); return; }
     }
-    updateLocalVid();
+    updateLocalTile();
     updateBtns();
     Object.values(peers).forEach(p => {
       localStream.getTracks().forEach(track => {
@@ -298,18 +342,48 @@ const MeetSystem = (() => {
     });
   }
 
-  function updateLocalVid() {
-    const wrap = document.getElementById("meet-local-vid-wrap");
-    const vid  = document.getElementById("meet-local-video");
-    if (vid && localStream) { vid.srcObject = localStream; vid.muted = true; vid.play().catch(()=>{}); }
-    wrap?.classList.toggle("hidden", !st.camOn);
+  function updateLocalTile() {
+    const avatar = document.getElementById("zroom-local-avatar");
+    const vid    = document.getElementById("meet-local-video");
+    if (vid && localStream) { vid.srcObject = localStream; vid.play().catch(()=>{}); }
+    if (vid) vid.classList.toggle("hidden", !st.camOn);
+    if (avatar) avatar.style.display = st.camOn ? "none" : "flex";
+    // mic icon
+    const micIcon = document.getElementById("zroom-local-mic-icon");
+    if (micIcon) {
+      micIcon.className = st.micOn ? "ztile-mic-on" : "ztile-mic-off";
+      micIcon.title = st.micOn ? "Mic on" : "Muted";
+      micIcon.innerHTML = st.micOn
+        ? `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 1 3 3v8a3 3 0 0 1-6 0V4a3 3 0 0 1 3-3z"/><path d="M19 11a7 7 0 0 1-14 0"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>`
+        : `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 1 3 3v8a3 3 0 0 1-6 0V4a3 3 0 0 1 3-3z"/><path d="M19 11a7 7 0 0 1-14 0"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`;
+    }
   }
 
   function updateBtns() {
-    const m = document.getElementById("meet-mic-btn");
-    const c = document.getElementById("meet-cam-btn");
-    if (m) { m.textContent = st.micOn ? "🎙️ Mic On" : "🔇 Muted"; m.classList.toggle("media-active", st.micOn); }
-    if (c) { c.textContent = st.camOn ? "📹 Cam On" : "📷 Cam Off"; c.classList.toggle("media-active", st.camOn); }
+    const micBtn = document.getElementById("meet-mic-btn");
+    const camBtn = document.getElementById("meet-cam-btn");
+
+    if (micBtn) {
+      micBtn.classList.toggle("zctrl-muted", !st.micOn);
+      micBtn.classList.toggle("zctrl-on",    st.micOn);
+      const lbl = micBtn.querySelector(".zctrl-label");
+      if (lbl) lbl.textContent = st.micOn ? "Mute" : "Unmute";
+      const icon = micBtn.querySelector(".zctrl-icon");
+      if (icon) icon.innerHTML = st.micOn
+        ? `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 1a3 3 0 0 1 3 3v8a3 3 0 0 1-6 0V4a3 3 0 0 1 3-3z"/><path d="M19 11a7 7 0 0 1-14 0"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>`
+        : `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 1a3 3 0 0 1 3 3v8a3 3 0 0 1-6 0V4a3 3 0 0 1 3-3z"/><path d="M19 11a7 7 0 0 1-14 0"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`;
+    }
+
+    if (camBtn) {
+      camBtn.classList.toggle("zctrl-muted", !st.camOn);
+      camBtn.classList.toggle("zctrl-on",    st.camOn);
+      const lbl = camBtn.querySelector(".zctrl-label");
+      if (lbl) lbl.textContent = st.camOn ? "Stop Video" : "Start Video";
+      const icon = camBtn.querySelector(".zctrl-icon");
+      if (icon) icon.innerHTML = st.camOn
+        ? `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>`
+        : `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M16 16v1a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2"/><polygon points="23 7 16 12 23 17 23 7"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`;
+    }
   }
 
   function mkPeer(peerId) {
@@ -317,9 +391,6 @@ const MeetSystem = (() => {
     const pc = new RTCPeerConnection({ iceServers: STUN });
     peers[peerId] = { pc, makingOffer: false };
 
-    // onnegotiationneeded fires whenever addTrack is called on a stable connection
-    // (e.g. when either peer enables mic/cam after the initial handshake).
-    // Without this, tracks added after the first offer/answer are never sent.
     pc.onnegotiationneeded = async () => {
       if (peers[peerId]?.makingOffer) return;
       peers[peerId].makingOffer = true;
@@ -339,12 +410,12 @@ const MeetSystem = (() => {
     };
 
     pc.ontrack = e => {
-      if (e.streams?.[0]) renderRemote(peerId, e.streams[0]);
+      if (e.streams?.[0]) renderRemoteTile(peerId, e.streams[0]);
     };
 
     pc.onconnectionstatechange = () => {
       if (["disconnected","failed","closed"].includes(pc.connectionState)) {
-        document.getElementById(`peer-${peerId}`)?.remove();
+        document.getElementById(`ztile-${peerId}`)?.remove();
         peers[peerId]?.pc?.close();
         delete peers[peerId];
       }
@@ -356,8 +427,6 @@ const MeetSystem = (() => {
 
   async function sendOffer(targetId) {
     const pc = mkPeer(targetId);
-    // Pre-declare sendrecv transceivers so the remote side can also send tracks
-    // even before either user has enabled mic/cam.
     if (pc.getTransceivers().length === 0) {
       pc.addTransceiver("audio", { direction: "sendrecv" });
       pc.addTransceiver("video", { direction: "sendrecv" });
@@ -373,7 +442,6 @@ const MeetSystem = (() => {
   async function handleOffer({ from, sdp }) {
     const pc = peers[from]?.pc || mkPeer(from);
     try {
-      // Collision: if we're mid-offer ourselves, roll back before applying theirs
       if (pc.signalingState === "have-local-offer") {
         await pc.setLocalDescription({ type: "rollback" });
       }
@@ -396,26 +464,52 @@ const MeetSystem = (() => {
     if (pc && candidate) try { await pc.addIceCandidate(new RTCIceCandidate(candidate)); } catch {}
   }
 
-  function renderRemote(peerId, stream) {
-    const grid = document.getElementById("meet-video-grid");
-    if (!grid) return;
-    let wrap = document.getElementById(`peer-${peerId}`);
-    if (!wrap) {
-      wrap = document.createElement("div");
-      wrap.id = `peer-${peerId}`;
-      wrap.className = "meet-peer-video";
+  function renderRemoteTile(peerId, stream) {
+    const gallery = document.getElementById("zroom-gallery");
+    if (!gallery) return;
+
+    let tile = document.getElementById(`ztile-${peerId}`);
+    if (!tile) {
+      tile = document.createElement("div");
+      tile.id = `ztile-${peerId}`;
+      tile.className = "ztile";
+
+      // Avatar placeholder
+      const avatar = document.createElement("div");
+      avatar.className = "ztile-avatar";
+      avatar.innerHTML = `<span class="ztile-avatar-initials">P</span>`;
+
       const vid = document.createElement("video");
-      vid.autoplay = true; vid.playsInline = true;
-      const lbl = document.createElement("div");
-      lbl.className = "meet-vid-label"; lbl.textContent = "Peer";
-      wrap.appendChild(vid); wrap.appendChild(lbl);
-      grid.appendChild(wrap);
+      vid.autoplay = true;
+      vid.playsInline = true;
+      vid.className = "ztile-video";
+
+      const overlay = document.createElement("div");
+      overlay.className = "ztile-overlay";
+      overlay.innerHTML = `<span class="ztile-name">Peer</span>
+        <span class="ztile-mic-off" title="Muted">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 1 3 3v8a3 3 0 0 1-6 0V4a3 3 0 0 1 3-3z"/><path d="M19 11a7 7 0 0 1-14 0"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+        </span>`;
+
+      tile.appendChild(avatar);
+      tile.appendChild(vid);
+      tile.appendChild(overlay);
+      gallery.appendChild(tile);
     }
-    wrap.querySelector("video").srcObject = stream;
+
+    const vid = tile.querySelector("video");
+    const avatar = tile.querySelector(".ztile-avatar");
+    if (vid) {
+      vid.srcObject = stream;
+      const hasVideo = stream.getVideoTracks().length > 0;
+      vid.classList.toggle("hidden", !hasVideo);
+      if (avatar) avatar.style.display = hasVideo ? "none" : "flex";
+    }
   }
 
   // ── Leave ──────────────────────────────────────────────
   async function leave() {
+    stopTimer();
     await sbCh?.untrack();
     await sbCh?.unsubscribe();
     sbCh = null;
@@ -431,27 +525,38 @@ const MeetSystem = (() => {
     document.getElementById("meet-messages").innerHTML = "";
     document.getElementById("meet-presence-bar").innerHTML = "";
 
-    // Reset video grid
-    const grid = document.getElementById("meet-video-grid");
-    if (grid) grid.innerHTML = `
-      <div id="meet-local-vid-wrap" class="meet-peer-video meet-local hidden">
-        <video id="meet-local-video" autoplay muted playsinline></video>
-        <div class="meet-vid-label">You</div>
-      </div>`;
+    // Reset gallery to just the local tile
+    const gallery = document.getElementById("zroom-gallery");
+    if (gallery) {
+      const remoteTiles = gallery.querySelectorAll(".ztile:not(.ztile-local)");
+      remoteTiles.forEach(t => t.remove());
+    }
+    // Reset local tile
+    const localAvatar = document.getElementById("zroom-local-avatar");
+    const localVid    = document.getElementById("meet-local-video");
+    if (localAvatar) localAvatar.style.display = "flex";
+    if (localVid)    { localVid.classList.add("hidden"); localVid.srcObject = null; }
 
-    document.getElementById("meet-room")?.classList.add("hidden");
-    document.getElementById("meet-landing")?.classList.remove("hidden");
+    document.getElementById("meet-room-app")?.classList.add("hidden");
+    document.getElementById("meet-landing-page")?.classList.remove("hidden");
     resetTheme();
+
+    // close side/stream panels
+    if (typeof closeSidePanel === "function") closeSidePanel();
+    document.getElementById("zroom-stream-panel")?.classList.add("hidden");
+    document.getElementById("zroom-stream-btn")?.classList.remove("zctrl-active");
   }
 
   // ── UI ─────────────────────────────────────────────────
   function showRoom(roomId) {
-    document.getElementById("meet-landing")?.classList.add("hidden");
-    document.getElementById("meet-room")?.classList.remove("hidden");
-    const code = document.getElementById("meet-room-code-display");
-    if (code) code.textContent = roomId;
+    document.getElementById("meet-landing-page")?.classList.add("hidden");
+    document.getElementById("meet-room-app")?.classList.remove("hidden");
+
+    const codeEl = document.getElementById("zroom-code-display");
+    if (codeEl) codeEl.textContent = roomId;
+
     const shareInp = document.getElementById("meet-share-url");
-    if (shareInp) shareInp.value = location.href.split("#")[0] + `#meet?room=${roomId}`;
+    if (shareInp) shareInp.value = location.origin + location.pathname + `?room=${roomId}`;
   }
 
   function bindRoom() {
@@ -460,7 +565,7 @@ const MeetSystem = (() => {
       if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMsg(); }
     });
     document.getElementById("meet-leave-btn")?.addEventListener("click", leave);
-    document.getElementById("meet-copy-link-btn")?.addEventListener("click", copyLink);
+    document.getElementById("zroom-copy-btn")?.addEventListener("click", copyLink);
     document.getElementById("meet-mic-btn")?.addEventListener("click", toggleMic);
     document.getElementById("meet-cam-btn")?.addEventListener("click", toggleCam);
     document.getElementById("meet-stream-go")?.addEventListener("click", () => {
@@ -470,6 +575,7 @@ const MeetSystem = (() => {
     document.getElementById("meet-stream-input")?.addEventListener("keydown", e => {
       if (e.key === "Enter") document.getElementById("meet-stream-go")?.click();
     });
+    // Emoji buttons (both in popover and in chat panel)
     document.querySelectorAll(".emoji-reaction-btn").forEach(btn => {
       btn.addEventListener("click", () => sendEmoji(btn.dataset.emoji));
     });
@@ -523,11 +629,11 @@ const MeetSystem = (() => {
 
   // ── Helpers ────────────────────────────────────────────
   function checkUrlRoom() {
-    const m = location.hash.match(/room=([A-Z0-9-]+)/i);
-    if (!m) return;
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("room");
+    if (!code) return;
     const inp = document.getElementById("meet-room-code-input");
-    if (inp) inp.value = m[1].toUpperCase();
-    document.getElementById("meet")?.scrollIntoView({ behavior:"smooth" });
+    if (inp) inp.value = code.toUpperCase();
   }
 
   function genId() {
