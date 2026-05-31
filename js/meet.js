@@ -42,6 +42,7 @@ const MeetSystem = (() => {
   };
   let sbCh = null;
   let localStream = null;
+  let screenStream = null;
   let peers = {};
   let _timerStart = null;
   let _timerInterval = null;
@@ -108,6 +109,14 @@ const MeetSystem = (() => {
     startTimer();
     await subscribe(roomId);
     await loadHistory(roomId);
+    // Fetch and auto-load any existing stream for this room
+    try {
+      const { data } = await _sb.from("rooms").select("stream_url").eq("id", roomId).maybeSingle();
+      if (data?.stream_url) {
+        loadStream(data.stream_url, false);
+        sysMsg("Loading the room's current stream…");
+      }
+    } catch(e) { /* non-fatal */ }
     sysMsg(`You joined as ${st.teamFlag} ${st.nickname}`);
     // Set local tile
     setLocalTileInfo();
@@ -252,43 +261,133 @@ const MeetSystem = (() => {
     }
   }
 
-  // ── Emoji Reactions ────────────────────────────────────
+  // ── Emoji Reactions (Zoom/Meet-style floating overlay) ──
   function sendEmoji(e) {
-    rain(e);
-    sbCh?.send({ type:"broadcast", event:"emoji_pop", payload:{ e } });
+    rain(e, st.teamFlag, true);
+    sbCh?.send({ type:"broadcast", event:"emoji_pop", payload:{ e, f: st.teamFlag, n: st.nickname } });
   }
 
-  function rain(emoji) {
+  function rain(emoji, flag, self = false) {
     const container = document.getElementById("meet-emoji-rain");
     if (!container) return;
-    const count = 4 + Math.floor(Math.random() * 4);
+
+    // A labelled "burst" pill rises from a random spot near the bottom —
+    // shows who reacted, Google-Meet style.
+    const lane = 8 + Math.random() * 78; // % from left
+    if (flag) {
+      const pill = document.createElement("span");
+      pill.className = "emoji-pill" + (self ? " emoji-pill-self" : "");
+      pill.innerHTML = `<span class="emoji-pill-flag">${flag}</span><span class="emoji-pill-emoji">${emoji}</span>`;
+      pill.style.left = lane + "%";
+      pill.style.animationDuration = (2 + Math.random() * 0.8) + "s";
+      container.appendChild(pill);
+      pill.addEventListener("animationend", () => pill.remove());
+    }
+
+    // Trailing cluster of the emoji itself for a lively, celebratory feel
+    const count = 5 + Math.floor(Math.random() * 4);
     for (let i = 0; i < count; i++) {
       setTimeout(() => {
         const el = document.createElement("span");
         el.className = "emoji-float";
         el.textContent = emoji;
-        el.style.left = (5 + Math.random() * 90) + "%";
-        el.style.fontSize = (1.4 + Math.random() * 1.4) + "rem";
-        el.style.animationDuration = (1.2 + Math.random() * 1) + "s";
+        el.style.left = (lane - 6 + Math.random() * 18) + "%";
+        el.style.fontSize = (1.4 + Math.random() * 1.6) + "rem";
+        el.style.animationDuration = (1.3 + Math.random() * 1) + "s";
         container.appendChild(el);
         el.addEventListener("animationend", () => el.remove());
-      }, i * 100);
+      }, i * 90);
     }
   }
 
+  // ── Stream URL normalization ───────────────────────────
+  function toYouTubeEmbed(url) {
+    let m = url.match(/(?:youtube\.com\/watch\?.*v=|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+    if (m) return `https://www.youtube.com/embed/${m[1]}?autoplay=1`;
+    m = url.match(/youtube\.com\/live\/([A-Za-z0-9_-]{11})/);
+    if (m) return `https://www.youtube.com/embed/${m[1]}?autoplay=1`;
+    if (/youtube\.com\/embed\//.test(url)) return url;
+    return null;
+  }
+
+  function isLikelyEmbeddable(url) {
+    const blocked = [
+      "foxsports.com","beinsports.com","tsn.ca","bbc.co.uk","peacocktv.com",
+      "dazn.com","sonyliv.com","hotstar.com","zee5.com","fancode.com",
+      "epicsports.online","fifa.com/fifaplus",
+    ];
+    return !blocked.some(d => url.includes(d));
+  }
+
+  function normalizeStreamUrl(raw) {
+    const url = (raw || "").trim();
+    if (!url) return { ok: false, reason: "Please enter a stream URL." };
+    try { new URL(url); } catch { return { ok: false, reason: "That doesn't look like a valid URL." }; }
+    const ytEmbed = toYouTubeEmbed(url);
+    if (ytEmbed) return { ok: true, url: ytEmbed, embeddable: true };
+    return { ok: true, url, embeddable: isLikelyEmbeddable(url) };
+  }
+
   // ── Stream Sync ────────────────────────────────────────
-  function loadStream(url, broadcast = true) {
-    const iframe = document.getElementById("meet-stream-iframe");
-    const wrap   = document.getElementById("meet-stream-frame-wrap");
-    const inp    = document.getElementById("meet-stream-input");
-    if (inp)   inp.value = url;
-    if (iframe) iframe.src = url;
+  async function loadStream(url, broadcast = true) {
+    const normalized = normalizeStreamUrl(url);
+    if (!normalized.ok) { alert2(normalized.reason); return; }
+    const finalUrl = normalized.url;
+
+    const iframe     = document.getElementById("meet-stream-iframe");
+    const wrap       = document.getElementById("meet-stream-frame-wrap");
+    const actionsBar = document.getElementById("meet-stream-actions");
+    const inp        = document.getElementById("meet-stream-input");
+    const openLink   = document.getElementById("meet-stream-open-link");
+    const statusEl   = document.getElementById("meet-stream-status");
+
+    if (inp)        inp.value = finalUrl;
+    if (openLink)   openLink.href = finalUrl;
+    if (statusEl)   statusEl.textContent = "";
+    if (actionsBar) actionsBar.style.display = "flex";
+
+    // Reset iframe before new src to avoid stale content
+    if (iframe) { iframe.src = "about:blank"; setTimeout(() => { iframe.src = finalUrl; }, 50); }
     wrap?.classList.remove("hidden");
+
+    console.log("[MeetStream] Loading:", finalUrl, "embeddable:", normalized.embeddable);
+
+    // Iframe load / error / timeout handling
+    if (iframe) {
+      let warned = false;
+      const showEmbedWarning = () => {
+        if (warned) return;
+        warned = true;
+        const msg = "This stream provider blocks in-app playback — use 'Open Stream' to watch in a new tab.";
+        if (statusEl) statusEl.textContent = msg;
+        sysMsg("Stream blocked by provider — click Open Stream below the player.");
+        console.log("[MeetStream] embed blocked or timed out for:", finalUrl);
+      };
+      const onLoad = () => {
+        console.log("[MeetStream] iframe load event fired");
+        clearTimeout(loadTimer);
+      };
+      iframe.removeEventListener("load", onLoad);
+      iframe.removeEventListener("error", showEmbedWarning);
+      iframe.addEventListener("load", onLoad, { once: true });
+      iframe.addEventListener("error", showEmbedWarning, { once: true });
+      const loadTimer = setTimeout(showEmbedWarning, 8000);
+      if (!normalized.embeddable) setTimeout(showEmbedWarning, 400);
+    }
+
+    _lastSyncedUrl = finalUrl;
+
     if (broadcast) {
-      sbCh?.send({ type:"broadcast", event:"stream_sync", payload:{ url } });
+      sbCh?.send({ type:"broadcast", event:"stream_sync", payload:{ url: finalUrl } });
+      try {
+        await _sb.from("rooms").upsert(
+          { id: st.roomId, stream_url: finalUrl, updated_at: new Date().toISOString() },
+          { onConflict: "id" }
+        );
+      } catch(e) { /* non-fatal */ }
       sysMsg(`${st.teamFlag} ${st.nickname} synced a stream for everyone`);
     } else {
-      sysMsg("Host synced a stream — loading for you…");
+      sysMsg("Stream synced — if it doesn't load, click Open Stream below the player.");
     }
   }
 
@@ -421,7 +520,17 @@ const MeetSystem = (() => {
       }
     };
 
-    if (localStream) localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
+    // If screen sharing is active, send screen video; otherwise send camera
+    if (screenStream) {
+      screenStream.getTracks().forEach(t => pc.addTrack(t, screenStream));
+    }
+    if (localStream) {
+      localStream.getTracks().forEach(t => {
+        // Skip video if already covered by screenStream
+        if (screenStream && t.kind === "video") return;
+        if (!pc.getSenders().find(s => s.track === t)) pc.addTrack(t, localStream);
+      });
+    }
     return pc;
   }
 
@@ -513,6 +622,9 @@ const MeetSystem = (() => {
     await sbCh?.untrack();
     await sbCh?.unsubscribe();
     sbCh = null;
+    closeFullscreenStream();
+    screenStream?.getTracks().forEach(t => t.stop());
+    screenStream = null;
     localStream?.getTracks().forEach(t => t.stop());
     localStream = null;
     Object.values(peers).forEach(p => p.pc.close());
@@ -522,8 +634,11 @@ const MeetSystem = (() => {
     const iframe = document.getElementById("meet-stream-iframe");
     if (iframe) iframe.src = "about:blank";
     document.getElementById("meet-stream-frame-wrap")?.classList.add("hidden");
+    document.getElementById("meet-stream-actions")?.style.setProperty("display","none");
     document.getElementById("meet-messages").innerHTML = "";
     document.getElementById("meet-presence-bar").innerHTML = "";
+    screenSharers.clear();
+    clearScreenContainer();
 
     // Reset gallery to just the local tile
     const gallery = document.getElementById("zroom-gallery");
@@ -568,9 +683,19 @@ const MeetSystem = (() => {
     document.getElementById("zroom-copy-btn")?.addEventListener("click", copyLink);
     document.getElementById("meet-mic-btn")?.addEventListener("click", toggleMic);
     document.getElementById("meet-cam-btn")?.addEventListener("click", toggleCam);
-    document.getElementById("meet-stream-go")?.addEventListener("click", () => {
+    document.getElementById("meet-screen-btn")?.addEventListener("click", toggleScreenShare);
+    document.getElementById("meet-stream-share-focused-btn")?.addEventListener("click", shareStreamFocused);
+    document.getElementById("meet-stream-expand-btn")?.addEventListener("click", openFullscreenStream);
+    document.getElementById("meet-stream-theater-btn")?.addEventListener("click", toggleTheater);
+    document.getElementById("meet-stream-fs-btn")?.addEventListener("click", toggleStreamFullscreen);
+    document.getElementById("meet-fs-close-btn")?.addEventListener("click", closeFullscreenStream);
+    document.getElementById("meet-fs-share-btn")?.addEventListener("click", () => {
+      closeFullscreenStream();
+      toggleScreenShare();
+    });
+    document.getElementById("meet-stream-go")?.addEventListener("click", async () => {
       const url = (document.getElementById("meet-stream-input")?.value || "").trim();
-      if (url) loadStream(url, true);
+      if (url) await loadStream(url, true);
     });
     document.getElementById("meet-stream-input")?.addEventListener("keydown", e => {
       if (e.key === "Enter") document.getElementById("meet-stream-go")?.click();
@@ -597,9 +722,10 @@ const MeetSystem = (() => {
     row.innerHTML = ids.map(id => {
       const th   = TEAM_THEMES[id];
       const team = (typeof TEAMS !== "undefined") ? TEAMS.find(x => x.id === id) : null;
-      return `<button class="theme-chip" style="--chip-color:${th?.accent||"#e50914"}"
+      const flag = (typeof flagImg === "function") ? flagImg(id, 36) : (team?.flag || id.toUpperCase());
+      return `<button class="theme-chip" style="--chip-color:${th?.accent||"#e50914"};display:flex;align-items:center;justify-content:center;overflow:hidden;"
         title="${team?.name||id}" onclick="MeetSystem.previewTheme('${id}')">
-        ${team?.flag || "🏳️"}
+        ${flag}
       </button>`;
     }).join("");
   }
@@ -654,5 +780,5 @@ const MeetSystem = (() => {
     return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
   }
 
-  return { init, previewTheme, checkUrlRoom };
+  return { init, previewTheme, checkUrlRoom, toggleScreenShare };
 })();
