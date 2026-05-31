@@ -43,10 +43,11 @@ function buildNav(activePage) {
   if (!container) return;
 
   container.innerHTML = `
-    <div class="nav-logo">
+    <a class="nav-logo" href="index.html" aria-label="World Cup 2026 home">
+      <img class="nav-logo-img" src="https://ioqgduqyfdcjvafyytxz.supabase.co/storage/v1/object/public/avatars/tournaments_fifa-world-cup-2026--white_3000x3000.football-logos.cc.png" alt="" onerror="this.style.display='none'" />
       <span class="logo-wc">WC</span><span class="logo-26">26</span>
-      <span style="font-family:var(--font-display);font-size:.65rem;letter-spacing:2px;color:#555;align-self:flex-end;margin-bottom:3px;padding-left:4px">FIFA</span>
-    </div>
+      <span class="logo-fifa">FIFA</span>
+    </a>
     <button class="nav-hamburger" id="nav-hamburger" aria-label="Menu">☰</button>
     <ul class="nav-links" id="nav-links-list">
       ${NAV_PAGES.map(p => `
