@@ -377,20 +377,24 @@
     >Change Team</button>
   </div>
 
-  <!-- Group winner predictions -->
+  <!-- Group winner predictions (client-side only) -->
   <div style="margin-top:8px;">
     <h2 class="bracket-section-heading">Predict Group Winners</h2>
-    <p class="bracket-section-desc">Who will top each group and advance from the group stage?</p>
+    <p class="bracket-section-desc">Who will top each group? (Saved locally in your browser.)</p>
     <div class="groups-grid" id="groups-grid">
       <!-- Injected by JS -->
     </div>
   </div>
 
-  <!-- Champion prediction -->
+  <!-- Champion + Runner-up -->
   <div class="champion-card">
     <div class="champion-label">🏆 Who will win the World Cup?</div>
     <select id="champion-select" class="meet-field champion-select">
       <option value="">— Select the champion —</option>
+    </select>
+    <div class="champion-label" style="margin-top:18px;">🥈 Runner-up?</div>
+    <select id="runner-up-select" class="meet-field champion-select">
+      <option value="">— Select the runner-up —</option>
     </select>
   </div>
 
@@ -548,45 +552,44 @@ function buildGroupsGrid() {
   });
 }
 
-// ── Build champion select ──
+// ── Build champion + runner-up selects ──
 function buildChampionSelect() {
-  const sel = document.getElementById("champion-select");
-  if (sel.dataset.built) return;
-  sel.dataset.built = "1";
+  const champSel = document.getElementById("champion-select");
+  const ruSel    = document.getElementById("runner-up-select");
+  if (champSel.dataset.built) return;
+  champSel.dataset.built = "1";
+  ruSel.dataset.built    = "1";
 
   const opts = TEAMS.map(t =>
     `<option value="${t.id}">${t.flag} ${t.name}</option>`
   ).join("");
-  sel.innerHTML = '<option value="">— Select the champion —</option>' + opts;
+  const emptyChamp = '<option value="">— Select the champion —</option>';
+  const emptyRU    = '<option value="">— Select the runner-up —</option>';
+  champSel.innerHTML = emptyChamp + opts;
+  ruSel.innerHTML    = emptyRU    + opts;
 
-  if (predictions.champion) sel.value = predictions.champion;
-  sel.addEventListener("change", () => { predictions.champion = sel.value; });
+  if (predictions.champion)  champSel.value = predictions.champion;
+  if (predictions.runner_up) ruSel.value    = predictions.runner_up;
+  champSel.addEventListener("change", () => { predictions.champion  = champSel.value; });
+  ruSel.addEventListener("change",    () => { predictions.runner_up = ruSel.value; });
 }
 
 // ── Populate predictions from saved data ──
 function applyLoadedPredictions(data) {
-  // Group winners
-  if (data.group_winners && typeof data.group_winners === "object") {
-    Object.assign(predictions, data.group_winners);
-  }
-  if (data.champion) predictions.champion = data.champion;
-  if (data.fav_team) {
-    favTeam = data.fav_team;
+  if (data.favorite_nation) {
+    favTeam = data.favorite_nation;
     localStorage.setItem("wc-fav-team", favTeam);
   }
+  if (data.champion)   predictions.champion  = data.champion;
+  if (data.runner_up)  predictions.runner_up = data.runner_up;
 
-  // Update selects if already rendered
-  const grid = document.getElementById("groups-grid");
-  if (grid.dataset.built) {
-    GROUP_LETTERS.forEach(letter => {
-      const key = "group" + letter + "_winner";
-      const sel = document.getElementById("gpred-" + letter);
-      if (sel && predictions[key]) sel.value = predictions[key];
-    });
-  }
   const champSel = document.getElementById("champion-select");
   if (champSel && champSel.dataset.built && predictions.champion) {
     champSel.value = predictions.champion;
+  }
+  const ruSel = document.getElementById("runner-up-select");
+  if (ruSel && ruSel.dataset.built && predictions.runner_up) {
+    ruSel.value = predictions.runner_up;
   }
   if (data.updated_at) {
     const d = new Date(data.updated_at);
@@ -599,7 +602,7 @@ function applyLoadedPredictions(data) {
 async function loadPredictions(userId) {
   try {
     const { data, error } = await _sb
-      .from("bracket_predictions")
+      .from("predictions")
       .select("*")
       .eq("user_id", userId)
       .single();
@@ -621,37 +624,31 @@ async function savePredictions() {
   btn.disabled = true;
   btn.textContent = "Saving…";
 
-  // Build group_winners object
-  const groupWinners = {};
-  GROUP_LETTERS.forEach(letter => {
-    const key = "group" + letter + "_winner";
-    groupWinners[key] = predictions[key] || null;
-  });
-
-  const champion = predictions.champion || null;
-  const userId = currentSession.user.id;
-  const email = currentSession.user.email;
+  const userId   = currentSession.user.id;
+  const champion = predictions.champion  || null;
+  const runnerUp = predictions.runner_up || null;
+  const now      = new Date().toISOString();
 
   try {
-    const { error } = await _sb.from("bracket_predictions").upsert(
-      {
-        user_id: userId,
-        email: email,
-        fav_team: favTeam || null,
-        group_winners: groupWinners,
-        champion: champion,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: "user_id" }
-    );
+    const [predRes, profRes] = await Promise.all([
+      _sb.from("predictions").upsert(
+        { user_id: userId, favorite_nation: favTeam || null, champion, runner_up: runnerUp, updated_at: now },
+        { onConflict: "user_id" }
+      ),
+      _sb.from("profiles").upsert(
+        { id: userId, fav_team: favTeam || null, updated_at: now },
+        { onConflict: "id" }
+      ),
+    ]);
 
-    if (error) {
-      showToast("Error saving: " + error.message, true);
+    if (predRes.error) {
+      showToast("Error saving: " + predRes.error.message, true);
     } else {
       showToast("Predictions saved! 🏆");
       document.getElementById("bracket-last-saved").textContent =
         "Last saved: " + new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString();
     }
+    if (profRes.error) console.warn("profiles upsert:", profRes.error.message);
   } catch (e) {
     showToast("Unexpected error. Please try again.", true);
     console.error(e);
