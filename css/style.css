@@ -3598,6 +3598,17 @@ body.meet-active .meet-peer-video { cursor: pointer; }
   text-align: left !important;
 }
 
+/* Global flag rendering: emoji shows first, CDN image overlays when loaded */
+.flag-emoji-bg {
+  font-size: inherit;
+  line-height: 1;
+  display: inline-block;
+  vertical-align: middle;
+}
+.flag-img { vertical-align: middle; }
+/* Hide any stale alt-text from lazy images — emoji is the fallback */
+img.flag-img { font-size: 0; }
+
 /* Flag images in team flags */
 .team-flag-lg .flag-img {
   width: 72px;
@@ -3611,14 +3622,22 @@ body.meet-active .meet-peer-video { cursor: pointer; }
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+  height: 44px;
 }
-.fav-flag-wrap .flag-img {
+.fav-flag-emoji {
+  font-size: 2.6rem;
+  line-height: 1;
   display: block;
-  border-radius: 6px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.5);
 }
-.fav-flag-wrap .flag-emoji {
-  font-size: 2.5rem;
+.fav-flag-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 4px;
+  /* shown only if CDN loads — emoji is the reliable fallback */
 }
 .fav-title-lbl {
   font-size: 0.72rem;

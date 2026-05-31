@@ -310,10 +310,14 @@ function initFavsPreview() {
         <span class="fav-player-label">${p.name.split(' ').pop()}</span>
       </div>`;
     }).join('');
+    const fc = FLAG_CODES[t.id];
+    const flagHtml = fc
+      ? `<span class="fav-flag-emoji">${t.flag}</span><img class="fav-flag-img" src="https://flagcdn.com/w64/${fc}.png" alt="" onerror="this.style.display='none'" />`
+      : `<span class="fav-flag-emoji">${t.flag}</span>`;
     return `
     <div class="fav-preview-card card-enter">
       <div class="fav-rank">#${i+1}</div>
-      <div class="fav-flag-wrap">${flagImg(t.id, 64)}</div>
+      <div class="fav-flag-wrap">${flagHtml}</div>
       <div class="fav-name">${t.name}</div>
       <div class="fav-pct">${t.titlePct}%</div>
       <div class="fav-title-lbl">title chance</div>
