@@ -672,16 +672,39 @@ const FLAG_CODES = {
   uzb:"uz", col:"co", eng:"gb-eng", cro:"hr", gha:"gh", pan:"pa",
 };
 
-function flagImg(teamId, size=32) {
-  const code = FLAG_CODES[teamId];
-  const team = TEAMS.find(t => t.id === teamId);
-  const emoji = team?.flag || '🏳️';
-  if (!code) return `<span class="flag-emoji">${emoji}</span>`;
+// League → flagcdn 2-letter (or sub-region) code, for league-nation flags
+const LEAGUE_FLAG_CODES = {
+  "EPL": "gb-eng", "LaLiga": "es", "Bundesliga": "de", "SerieA": "it",
+  "Ligue1": "fr", "LigaPortugal": "pt", "Eredivisie": "nl",
+  "SaudiPro": "sa", "LigaMX": "mx", "MLS": "us", "JupilerPro": "be"
+};
+
+// Core flag markup: image overlays emoji fallback so OS letter-codes never show
+function _flagMarkup(code, emoji, size) {
+  if (!code) return `<span class="flag-emoji">${emoji || '🏳️'}</span>`;
   const h = Math.round(size * 0.75);
   return `<span class="flag-wrap" style="width:${size}px;height:${h}px">` +
-    `<span class="flag-emoji-bg">${emoji}</span>` +
+    `<span class="flag-emoji-bg">${emoji || ''}</span>` +
     `<img class="flag-img" src="https://flagcdn.com/w${size}/${code}.png" alt="" loading="eager" onerror="this.style.display='none'" />` +
   `</span>`;
+}
+
+function flagImg(teamId, size=32) {
+  const team = TEAMS.find(t => t.id === teamId);
+  return _flagMarkup(FLAG_CODES[teamId], team?.flag || '🏳️', size);
+}
+
+// League nation flag (e.g. Premier League → England flag)
+function leagueFlag(leagueKey, size=20) {
+  const lm = (typeof LEAGUE_META !== 'undefined' && LEAGUE_META[leagueKey]) || null;
+  return _flagMarkup(LEAGUE_FLAG_CODES[leagueKey], lm ? lm.nation : '🌍', size);
+}
+
+// Player nation flag from a flag emoji — resolves via matching TEAM, else falls back
+function natFlag(emoji, size=24) {
+  const team = TEAMS.find(t => t.flag === emoji);
+  if (team) return flagImg(team.id, size);
+  return `<span class="flag-emoji">${emoji || '🏳️'}</span>`;
 }
 
 // ---- Player photo URLs (Wikipedia Commons) ----

@@ -106,6 +106,7 @@ function buildFooter(containerId) {
   const el = document.getElementById(containerId || "footer");
   if (!el) return;
   el.innerHTML = `
+    <img class="footer-logo" src="https://ioqgduqyfdcjvafyytxz.supabase.co/storage/v1/object/public/avatars/tournaments_fifa-world-cup-2026--white_3000x3000.football-logos.cc.png" alt="World Cup 2026" onerror="this.style.display='none'" />
     <div class="footer-links">
       ${NAV_PAGES.map(p => `<a href="${p.href}">${p.icon} ${p.label}</a>`).join("")}
       <a href="https://www.fifa.com" target="_blank" rel="noopener">FIFA Official</a>

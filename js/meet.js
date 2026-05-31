@@ -284,7 +284,7 @@ const MeetSystem = (() => {
     prevPresenceIds.forEach(id => {
       if (id !== st.peerId && !currentIds.has(id)) {
         const meta = peerMeta[id];
-        const name = meta ? `${meta.flag || "⚽"} ${meta.nickname}` : "Someone";
+        const name = meta ? meta.nickname : "Someone";
         showToast(`${name} left the meeting`, "warning", 2500);
         if (st.participantsOpen) renderParticipantsList();
       }
@@ -416,7 +416,7 @@ const MeetSystem = (() => {
     const lbl = wrap.querySelector(".meet-vid-label");
     if (lbl) lbl.textContent = (meta.handRaised ? "✋ " : "") + (meta.nickname || "Peer");
     const flagEl = wrap.querySelector(".meet-vid-flag");
-    if (flagEl) flagEl.textContent = meta.flag || "";
+    if (flagEl) flagEl.innerHTML = (typeof natFlag === "function" && meta.flag) ? natFlag(meta.flag, 18) : (meta.flag || "");
     wrap.classList.toggle("meet-hand-raised", !!meta.handRaised);
   }
 
@@ -724,7 +724,9 @@ const MeetSystem = (() => {
       av.style.background = avatarColor(meta.nickname || "");
       // Flag
       const flag = document.createElement("span");
-      flag.className = "meet-vid-flag"; flag.textContent = meta.flag || "";
+      flag.className = "meet-vid-flag";
+      if (typeof natFlag === "function" && meta.flag) { flag.innerHTML = natFlag(meta.flag, 18); }
+      else { flag.textContent = meta.flag || ""; }
       // Label
       const lbl = document.createElement("div");
       lbl.className = "meet-vid-label"; lbl.textContent = (meta.handRaised ? "✋ " : "") + (meta.nickname || "Peer");
@@ -877,7 +879,7 @@ const MeetSystem = (() => {
     list.innerHTML = users.map(u => `
       <div class="meet-participant-row${u.self ? " self" : ""}">
         <span class="meet-participant-avatar" style="background:${avatarColor(u.nickname)}">${getInitials(u.nickname)}</span>
-        <span class="meet-participant-flag">${u.flag || "⚽"}</span>
+        <span class="meet-participant-flag">${typeof natFlag === "function" ? natFlag(u.flag, 18) : (u.flag || "⚽")}</span>
         <span class="meet-participant-name">${esc(u.nickname)}${u.self ? " (you)" : ""}</span>
         <span class="meet-participant-icons">
           ${u.handRaised ? "✋" : ""}
@@ -1110,7 +1112,7 @@ const MeetSystem = (() => {
         return `<div class="mps-card" title="${p.name} · ${team?.name||""}">
           <div class="mps-photo-wrap">
             <img class="mps-photo" src="${ph.src}" onerror="this.src='${ph.fallback}'" alt="${p.name}" />
-            <span class="mps-flag">${team?.flag||""}</span>
+            <span class="mps-flag" style="font-size:0;">${team && typeof flagImg === "function" ? flagImg(team.id, 20) : ""}</span>
           </div>
           <div class="mps-name">${p.name.split(" ").pop()}</div>
           <div class="mps-ovr">${ovr}</div>

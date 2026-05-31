@@ -529,7 +529,7 @@ function buildGroupsGrid() {
     const teams = GROUPS[letter];
     const key = "group" + letter + "_winner";
     const options = teams.map(t =>
-      `<option value="${t.id}">${t.flag} ${t.name}</option>`
+      `<option value="${t.id}">${t.name}</option>`
     ).join("");
     return `
       <div class="group-pred-card">
@@ -561,7 +561,7 @@ function buildChampionSelect() {
   ruSel.dataset.built    = "1";
 
   const opts = TEAMS.map(t =>
-    `<option value="${t.id}">${t.flag} ${t.name}</option>`
+    `<option value="${t.id}">${t.name}</option>`
   ).join("");
   const emptyChamp = '<option value="">— Select the champion —</option>';
   const emptyRU    = '<option value="">— Select the runner-up —</option>';

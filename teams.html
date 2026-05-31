@@ -448,7 +448,7 @@ function buildSquadPanel(players, squad, awards) {
             '<div class="tv-pc-pos ' + pos + '">' + pos + "</div>" +
             '<div class="tv-pc-name">' + p.name + "</div>" +
             '<img style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,.15);margin:4px 0;" src="' + (typeof getPlayerPhoto === 'function' ? getPlayerPhoto(p.name).src : '') + '" onerror="this.src=\'https://ui-avatars.com/api/?name=' + encodeURIComponent(p.name) + '&background=1e1e30&color=e5e5e5&size=80&bold=true&format=svg\'" alt="" />' +
-            '<div class="tv-pc-club">' + (lm.nation || "") + " " + p.club + "</div>" +
+            '<div class="tv-pc-club"><span style="font-size:0;">' + (typeof leagueFlag === 'function' ? leagueFlag(p.league, 16) : "") + '</span> ' + p.club + "</div>" +
             statsRow + "</div>";
         }).join("") +
         "</div></div>";
@@ -467,7 +467,7 @@ function buildSquadPanel(players, squad, awards) {
             '<div class="tv-pc-pos ' + pos + '">' + pos + "</div>" +
             '<div class="tv-pc-name">' + p.name + "</div>" +
             '<img style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,.15);margin:4px 0;" src="' + (typeof getPlayerPhoto === 'function' ? getPlayerPhoto(p.name).src : '') + '" onerror="this.src=\'https://ui-avatars.com/api/?name=' + encodeURIComponent(p.name) + '&background=1e1e30&color=e5e5e5&size=80&bold=true&format=svg\'" alt="" />' +
-            '<div class="tv-pc-club">' + (lm.nation || "") + " " + p.club + "</div>" +
+            '<div class="tv-pc-club"><span style="font-size:0;">' + (typeof leagueFlag === 'function' ? leagueFlag(p.league, 16) : "") + '</span> ' + p.club + "</div>" +
             '<div style="margin-top:6px;font-size:.72rem;color:var(--text-dim)">⭐ ' + p.rating +
             (p.goals ? " · ⚽ " + p.goals + "G " + p.assists + "A" : p.cs ? " · 🧤 " + p.cs + " CS" : "") + "</div>" +
             "</div>";
