@@ -385,24 +385,20 @@ function buildLineupPanel(probableXI, squad) {
     {pos:"FW",x:20,y:28},{pos:"FW",x:50,y:22},{pos:"FW",x:80,y:28}
   ];
   var pitchHTML = "";
-  if (probableXI && probableXI.players && probableXI.players.length >= 9) {
-    var byPos = {GK:[],DF:[],MF:[],FW:[]};
-    probableXI.players.forEach(function(p) { if (byPos[p.pos]) byPos[p.pos].push(p); });
-    var placed = [];
-    ["GK","DF","MF","FW"].forEach(function(pos) {
-      slots.filter(function(s) { return s.pos === pos; }).forEach(function(sl, i) {
-        var pl = byPos[pos][i];
-        if (pl) placed.push({name:pl.name,pos:pl.pos,rating:pl.rating,club:pl.club,x:sl.x,y:sl.y});
-      });
-    });
-    pitchHTML = placed.map(function(p, i) {
-      var cls = "pc pc-" + p.pos.toLowerCase();
+  // probableXI.players is already the top 11 in 4-3-3 slot order (GK, 4 DF,
+  // 3 MF, 3 FW) with short positions backfilled, so just zip with the slots.
+  var xi = (probableXI && probableXI.players) ? probableXI.players.slice(0, 11) : [];
+  if (xi.length >= 1) {
+    pitchHTML = xi.map(function(p, i) {
+      var sl = slots[i];
+      if (!sl || !p) return "";
+      var cls = "pc pc-" + (p.pos || "").toLowerCase();
       var photo = (typeof getPlayerPhoto === 'function') ? getPlayerPhoto(p.name) : { src: '', fallback: '' };
-      return '<div class="' + cls + '" style="left:' + p.x + '%;top:' + p.y + '%;animation-delay:' + (i*60) + 'ms">' +
+      return '<div class="' + cls + '" style="left:' + sl.x + '%;top:' + sl.y + '%;animation-delay:' + (i*60) + 'ms">' +
         '<div class="pc-card">' +
         '<img class="pc-photo" src="' + photo.src + '" onerror="this.src=\'' + photo.fallback + '\'" alt="' + p.name + '" />' +
         '<div class="pc-rating">' + p.rating + "</div>" +
-        '<div class="pc-pos">' + p.pos + "</div>" +
+        '<div class="pc-pos">' + (p.pos || "") + "</div>" +
         '<div class="pc-name">' + p.name + "</div>" +
         '<div class="pc-club">' + p.club + "</div>" +
         "</div></div>";
