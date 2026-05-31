@@ -631,7 +631,7 @@ function initLineupBuilder() {
     return sq && sq.players && sq.players.length > 0;
   });
   sel.innerHTML = opts.map(function(t) {
-    return '<option value="' + t.id + '">' + t.flag + ' ' + t.name + '</option>';
+    return '<option value="' + t.id + '">' + t.name + '</option>';
   }).join("");
   lbState.team = opts[0] ? opts[0].id : null;
 

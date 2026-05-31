@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Teams — World Cup 2026</title>
   <meta name="description" content="All 48 teams at FIFA World Cup 2026 — real flags, squads, FIFA rankings, confederation filter." />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚽</text></svg>" />
+  <link rel="icon" type="image/png" href="https://ioqgduqyfdcjvafyytxz.supabase.co/storage/v1/object/public/avatars/tournaments_fifa-world-cup-2026--white_3000x3000.football-logos.cc.png" />
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/animations.css" />
 <style>
@@ -385,24 +385,20 @@ function buildLineupPanel(probableXI, squad) {
     {pos:"FW",x:20,y:28},{pos:"FW",x:50,y:22},{pos:"FW",x:80,y:28}
   ];
   var pitchHTML = "";
-  if (probableXI && probableXI.players && probableXI.players.length >= 9) {
-    var byPos = {GK:[],DF:[],MF:[],FW:[]};
-    probableXI.players.forEach(function(p) { if (byPos[p.pos]) byPos[p.pos].push(p); });
-    var placed = [];
-    ["GK","DF","MF","FW"].forEach(function(pos) {
-      slots.filter(function(s) { return s.pos === pos; }).forEach(function(sl, i) {
-        var pl = byPos[pos][i];
-        if (pl) placed.push({name:pl.name,pos:pl.pos,rating:pl.rating,club:pl.club,x:sl.x,y:sl.y});
-      });
-    });
-    pitchHTML = placed.map(function(p, i) {
-      var cls = "pc pc-" + p.pos.toLowerCase();
+  // probableXI.players is already the top 11 in 4-3-3 slot order (GK, 4 DF,
+  // 3 MF, 3 FW) with short positions backfilled, so just zip with the slots.
+  var xi = (probableXI && probableXI.players) ? probableXI.players.slice(0, 11) : [];
+  if (xi.length >= 1) {
+    pitchHTML = xi.map(function(p, i) {
+      var sl = slots[i];
+      if (!sl || !p) return "";
+      var cls = "pc pc-" + (p.pos || "").toLowerCase();
       var photo = (typeof getPlayerPhoto === 'function') ? getPlayerPhoto(p.name) : { src: '', fallback: '' };
-      return '<div class="' + cls + '" style="left:' + p.x + '%;top:' + p.y + '%;animation-delay:' + (i*60) + 'ms">' +
+      return '<div class="' + cls + '" style="left:' + sl.x + '%;top:' + sl.y + '%;animation-delay:' + (i*60) + 'ms">' +
         '<div class="pc-card">' +
         '<img class="pc-photo" src="' + photo.src + '" onerror="this.src=\'' + photo.fallback + '\'" alt="' + p.name + '" />' +
         '<div class="pc-rating">' + p.rating + "</div>" +
-        '<div class="pc-pos">' + p.pos + "</div>" +
+        '<div class="pc-pos">' + (p.pos || "") + "</div>" +
         '<div class="pc-name">' + p.name + "</div>" +
         '<div class="pc-club">' + p.club + "</div>" +
         "</div></div>";
@@ -448,7 +444,7 @@ function buildSquadPanel(players, squad, awards) {
             '<div class="tv-pc-pos ' + pos + '">' + pos + "</div>" +
             '<div class="tv-pc-name">' + p.name + "</div>" +
             '<img style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,.15);margin:4px 0;" src="' + (typeof getPlayerPhoto === 'function' ? getPlayerPhoto(p.name).src : '') + '" onerror="this.src=\'https://ui-avatars.com/api/?name=' + encodeURIComponent(p.name) + '&background=1e1e30&color=e5e5e5&size=80&bold=true&format=svg\'" alt="" />' +
-            '<div class="tv-pc-club">' + (lm.nation || "") + " " + p.club + "</div>" +
+            '<div class="tv-pc-club"><span style="font-size:0;">' + (typeof leagueFlag === 'function' ? leagueFlag(p.league, 16) : "") + '</span> ' + p.club + "</div>" +
             statsRow + "</div>";
         }).join("") +
         "</div></div>";
@@ -467,7 +463,7 @@ function buildSquadPanel(players, squad, awards) {
             '<div class="tv-pc-pos ' + pos + '">' + pos + "</div>" +
             '<div class="tv-pc-name">' + p.name + "</div>" +
             '<img style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,.15);margin:4px 0;" src="' + (typeof getPlayerPhoto === 'function' ? getPlayerPhoto(p.name).src : '') + '" onerror="this.src=\'https://ui-avatars.com/api/?name=' + encodeURIComponent(p.name) + '&background=1e1e30&color=e5e5e5&size=80&bold=true&format=svg\'" alt="" />' +
-            '<div class="tv-pc-club">' + (lm.nation || "") + " " + p.club + "</div>" +
+            '<div class="tv-pc-club"><span style="font-size:0;">' + (typeof leagueFlag === 'function' ? leagueFlag(p.league, 16) : "") + '</span> ' + p.club + "</div>" +
             '<div style="margin-top:6px;font-size:.72rem;color:var(--text-dim)">⭐ ' + p.rating +
             (p.goals ? " · ⚽ " + p.goals + "G " + p.assists + "A" : p.cs ? " · 🧤 " + p.cs + " CS" : "") + "</div>" +
             "</div>";

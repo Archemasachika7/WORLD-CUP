@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Bracket Predictor — World Cup 2026</title>
   <meta name="description" content="Pick your favourite team and predict World Cup 2026 group winners and champion. Sign in to save your predictions." />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏆</text></svg>" />
+  <link rel="icon" type="image/png" href="https://ioqgduqyfdcjvafyytxz.supabase.co/storage/v1/object/public/avatars/tournaments_fifa-world-cup-2026--white_3000x3000.football-logos.cc.png" />
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/animations.css" />
   <style>
@@ -529,7 +529,7 @@ function buildGroupsGrid() {
     const teams = GROUPS[letter];
     const key = "group" + letter + "_winner";
     const options = teams.map(t =>
-      `<option value="${t.id}">${t.flag} ${t.name}</option>`
+      `<option value="${t.id}">${t.name}</option>`
     ).join("");
     return `
       <div class="group-pred-card">
@@ -561,7 +561,7 @@ function buildChampionSelect() {
   ruSel.dataset.built    = "1";
 
   const opts = TEAMS.map(t =>
-    `<option value="${t.id}">${t.flag} ${t.name}</option>`
+    `<option value="${t.id}">${t.name}</option>`
   ).join("");
   const emptyChamp = '<option value="">— Select the champion —</option>';
   const emptyRU    = '<option value="">— Select the runner-up —</option>';

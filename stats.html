@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Player Stats — World Cup 2026</title>
   <meta name="description" content="Real 2025-26 player stats for FIFA World Cup 2026 — EA FC-style cards and table view." />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚽</text></svg>" />
+  <link rel="icon" type="image/png" href="https://ioqgduqyfdcjvafyytxz.supabase.co/storage/v1/object/public/avatars/tournaments_fifa-world-cup-2026--white_3000x3000.football-logos.cc.png" />
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/animations.css" />
 </head>
@@ -100,7 +100,7 @@ function renderStats() {
 
   let html = `<div class="awards-banner"><h3>🏆 2025-26 Season Honours</h3><div class="awards-scroll">
     ${AWARDS.map(a => `<div class="award-chip">
-      <span class="award-nation">${a.nation}</span>
+      <span class="award-nation" style="font-size:0;">${natFlag(a.nation, 28)}</span>
       <div><strong>${a.winner}</strong><br><small>${a.award}</small></div>
     </div>`).join("")}
   </div></div>`;
@@ -119,7 +119,7 @@ function renderStats() {
     Object.entries(byLeague).forEach(([league, players]) => {
       const lm = LEAGUE_META[league] || {};
       html += `<div class="league-section">
-        <h3 class="league-title">${lm.nation} ${lm.name} <span class="weight-tag">Weight: ${lm.weight}</span></h3>
+        <h3 class="league-title"><span style="font-size:0;">${leagueFlag(league, 24)}</span> ${lm.name} <span class="weight-tag">Weight: ${lm.weight}</span></h3>
         ${playerTable(players)}
       </div>`;
     });
@@ -141,23 +141,22 @@ function renderEaCard(p) {
   const eff = (p.rating * lm.weight).toFixed(1);
   const wct = p.teamId ? TEAMS.find(t => t.id === p.teamId) : null;
   const tier = ovr >= 90 ? "gold" : ovr >= 85 ? "silver" : "bronze";
-  const posIcon = p.pos === "GK" ? "🧤" : p.pos === "DF" ? "🛡️" : p.pos === "MF" ? "⚙️" : "⚽";
   const stat1lbl = p.pos === "GK" ? "CS"  : p.pos === "DF" ? "GA"  : "GOL";
   const stat1val = p.pos === "GK" ? p.cs  : p.pos === "DF" ? p.ga  : p.goals;
   const stat2lbl = p.pos === "GK" ? "RTG" : "AST";
   const stat2val = p.pos === "GK" ? p.rating : p.assists;
+  const ph = getPlayerPhoto(p.name);
   return `
     <div class="ea-card ea-${tier} card-enter" title="${p.name} — ${p.club}">
       <div class="ea-top">
         <div class="ea-ovr">${ovr}</div>
         <div class="ea-pos">${p.pos}</div>
-        <div class="ea-nation">${p.nation}</div>
-        ${wct ? `<div class="ea-wcteam" style="font-size:0;">${flagImg(wct.id, 20)}</div>` : ''}
+        <div class="ea-nation" style="font-size:0;">${wct ? flagImg(wct.id, 28) : natFlag(p.nation, 28)}</div>
       </div>
-      <div class="ea-silhouette">${posIcon}</div>
+      <div class="ea-silhouette"><img class="ea-photo" src="${ph.src}" onerror="this.src='${ph.fallback}'" alt="${p.name}" /></div>
       <div class="ea-name">${p.name.toUpperCase().split(" ").pop()}</div>
       <div class="ea-fullname">${p.name}</div>
-      <div class="ea-club">${lm.nation} ${p.club}</div>
+      <div class="ea-club"><span style="font-size:0;">${leagueFlag(p.league, 18)}</span> ${p.club}</div>
       <div class="ea-stats">
         <div class="ea-stat"><span class="ea-sv">${stat1val||"—"}</span><span class="ea-sl">${stat1lbl}</span></div>
         <div class="ea-stat"><span class="ea-sv">${stat2val||"—"}</span><span class="ea-sl">${stat2lbl}</span></div>
@@ -185,8 +184,8 @@ function playerTable(players) {
       const wct = p.teamId ? TEAMS.find(t => t.id === p.teamId) : null;
       return `<tr class="${p.award?'award-row':''}">
         <td><strong>${p.name}</strong>${p.award?' 🏆':''}</td>
-        <td><span class="league-pill ${lm.tier===1?'tier1-pill':'tier2-pill'}">${lm.nation}</span> ${p.club}</td>
-        <td>${p.nation}</td>
+        <td><span class="league-pill ${lm.tier===1?'tier1-pill':'tier2-pill'}" style="font-size:0;">${leagueFlag(p.league, 18)}</span> ${p.club}</td>
+        <td>${natFlag(p.nation, 24)}</td>
         <td>${wct ? flagImg(wct.id, 24) : '—'}</td>
         <td>${p.goals||'—'}</td>
         <td>${p.assists||'—'}</td>

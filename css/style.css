@@ -110,13 +110,42 @@ button { cursor: pointer; }
 .nav-logo {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   font-family: var(--font-hero);
   font-size: 1.7rem;
   font-weight: 400;
   letter-spacing: 3px;
   text-transform: uppercase;
   line-height: 1;
+  text-decoration: none;
+  transition: transform 0.2s ease;
+}
+.nav-logo:hover { transform: scale(1.04); }
+
+.nav-logo-img {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.45));
+  animation: navLogoFloat 4s ease-in-out infinite;
+}
+@keyframes navLogoFloat {
+  0%, 100% { transform: translateY(0) rotate(-1deg); }
+  50%      { transform: translateY(-3px) rotate(1deg); }
+}
+@media (max-width: 768px) {
+  .nav-logo-img { height: 32px; }
+  .nav-logo { font-size: 1.4rem; gap: 6px; }
+}
+
+.nav-logo .logo-fifa {
+  font-family: var(--font-display);
+  font-size: 0.65rem;
+  letter-spacing: 2px;
+  color: #777;
+  align-self: flex-end;
+  margin-bottom: 3px;
+  padding-left: 2px;
 }
 
 .nav-logo .trophy { font-size: 1.2rem; }
@@ -224,6 +253,27 @@ button { cursor: pointer; }
   margin: 0 auto;
   padding: 120px 40px 60px;
   width: 100%;
+}
+
+.hero-logo {
+  display: block;
+  width: 120px;
+  max-width: 32vw;
+  height: auto;
+  margin-bottom: 22px;
+  filter: drop-shadow(0 6px 22px rgba(0,0,0,0.55));
+  animation: heroLogoIn 0.9s cubic-bezier(.2,.8,.2,1) both, heroLogoFloat 5s ease-in-out 0.9s infinite;
+}
+@keyframes heroLogoIn {
+  0%   { opacity: 0; transform: translateY(-18px) scale(0.85); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes heroLogoFloat {
+  0%, 100% { transform: translateY(0) rotate(-1.5deg); }
+  50%      { transform: translateY(-7px) rotate(1.5deg); }
+}
+@media (max-width: 768px) {
+  .hero-logo { width: 84px; margin-bottom: 16px; }
 }
 
 .hero-eyebrow {
@@ -1345,6 +1395,16 @@ button { cursor: pointer; }
   color: var(--text-dim);
   font-size: 0.82rem;
 }
+.footer-logo {
+  display: block;
+  width: 70px;
+  height: auto;
+  margin: 0 auto 18px;
+  opacity: 0.9;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.45));
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+.footer-logo:hover { transform: scale(1.08); opacity: 1; }
 
 .footer-links {
   display: flex;
@@ -3731,6 +3791,35 @@ body.meet-active .meet-peer-video { cursor: pointer; }
 }
 
 /* Global flag rendering: emoji shows first, CDN image overlays when loaded */
+/* Flag wrapper: image overlays the emoji fallback so OS letter-codes
+   (e.g. "MX", "ZA", "KR") never show beside the flag */
+.flag-wrap {
+  position: relative;
+  display: inline-block;
+  vertical-align: middle;
+  line-height: 0;
+  overflow: hidden;
+  border-radius: 3px;
+}
+.flag-wrap .flag-emoji-bg {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  z-index: 0;
+  overflow: hidden;
+  font-size: 0.7em;
+}
+.flag-wrap .flag-img {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 .flag-emoji-bg {
   font-size: inherit;
   line-height: 1;
@@ -4252,6 +4341,37 @@ body.light-mode .theme-toggle:hover { background: rgba(0,0,0,0.12); }
 .ea-gold .ea-photo  { border-color: #d4af37; }
 .ea-silver .ea-photo { border-color: #c8c8c8; }
 .ea-bronze .ea-photo { border-color: #c87941; }
+
+/* ============================================================
+   Player Photo Background (behind a section)
+   ============================================================ */
+.has-player-bg { position: relative; overflow: hidden; }
+.has-player-bg > .section-header,
+.has-player-bg > .quick-nav-grid { position: relative; z-index: 2; }
+
+.player-bg-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  grid-auto-rows: 1fr;
+  gap: 0;
+  pointer-events: none;
+  opacity: 0.16;
+  filter: grayscale(0.2) contrast(1.05);
+  -webkit-mask-image: radial-gradient(ellipse at center, #000 30%, transparent 85%);
+          mask-image: radial-gradient(ellipse at center, #000 30%, transparent 85%);
+}
+.player-bg-face {
+  background-size: cover;
+  background-position: center top;
+  min-height: 120px;
+  filter: blur(1px);
+}
+@media (max-width: 768px) {
+  .player-bg-layer { opacity: 0.12; }
+}
 
 
 /* ============================================================

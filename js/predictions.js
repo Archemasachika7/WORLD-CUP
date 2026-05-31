@@ -145,12 +145,12 @@ const Predictions = (() => {
     if (!h || !a) return "";
     const diff = hG - aG;
     if (min === 0) return "Pre-match — move the sliders to see live probability shift";
-    if (hWin > 0.75) return `${h.flag} ${h.name} in complete control`;
-    if (aWin > 0.75) return `${a.flag} ${a.name} heading for the win`;
+    if (hWin > 0.75) return `${h.name} in complete control`;
+    if (aWin > 0.75) return `${a.name} heading for the win`;
     if (Math.abs(diff) === 0 && min > 75) return "Late-game stalemate — penalty shootout looms";
     if (Math.abs(diff) === 1 && min > 70) return "Nervy finish — one goal can flip everything";
-    if (diff > 0) return `${h.flag} ${h.name} are ahead — holding on`;
-    if (diff < 0) return `${a.flag} ${a.name} are ahead — ${h.flag} ${h.name} chasing`;
+    if (diff > 0) return `${h.name} are ahead — holding on`;
+    if (diff < 0) return `${a.name} are ahead — ${h.name} chasing`;
     return "Tight encounter — any team can win";
   }
 
@@ -159,21 +159,46 @@ const Predictions = (() => {
   function buildProbableXI(teamId) {
     const squad = SQUADS[teamId] || { players: [] };
     const tracked = new Map(PLAYERS.filter(p => p.teamId === teamId).map(p => [p.name.toLowerCase(), p]));
-    const announced = squad.status === "ANNOUNCED";
-    const candidates = (squad.players || []).map(sp => {
+
+    // Candidate pool: the official/announced squad if available, else fall back
+    // to tracked players so every team can still show a projected XI.
+    let source = (squad.players && squad.players.length) ? squad.players : null;
+    if (!source) {
+      source = PLAYERS.filter(p => p.teamId === teamId)
+        .map(p => ({ name: p.name, pos: p.pos, club: p.club, league: p.league }));
+    }
+    const candidates = source.map(sp => {
       const tp = tracked.get(sp.name.toLowerCase());
       const lm = LEAGUE_META[sp.league] || LEAGUE_META["Other"];
       const rating = tp?.rating || 6.2;
       const score = rating * (lm.weight || 0.5) + ((tp?.goals||0)*0.03 + (tp?.assists||0)*0.02);
       return { ...sp, rating, selectScore: score, goals: tp?.goals||0, assists: tp?.assists||0 };
     });
-    const pick = (pos, n) => candidates.filter(c=>c && c.pos===pos).sort((a,b)=>b.selectScore-a.selectScore).slice(0,n);
-    const gk = pick("GK",1);
-    const df = pick("DF",4);
-    const mf = pick("MF",3);
-    const fw = pick("FW",3);
-    const xi = [...gk,...df,...mf,...fw];
-    return { formation:"4-3-3", players: xi.sort((a,b)=>b.selectScore-a.selectScore), complete: xi.length===11 };
+
+    // 4-3-3 slot order (matches the pitch coordinates on the team viewer)
+    const slotOrder = ["GK","DF","DF","DF","DF","MF","MF","MF","FW","FW","FW"];
+    const used = new Set();
+    const bestOf = (predicate) => candidates
+      .filter(c => c && !used.has(c) && predicate(c))
+      .sort((a, b) => b.selectScore - a.selectScore)[0] || null;
+
+    // Fill each slot with the best unused player of that position; if a
+    // position runs short, backfill with the best remaining player of any
+    // position so the pitch always shows a full top-11.
+    const slots = slotOrder.map(pos => {
+      let pl = bestOf(c => c.pos === pos);
+      if (!pl) pl = bestOf(() => true);
+      if (pl) used.add(pl);
+      return pl;
+    });
+
+    const xi = slots.filter(Boolean);
+    return {
+      formation: "4-3-3",
+      players: xi,                 // top 11, in slot order
+      slots: slots,                // slot-aligned (may contain null if <11 avail)
+      complete: xi.length === 11
+    };
   }
 function getTournamentFavourites() {
     return TEAMS

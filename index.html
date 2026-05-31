@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>World Cup 2026 — Live Hub</title>
   <meta name="description" content="FIFA World Cup 2026 — live stream + watch party, all 48 teams, real 2025-26 stats, in-play predictor." />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚽</text></svg>" />
+  <link rel="icon" type="image/png" href="https://ioqgduqyfdcjvafyytxz.supabase.co/storage/v1/object/public/avatars/tournaments_fifa-world-cup-2026--white_3000x3000.football-logos.cc.png" />
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/animations.css" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -31,6 +31,7 @@
   <div class="hero-particles" id="hero-particles"></div>
 
   <div class="hero-content">
+    <img class="hero-logo" src="https://ioqgduqyfdcjvafyytxz.supabase.co/storage/v1/object/public/avatars/tournaments_fifa-world-cup-2026--white_3000x3000.football-logos.cc.png" alt="FIFA World Cup 2026" onerror="this.style.display='none'" />
     <div class="hero-eyebrow">
       <span class="hero-live-dot"></span>
       FIFA World Cup 2026 — Fan Hub
@@ -109,7 +110,8 @@
 <!-- ======================================================
      Quick Navigation
      ====================================================== -->
-<section class="section section-fade" id="quick-nav-section">
+<section class="section section-fade has-player-bg" id="quick-nav-section">
+  <div class="player-bg-layer" id="quicknav-player-bg" aria-hidden="true"></div>
   <div class="section-header">
     <span class="section-tag">Explore</span>
     <h2 class="section-title">Quick Access</h2>
@@ -233,9 +235,30 @@ document.addEventListener("DOMContentLoaded", () => {
   initHeroCountdown();
   initHeroParticles();
   initFavsPreview();
+  initPlayerBackground();
   API.startNewsAutoRefresh(renderNews);
   initScrollAnimations();
 });
+
+// ---- Player photo background collage (behind Quick Access) ----
+function initPlayerBackground() {
+  var layer = document.getElementById("quicknav-player-bg");
+  if (!layer || typeof PLAYER_PHOTOS === 'undefined') return;
+  // Portugal-first, then world stars — only names that have real photos
+  var names = [
+    "Cristiano Ronaldo", "Bruno Fernandes", "Rafael Leão", "Bernardo Silva",
+    "Rúben Dias", "João Félix", "Kylian Mbappé", "Erling Haaland",
+    "Jude Bellingham", "Vinicius Junior", "Lamine Yamal", "Lionel Messi",
+    "Harry Kane", "Mohamed Salah", "Jamal Musiala", "Raphinha",
+    "Julián Álvarez", "Pedri", "Robert Lewandowski", "Heung-min Son"
+  ];
+  var html = names.map(function(n) {
+    var url = PLAYER_PHOTOS[n];
+    if (!url) return '';
+    return '<div class="player-bg-face" style="background-image:url(\'' + url + '\')" title="' + n + '"></div>';
+  }).filter(Boolean).join('');
+  layer.innerHTML = html;
+}
 
 // ---- Flip countdown ----
 function initHeroCountdown() {

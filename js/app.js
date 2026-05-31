@@ -256,7 +256,7 @@ function displayMatches(group) {
         <div class="match-date">${ds} ${m.time} &bull; ${m.venue}</div>
         <div class="match-teams">
           <div class="match-team">
-            <span class="mflag-lg">${home.flag}</span>
+            <span class="mflag-lg">${flagImg(home.id, 48)}</span>
             <span class="mname-sm">${home.name}</span>
           </div>
           <div class="match-center">
@@ -265,7 +265,7 @@ function displayMatches(group) {
               : `<span class="vs-badge">VS</span>`}
           </div>
           <div class="match-team">
-            <span class="mflag-lg">${away.flag}</span>
+            <span class="mflag-lg">${flagImg(away.id, 48)}</span>
             <span class="mname-sm">${away.name}</span>
           </div>
         </div>
@@ -275,7 +275,7 @@ function displayMatches(group) {
           <div class="prob-away" style="width:${prob.away}%">${prob.away}%</div>
         </div>
         <div class="prob-labels">
-          <span>${home.flag} Win</span><span>Draw</span><span>Win ${away.flag}</span>
+          <span>${flagImg(home.id, 20)} Win</span><span>Draw</span><span>Win ${flagImg(away.id, 20)}</span>
         </div>
       </div>`;
   }).join("");
@@ -298,21 +298,21 @@ function openMatchModal(match) {
       <h2>${match.stage}</h2><p>${dt} &bull; ${match.time}</p><p>📍 ${match.venue}</p>
     </div>
     <div class="big-matchup">
-      <div class="bm-team"><span class="bm-flag">${home.flag}</span><br><strong>${home.name}</strong><br><small>FIFA #${home.ranking} &bull; Elo ${home.elo}</small></div>
+      <div class="bm-team"><span class="bm-flag">${flagImg(home.id, 80)}</span><br><strong>${home.name}</strong><br><small>FIFA #${home.ranking} &bull; Elo ${home.elo}</small></div>
       <div class="bm-vs">VS</div>
-      <div class="bm-team"><span class="bm-flag">${away.flag}</span><br><strong>${away.name}</strong><br><small>FIFA #${away.ranking} &bull; Elo ${away.elo}</small></div>
+      <div class="bm-team"><span class="bm-flag">${flagImg(away.id, 80)}</span><br><strong>${away.name}</strong><br><small>FIFA #${away.ranking} &bull; Elo ${away.elo}</small></div>
     </div>
     <h3 class="modal-section-title">Pre-Match Win Probability</h3>
     <div class="big-prob-bar">
-      <div class="bpb-home" style="width:${prob.home}%">${home.flag} ${prob.home}%</div>
+      <div class="bpb-home" style="width:${prob.home}%">${flagImg(home.id, 20)} ${prob.home}%</div>
       <div class="bpb-draw" style="width:${prob.draw}%">Draw<br>${prob.draw}%</div>
-      <div class="bpb-away" style="width:${prob.away}%">${away.flag} ${prob.away}%</div>
+      <div class="bpb-away" style="width:${prob.away}%">${flagImg(away.id, 20)} ${prob.away}%</div>
     </div>
     <div class="modal-scores mt-16">
-      <div class="score-box"><div class="score-val">${prob.homeSqScore}</div><div class="score-lbl">${home.flag} Squad</div></div>
-      <div class="score-box"><div class="score-val">${prob.homeTop5}</div><div class="score-lbl">${home.flag} Top-5</div></div>
-      <div class="score-box"><div class="score-val">${prob.awaySqScore}</div><div class="score-lbl">${away.flag} Squad</div></div>
-      <div class="score-box"><div class="score-val">${prob.awayTop5}</div><div class="score-lbl">${away.flag} Top-5</div></div>
+      <div class="score-box"><div class="score-val">${prob.homeSqScore}</div><div class="score-lbl">${flagImg(home.id, 20)} Squad</div></div>
+      <div class="score-box"><div class="score-val">${prob.homeTop5}</div><div class="score-lbl">${flagImg(home.id, 20)} Top-5</div></div>
+      <div class="score-box"><div class="score-val">${prob.awaySqScore}</div><div class="score-lbl">${flagImg(away.id, 20)} Squad</div></div>
+      <div class="score-box"><div class="score-val">${prob.awayTop5}</div><div class="score-lbl">${flagImg(away.id, 20)} Top-5</div></div>
     </div>
     <p class="prediction-verdict mt-10">
       🔮 <strong>${prob.home > prob.away + 10 ? home.name + " to win" : prob.away > prob.home + 10 ? away.name + " to win" : "Very close — could go either way"}</strong>
