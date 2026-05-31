@@ -3727,3 +3727,155 @@ body.meet-active .meet-peer-video { cursor: pointer; }
   .h2h-selectors select { width: 100%; }
   .favs-podium { grid-template-columns: 1fr; }
 }
+
+/* ── Match Schedule redesign ─────────────────────────────── */
+
+/* Override old flat grid — now nested inside .match-day-grid */
+#matches-list { display: block !important; }
+
+/* Date section header */
+.match-day-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 4px 8px;
+  margin-top: 24px;
+  border-bottom: 2px solid rgba(229,9,20,0.3);
+}
+.match-day-header:first-child { margin-top: 0; }
+.match-day-date { font-size: 0.95rem; font-weight: 800; color: var(--text); }
+.match-day-count { font-size: 0.75rem; color: var(--text-dim); font-weight: 600; }
+
+/* Day grid */
+.match-day-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+  gap: 14px;
+  padding: 14px 0 4px;
+}
+
+/* Match card top bar */
+.match-card-top {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 6px;
+}
+.match-stage-pill {
+  font-size: 0.65rem; font-weight: 800;
+  text-transform: uppercase; letter-spacing: 0.8px;
+  color: var(--accent);
+  background: rgba(229,9,20,0.1);
+  border-radius: 4px; padding: 3px 8px;
+}
+.match-time-badge {
+  font-size: 0.75rem; font-weight: 700;
+  color: var(--text-dim);
+  background: rgba(255,255,255,0.05);
+  border-radius: 4px; padding: 3px 8px;
+}
+.match-card-venue {
+  font-size: 0.71rem; color: var(--text-dim);
+  margin-bottom: 12px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* New teams row */
+.match-card-teams {
+  display: flex; align-items: center; gap: 6px;
+  margin-bottom: 12px;
+}
+.mct-team {
+  display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0;
+}
+.mct-team.home-side { justify-content: flex-start; }
+.mct-team.away-side { justify-content: flex-end; flex-direction: row-reverse; }
+.mct-flag img, .mct-flag .flag-img { width: 44px; height: auto; border-radius: 4px; display: block; }
+.mct-flag .flag-emoji { font-size: 2rem; line-height: 1; }
+.mct-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.mct-team.home-side .mct-info { align-items: flex-start; }
+.mct-team.away-side .mct-info { align-items: flex-end; }
+.mct-name { font-size: 0.82rem; font-weight: 800; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100px; }
+.mct-rank { font-size: 0.65rem; color: var(--text-dim); font-weight: 600; }
+.mct-center { flex-shrink: 0; text-align: center; min-width: 60px; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.match-time-center { font-size: 0.6rem; color: var(--text-dim); }
+
+/* Probability strip */
+.prob-strip {
+  display: flex; height: 22px; border-radius: 5px; overflow: hidden;
+  margin-bottom: 5px;
+}
+.prob-seg {
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.6rem; font-weight: 700; overflow: hidden; transition: width 0.4s ease;
+}
+.prob-h { background: var(--accent); color: rgba(255,255,255,0.9); justify-content: flex-start; padding-left: 5px; }
+.prob-d { background: rgba(255,255,255,0.22); color: rgba(255,255,255,0.7); }
+.prob-a { background: #2980b9; color: rgba(255,255,255,0.9); justify-content: flex-end; padding-right: 5px; }
+.prob-legend {
+  display: flex; justify-content: space-between;
+  font-size: 0.63rem; color: var(--text-dim);
+}
+
+/* TBD card */
+.match-card-tbd { opacity: 0.72; cursor: default !important; }
+.match-card-tbd:hover { transform: none !important; box-shadow: none !important; border-color: var(--border) !important; }
+.match-tbd-note {
+  font-size: 0.65rem; color: var(--text-dim);
+  text-align: center; padding: 8px 0 2px;
+  font-style: italic;
+}
+
+/* Empty state */
+.matches-empty {
+  text-align: center; color: var(--text-dim);
+  padding: 60px 20px; font-size: 0.9rem;
+  grid-column: 1 / -1;
+}
+
+/* ============================================================
+   Dark / Light Mode
+   ============================================================ */
+body.light-mode {
+  --bg-dark:  #f4f4f8;
+  --bg-card:  #ffffff;
+  --bg-hover: #e8e8f0;
+  --text:     #0d0d14;
+  --text-dim: #5a5a72;
+  --border:   #d0d0e0;
+  --shadow:   0 8px 32px rgba(0,0,0,0.12);
+}
+
+body.light-mode #main-nav {
+  background: linear-gradient(to bottom, rgba(244,244,248,0.97) 0%, transparent 100%);
+}
+body.light-mode #main-nav.scrolled {
+  background: rgba(244,244,248,0.98);
+}
+body.light-mode .nav-link { color: #3a3a52; }
+body.light-mode .nav-link:hover { color: #0d0d14; }
+
+body.light-mode .meet-right-col,
+body.light-mode .meet-participants-panel,
+body.light-mode .meet-settings-dialog { background: #ffffff; }
+
+body.light-mode .meet-msg-other { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.08); }
+body.light-mode .meet-sys-msg   { background: rgba(0,0,0,0.04); }
+
+body.light-mode .match-card,
+body.light-mode .team-card,
+body.light-mode .stat-card { background: #ffffff; }
+
+/* Theme toggle button in nav */
+.theme-toggle {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.16);
+  color: var(--text);
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s, transform 0.2s;
+  flex-shrink: 0;
+  padding: 0;
+}
+.theme-toggle:hover { background: rgba(255,255,255,0.14); transform: scale(1.1); }
+body.light-mode .theme-toggle { background: rgba(0,0,0,0.06); border-color: rgba(0,0,0,0.14); }
+body.light-mode .theme-toggle:hover { background: rgba(0,0,0,0.12); }
