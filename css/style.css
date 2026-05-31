@@ -3143,6 +3143,295 @@ button { cursor: pointer; }
 .emoji-reaction-btn:hover  { transform: scale(1.35); background: rgba(255,255,255,0.10); }
 .emoji-reaction-btn:active { transform: scale(0.88); }
 
+/* ── Meeting Timer ──────────────────────────────────────── */
+.meet-timer-wrap {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 12px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px;
+  flex-shrink: 0;
+}
+
+.meet-live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #e74c3c;
+  flex-shrink: 0;
+  animation: livePulse 1.8s ease-in-out infinite;
+}
+
+@keyframes livePulse {
+  0%,100% { opacity: 1; transform: scale(1); }
+  50%     { opacity: 0.45; transform: scale(0.7); }
+}
+
+.meet-timer {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+  min-width: 36px;
+  letter-spacing: 0.5px;
+}
+
+/* ── Fixed bottom controls when in-call ─────────────────── */
+body.meet-active .meet-controls-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 800;
+  border-radius: 0;
+  border-left: none;
+  border-right: none;
+  border-bottom: none;
+  background: rgba(10,10,15,0.97);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  padding: 14px 24px;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  margin-top: 0;
+}
+
+body.meet-active #meet-room {
+  padding-bottom: 80px;
+}
+
+/* Hide page chrome when in a call for more space */
+body.meet-active .page-hero { display: none !important; }
+body.meet-active > section > div:not(#meet-room):not(#meet-alert) { display: none !important; }
+
+/* ── Video tile polish ───────────────────────────────────── */
+.meet-peer-video {
+  aspect-ratio: 16 / 9;
+}
+
+.meet-peer-video video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  aspect-ratio: 16 / 9;
+  min-height: unset;
+  transition: opacity 0.3s;
+}
+
+/* Hover overlay — reveal pin hint */
+.meet-tile-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 10px;
+  opacity: 0;
+  transition: opacity 0.2s, background 0.2s;
+  pointer-events: none;
+  border-radius: 8px;
+}
+
+.meet-peer-video:hover .meet-tile-overlay {
+  opacity: 1;
+  background: rgba(0,0,0,0.25);
+}
+
+.tile-pin-hint {
+  background: rgba(0,0,0,0.75);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 12px;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* Pinned tile */
+.meet-peer-video.meet-pinned {
+  border-color: var(--meet-accent) !important;
+  box-shadow: 0 0 0 3px rgba(229,9,20,0.3);
+}
+
+.meet-peer-video.meet-pinned::before {
+  content: "📌 Pinned";
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(229,9,20,0.85);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 10px;
+  z-index: 10;
+  pointer-events: none;
+  white-space: nowrap;
+  letter-spacing: 0.3px;
+}
+
+/* Cursor pointer on tiles in call */
+body.meet-active .meet-peer-video { cursor: pointer; }
+
+/* ── Quality indicator (3 WiFi bars) ────────────────────── */
+.meet-tile-quality {
+  position: absolute;
+  bottom: 28px;
+  right: 8px;
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 14px;
+  pointer-events: none;
+}
+
+.qb {
+  width: 3px;
+  border-radius: 1px;
+  background: rgba(255,255,255,0.2);
+  transition: background 0.5s;
+}
+
+.qb:nth-child(1) { height: 35%; }
+.qb:nth-child(2) { height: 65%; }
+.qb:nth-child(3) { height: 100%; }
+
+/* ── Toast notifications ────────────────────────────────── */
+.meet-toast-container {
+  position: fixed;
+  top: 72px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+  max-width: 320px;
+}
+
+.meet-toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(22,22,38,0.97);
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 0.83rem;
+  color: var(--text);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  min-width: 200px;
+  opacity: 0;
+  transform: translateX(24px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: auto;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+}
+
+.meet-toast.toast-visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.meet-toast.toast-exit {
+  opacity: 0;
+  transform: translateX(24px);
+}
+
+.meet-toast-info    { border-left: 3px solid #3498db; }
+.meet-toast-success { border-left: 3px solid #2ecc71; }
+.meet-toast-warning { border-left: 3px solid #f39c12; }
+.meet-toast-hand    { border-left: 3px solid #f1c40f; }
+
+.toast-icon { font-size: 1rem; flex-shrink: 0; }
+.toast-msg  { flex: 1; line-height: 1.4; }
+
+/* ── Leave confirmation dialog ──────────────────────────── */
+.meet-leave-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  z-index: 9500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.meet-leave-overlay.hidden { display: none; }
+
+.meet-leave-dialog {
+  background: #181828;
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 16px;
+  padding: 32px;
+  width: 340px;
+  max-width: 92vw;
+  text-align: center;
+  box-shadow: 0 16px 60px rgba(0,0,0,0.7);
+}
+
+.meet-leave-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+
+.meet-leave-desc {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.meet-leave-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.meet-leave-cancel-btn {
+  flex: 1;
+  padding: 12px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.16);
+  color: var(--text);
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.meet-leave-cancel-btn:hover { background: rgba(255,255,255,0.14); }
+
+.meet-leave-confirm-btn {
+  flex: 1;
+  padding: 12px;
+  background: rgba(229,9,20,0.85);
+  border: none;
+  color: #fff;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.meet-leave-confirm-btn:hover { background: #e50914; }
+
 /* ── Responsive ──────────────────────────────────────────── */
 @media (max-width: 960px) {
   .meet-landing-grid  { grid-template-columns: 1fr; }
@@ -3155,7 +3444,8 @@ button { cursor: pointer; }
   .meet-room-header { flex-wrap: wrap; }
   .meet-share-wrap  { order: 3; width: 100%; }
   .meet-room-right  { margin-left: 0; }
-  .meet-controls-bar { flex-direction: column; align-items: flex-start; }
+  body.meet-active .meet-controls-bar { flex-wrap: wrap; justify-content: flex-start; }
+  .meet-toast-container { right: 10px; left: 10px; max-width: unset; }
 }
 
 /* ============================================================

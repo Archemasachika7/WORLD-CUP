@@ -74,6 +74,10 @@
         <input id="meet-share-url" type="text" readonly class="meet-share-input" />
         <button id="meet-copy-link-btn" class="meet-copy-btn">📋 Copy Link</button>
       </div>
+      <div class="meet-timer-wrap" title="Meeting duration">
+        <span class="meet-live-dot"></span>
+        <span id="meet-timer" class="meet-timer">0:00</span>
+      </div>
       <div class="meet-room-right">
         <span id="meet-user-count" class="meet-user-count">0 watching</span>
         <button id="meet-leave-btn" class="meet-leave-btn">🚪 Leave</button>
@@ -87,11 +91,15 @@
       <!-- Left: video grid + stream -->
       <div class="meet-left-col" id="meet-left-col">
         <div id="meet-video-grid" class="meet-video-grid">
-          <div id="meet-local-vid-wrap" class="meet-peer-video meet-local hidden">
+          <div id="meet-local-vid-wrap" class="meet-peer-video meet-local hidden" data-peer="local">
             <video id="meet-local-video" autoplay muted playsinline></video>
             <div class="meet-avatar" id="meet-local-avatar"><span></span></div>
             <div class="meet-tile-status" id="meet-local-tile-status"></div>
+            <div class="meet-tile-quality"><div class="qb"></div><div class="qb"></div><div class="qb"></div></div>
             <div class="meet-vid-label">You</div>
+            <div class="meet-tile-overlay">
+              <span class="tile-pin-hint">📌 Click to pin</span>
+            </div>
           </div>
         </div>
 
@@ -155,11 +163,12 @@
     <!-- Controls -->
     <div class="meet-controls-bar">
       <div class="meet-media-group">
-        <button id="meet-mic-btn" class="meet-media-btn" title="Toggle microphone">🔇 Mute</button>
-        <button id="meet-cam-btn" class="meet-media-btn" title="Toggle camera">📷 Video</button>
-        <button id="meet-screen-btn" class="meet-media-btn" title="Share your screen">🖥️ Share</button>
-        <button id="meet-hand-btn" class="meet-media-btn" title="Raise / lower hand">✋ Hand</button>
-        <button id="meet-participants-btn" class="meet-media-btn" title="Show participants">👥 People</button>
+        <button id="meet-mic-btn" class="meet-media-btn" title="Toggle microphone (M)">🔇 Mute</button>
+        <button id="meet-cam-btn" class="meet-media-btn" title="Toggle camera (V)">📷 Video</button>
+        <button id="meet-blur-btn" class="meet-media-btn" title="Toggle background blur (B)">✨ Blur</button>
+        <button id="meet-screen-btn" class="meet-media-btn" title="Share your screen (S)">🖥️ Share</button>
+        <button id="meet-hand-btn" class="meet-media-btn" title="Raise / lower hand (H)">✋ Hand</button>
+        <button id="meet-participants-btn" class="meet-media-btn" title="Show participants (P)">👥 People</button>
         <button id="meet-settings-btn" class="meet-media-btn" title="Device settings">⚙️ Settings</button>
         <button id="meet-view-btn" class="meet-media-btn" title="Toggle gallery / speaker view">⊞ Gallery</button>
         <button id="meet-fullscreen-btn" class="meet-media-btn" title="Fullscreen video area">⛶ Fullscreen</button>
@@ -183,6 +192,21 @@
   </div><!-- /meet-room -->
 
 </section>
+
+<!-- Toast notification container (lives outside section so it's always on top) -->
+<div id="meet-toast-container" class="meet-toast-container" aria-live="polite"></div>
+
+<!-- Leave confirmation dialog -->
+<div id="meet-leave-dialog" class="meet-leave-overlay hidden">
+  <div class="meet-leave-dialog">
+    <h3 class="meet-leave-title">Leave meeting?</h3>
+    <p class="meet-leave-desc">You can rejoin with the same code.</p>
+    <div class="meet-leave-actions">
+      <button id="meet-leave-cancel" class="meet-leave-cancel-btn">Stay</button>
+      <button id="meet-leave-confirm" class="meet-leave-confirm-btn">Leave</button>
+    </div>
+  </div>
+</div>
 
 <footer id="footer"></footer>
 
