@@ -8,9 +8,7 @@ const API = (() => {
   const FD_KEY    = "739d8e7604b344ea91cd13639476f1b9";
   const FD_BASE   = "https://api.football-data.org/v4";
 
-  // GNews free tier — register at https://gnews.io
-  const GNEWS_KEY  = "3731ddd8aa6399d08515286fb42d010e";
-  const GNEWS_BASE = "https://gnews.io/api/v4";
+  // News is fetched via the secure /api/news serverless route (key stays server-side).
 
   // Fallback news stories (shown when API key not set / quota hit)
   const FALLBACK_NEWS = [
@@ -76,15 +74,16 @@ const API = (() => {
 
     let articles = [];
 
-    if (GNEWS_KEY && GNEWS_KEY !== "YOUR_GNEWS_API_KEY") {
-      try {
-        const url = `${GNEWS_BASE}/search?q=FIFA+World+Cup+2026&lang=en&max=10&apikey=${GNEWS_KEY}`;
-        const res  = await fetch(url);
+    // Fetch through the secure serverless route (/api/news) — the GNews key
+    // lives server-side in process.env, never exposed to the client.
+    try {
+      const res  = await fetch("/api/news");
+      if (res.ok) {
         const json = await res.json();
-        articles = (json.articles || []).map(a => ({ ...a, tag: "Live News" }));
-      } catch (e) {
-        console.warn("GNews API unavailable, using fallback:", e.message);
+        articles = json.articles || [];
       }
+    } catch (e) {
+      console.warn("News API route unavailable, using fallback:", e.message);
     }
 
     if (!articles.length) articles = FALLBACK_NEWS;
