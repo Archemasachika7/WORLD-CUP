@@ -3,14 +3,9 @@
 // ============================================================
 
 const API = (() => {
-  // football-data.org free tier — register at https://www.football-data.org/client/register
-  // Replace with your free API key
-  const FD_KEY    = "739d8e7604b344ea91cd13639476f1b9";
+  // API keys removed — proxied through Supabase Edge Functions
+  const FD_KEY    = "";
   const FD_BASE   = "https://api.football-data.org/v4";
-
-  // GNews free tier — register at https://gnews.io
-  const GNEWS_KEY  = "3731ddd8aa6399d08515286fb42d010e";
-  const GNEWS_BASE = "https://gnews.io/api/v4";
 
   // Fallback news stories (shown when API key not set / quota hit)
   const FALLBACK_NEWS = [
@@ -73,24 +68,24 @@ const API = (() => {
   async function fetchNews() {
     const cached = loadCache(NEWS_KEY);
     if (cached) return cached;
-
-    let articles = [];
-
-    if (GNEWS_KEY && GNEWS_KEY !== "YOUR_GNEWS_API_KEY") {
-      try {
-        const url = `${GNEWS_BASE}/search?q=FIFA+World+Cup+2026&lang=en&max=10&apikey=${GNEWS_KEY}`;
-        const res  = await fetch(url);
-        const json = await res.json();
-        articles = (json.articles || []).map(a => ({ ...a, tag: "Live News" }));
-      } catch (e) {
-        console.warn("GNews API unavailable, using fallback:", e.message);
+    try {
+      const anonKey = (typeof SUPABASE_ANON_KEY !== "undefined") ? SUPABASE_ANON_KEY : null;
+      if (!anonKey) throw new Error("SUPABASE_ANON_KEY not available");
+      const res = await fetch(
+        "https://yqwmiffmwbdouxfkgbqa.supabase.co/functions/v1/news-proxy",
+        { headers: { "Authorization": `Bearer ${anonKey}`, "Content-Type": "application/json" } }
+      );
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = await res.json();
+      const articles = (json.articles || []).map(a => ({ ...a, tag: "Live News" }));
+      if (articles.length) {
+        saveCache(NEWS_KEY, articles, NEWS_TTL);
+        return articles;
       }
+    } catch (e) {
+      console.warn("News proxy unavailable, using fallback:", e.message);
     }
-
-    if (!articles.length) articles = FALLBACK_NEWS;
-
-    saveCache(NEWS_KEY, articles, NEWS_TTL);
-    return articles;
+    return FALLBACK_NEWS;
   }
 
   // Auto-refresh hook — call once; re-fetches every 6 h
@@ -105,30 +100,12 @@ const API = (() => {
 
   // Optional: live match data from football-data.org
   async function fetchLiveMatches() {
-    if (!FD_KEY || FD_KEY === "YOUR_FOOTBALL_DATA_API_KEY") return null;
-    try {
-      const res  = await fetch(`${FD_BASE}/competitions/WC/matches?status=LIVE`, {
-        headers: { "X-Auth-Token": FD_KEY }
-      });
-      return await res.json();
-    } catch (e) {
-      console.warn("football-data.org unavailable:", e.message);
-      return null;
-    }
+    return null;
   }
 
   // Optional: standings
   async function fetchStandings() {
-    if (!FD_KEY || FD_KEY === "YOUR_FOOTBALL_DATA_API_KEY") return null;
-    try {
-      const res  = await fetch(`${FD_BASE}/competitions/WC/standings`, {
-        headers: { "X-Auth-Token": FD_KEY }
-      });
-      return await res.json();
-    } catch (e) {
-      console.warn("Standings fetch failed:", e.message);
-      return null;
-    }
+    return null;
   }
 
   // ---- LocalStorage helpers ----

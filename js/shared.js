@@ -8,9 +8,35 @@ const NAV_PAGES = [
   { id: "matches",     href: "matches.html",      icon: "⚽", label: "Matches"     },
   { id: "stats",       href: "stats.html",        icon: "📊", label: "Stats"       },
   { id: "predictions", href: "predictions.html",  icon: "🔮", label: "Predictions" },
+  { id: "bracket",     href: "bracket.html",      icon: "🏆", label: "Bracket"     },
   { id: "meet",        href: "meet.html",         icon: "🏟️", label: "Meet"        },
   { id: "games",       href: "games.html",        icon: "🎮", label: "Games"       },
 ];
+
+// Convert a match UTC date+time to user's local timezone
+// Returns e.g. "20:00 UTC · 15:00 EDT (you)"
+function localMatchTime(dateStr, utcTime) {
+  try {
+    const [h, m] = utcTime.split(":").map(Number);
+    const dt = new Date(Date.UTC(
+      parseInt(dateStr.slice(0,4)),
+      parseInt(dateStr.slice(5,7)) - 1,
+      parseInt(dateStr.slice(8,10)),
+      h, m
+    ));
+    const localStr = dt.toLocaleTimeString([], { hour:"2-digit", minute:"2-digit", hour12: false });
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
+    const tzAbbr = new Intl.DateTimeFormat("en-US", { timeZoneName: "short", hour:"numeric" })
+      .formatToParts(dt).find(p => p.type === "timeZoneName")?.value || "";
+    // If local time equals UTC time (user IS in UTC), just show UTC
+    const utcHH = String(h).padStart(2,"0");
+    const utcMM = String(m).padStart(2,"0");
+    if (localStr === `${utcHH}:${utcMM}`) return `${utcTime} UTC`;
+    return `${utcTime} UTC · ${localStr} ${tzAbbr} (your time)`;
+  } catch {
+    return utcTime;
+  }
+}
 
 function buildNav(activePage) {
   const container = document.getElementById("main-nav");
@@ -33,6 +59,7 @@ function buildNav(activePage) {
       `).join("")}
     </ul>
     <a class="nav-cta" href="meet.html">🏟️ Meet Rooms</a>
+    <button class="theme-toggle" id="theme-toggle" title="Toggle dark/light mode" aria-label="Toggle theme">🌙</button>
   `;
 
   // Scroll effect
@@ -54,6 +81,21 @@ function buildNav(activePage) {
         linksList.classList.remove("nav-open");
         hamburger.textContent = "☰";
       });
+    });
+  }
+
+  // Theme toggle
+  const themeBtn = document.getElementById("theme-toggle");
+  const savedTheme = localStorage.getItem("wc-theme") || "dark";
+  if (savedTheme === "light") {
+    document.body.classList.add("light-mode");
+    if (themeBtn) themeBtn.textContent = "☀️";
+  }
+  if (themeBtn) {
+    themeBtn.addEventListener("click", () => {
+      const isLight = document.body.classList.toggle("light-mode");
+      themeBtn.textContent = isLight ? "☀️" : "🌙";
+      localStorage.setItem("wc-theme", isLight ? "light" : "dark");
     });
   }
 }
