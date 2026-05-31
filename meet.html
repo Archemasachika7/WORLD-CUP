@@ -82,13 +82,15 @@
 
     <div id="meet-presence-bar" class="meet-presence-bar"></div>
 
-    <div class="meet-main-layout">
+    <div class="meet-main-layout" id="meet-main-layout">
 
       <!-- Left: video grid + stream -->
       <div class="meet-left-col" id="meet-left-col">
         <div id="meet-video-grid" class="meet-video-grid">
           <div id="meet-local-vid-wrap" class="meet-peer-video meet-local hidden">
             <video id="meet-local-video" autoplay muted playsinline></video>
+            <div class="meet-avatar" id="meet-local-avatar"><span></span></div>
+            <div class="meet-tile-status" id="meet-local-tile-status"></div>
             <div class="meet-vid-label">You</div>
           </div>
         </div>
@@ -110,8 +112,11 @@
       </div>
 
       <!-- Right: chat -->
-      <div class="meet-right-col">
-        <div class="meet-chat-header">💬 Room Chat</div>
+      <div class="meet-right-col" id="meet-right-col">
+        <div class="meet-chat-header">
+          💬 Room Chat
+          <span id="meet-chat-badge" class="meet-chat-badge hidden"></span>
+        </div>
         <div id="meet-messages" class="meet-messages"></div>
         <div class="meet-chat-input-wrap">
           <input id="meet-msg-input" type="text" placeholder="Say something… ⚽" maxlength="200" class="meet-msg-input" />
@@ -119,7 +124,33 @@
         </div>
       </div>
 
+      <!-- Participants panel (hidden until toggled) -->
+      <div id="meet-participants-panel" class="meet-participants-panel hidden">
+        <div class="meet-panel-header">
+          👥 Participants
+          <button id="meet-close-participants" class="meet-panel-close">✕</button>
+        </div>
+        <div id="meet-participants-list" class="meet-participants-list"></div>
+      </div>
+
     </div><!-- /meet-main-layout -->
+
+    <!-- Settings modal -->
+    <div id="meet-settings-modal" class="meet-settings-overlay hidden">
+      <div class="meet-settings-dialog">
+        <div class="meet-settings-header">
+          ⚙️ Device Settings
+          <button id="meet-close-settings" class="meet-panel-close">✕</button>
+        </div>
+        <div class="meet-settings-body">
+          <label class="meet-settings-label">🎙️ Microphone</label>
+          <select id="meet-mic-select" class="meet-field"></select>
+          <label class="meet-settings-label">📷 Camera</label>
+          <select id="meet-cam-select" class="meet-field"></select>
+          <button id="meet-apply-devices" class="btn-primary" style="margin-top:12px;width:100%">Apply</button>
+        </div>
+      </div>
+    </div>
 
     <!-- Controls -->
     <div class="meet-controls-bar">
@@ -128,6 +159,8 @@
         <button id="meet-cam-btn" class="meet-media-btn" title="Toggle camera">📷 Video</button>
         <button id="meet-screen-btn" class="meet-media-btn" title="Share your screen">🖥️ Share</button>
         <button id="meet-hand-btn" class="meet-media-btn" title="Raise / lower hand">✋ Hand</button>
+        <button id="meet-participants-btn" class="meet-media-btn" title="Show participants">👥 People</button>
+        <button id="meet-settings-btn" class="meet-media-btn" title="Device settings">⚙️ Settings</button>
         <button id="meet-view-btn" class="meet-media-btn" title="Toggle gallery / speaker view">⊞ Gallery</button>
         <button id="meet-fullscreen-btn" class="meet-media-btn" title="Fullscreen video area">⛶ Fullscreen</button>
       </div>
