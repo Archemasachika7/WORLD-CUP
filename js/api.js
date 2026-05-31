@@ -8,9 +8,7 @@ const API = (() => {
   const FD_KEY    = "739d8e7604b344ea91cd13639476f1b9";
   const FD_BASE   = "https://api.football-data.org/v4";
 
-  // GNews free tier — register at https://gnews.io
-  const GNEWS_KEY  = "3731ddd8aa6399d08515286fb42d010e";
-  const GNEWS_BASE = "https://gnews.io/api/v4";
+  // News is fetched via the secure /api/news serverless route (key stays server-side).
 
   // Fallback news stories (shown when API key not set / quota hit)
   const FALLBACK_NEWS = [

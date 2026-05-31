@@ -18,297 +18,167 @@
 
 <nav id="main-nav"></nav>
 
-<!-- ═══════════════════════════════════════════════════════════
-     LANDING PAGE (shown before joining a room)
-     ═══════════════════════════════════════════════════════════ -->
-<div id="meet-landing-page">
+<div class="page-hero" style="padding:100px 40px 40px;max-width:1200px;margin:0 auto;">
+  <span class="section-tag">🏟️ Watch Together</span>
+  <h1 class="section-title" style="font-size:2.5rem;margin-top:8px">Meet Rooms</h1>
+  <p class="section-desc">Create a room — get a shareable code. Real-time chat across all devices, live voice &amp; video, emoji reactions, and synced streams for everyone in the room. No sign-up needed.</p>
+</div>
 
-  <div class="page-hero" style="padding:100px 40px 40px;max-width:1200px;margin:0 auto;">
-    <span class="section-tag">🏟️ Watch Together</span>
-    <h1 class="section-title" style="font-size:2.5rem;margin-top:8px">Meet Rooms</h1>
-    <p class="section-desc">Create a room — get a shareable code. Real-time chat across all devices, live voice &amp; video, emoji reactions, and synced streams for everyone in the room. No sign-up needed.</p>
-  </div>
+<!-- Stream presets bar -->
+<div style="max-width:1200px;margin:0 auto;padding:0 40px 16px;">
+  <div style="margin-bottom:8px;font-size:0.8rem;color:var(--text-dim);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Quick Stream Presets</div>
+  <div class="stream-presets" id="meet-page-presets"></div>
+</div>
 
-  <!-- Stream presets bar -->
-  <div style="max-width:1200px;margin:0 auto;padding:0 40px 16px;">
-    <div style="margin-bottom:8px;font-size:0.8rem;color:var(--text-dim);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Quick Stream Presets</div>
-    <div class="stream-presets" id="meet-page-presets"></div>
-  </div>
+<section style="max-width:1200px;margin:0 auto;padding:0 40px 80px;">
 
-  <section style="max-width:1200px;margin:0 auto;padding:0 40px 80px;">
+  <div id="meet-alert" class="meet-alert"></div>
 
-    <div id="meet-alert" class="meet-alert"></div>
+  <!-- Landing -->
+  <div id="meet-landing" class="meet-landing">
+    <div class="meet-landing-grid">
 
-    <div class="meet-landing">
-      <div class="meet-landing-grid">
+      <div class="meet-identity-card">
+        <h3 class="meet-card-title">👤 Your Identity</h3>
+        <input id="meet-nickname-input" type="text" placeholder="Your nickname" maxlength="24" class="meet-field" />
+        <select id="meet-team-select" class="meet-field">
+          <option value="⚽" data-id="">⚽ Neutral</option>
+        </select>
+        <p class="meet-theme-hint">Pick your team — it themes the room with their colours:</p>
+        <div id="meet-themes-row" class="meet-themes-row"></div>
+      </div>
 
-        <div class="meet-identity-card">
-          <h3 class="meet-card-title">👤 Your Identity</h3>
-          <input id="meet-nickname-input" type="text" placeholder="Your nickname" maxlength="24" class="meet-field" />
-          <select id="meet-team-select" class="meet-field">
-            <option value="⚽" data-id="">⚽ Neutral</option>
-          </select>
-          <p class="meet-theme-hint">Pick your team — it themes the room with their colours:</p>
-          <div id="meet-themes-row" class="meet-themes-row"></div>
+      <div class="meet-action-card">
+        <h3 class="meet-card-title">🎉 Start a Room</h3>
+        <p class="meet-card-desc">Create a private room, get a code, and share it with friends worldwide. Paste the stream URL inside and everyone watches together.</p>
+        <button id="meet-create-btn" class="btn-primary meet-big-btn">Create Room →</button>
+      </div>
+
+      <div class="meet-action-card">
+        <h3 class="meet-card-title">🔗 Join a Room</h3>
+        <p class="meet-card-desc">Got a code from a friend? Enter it below and jump straight into the action — chat, video, and the stream already loaded.</p>
+        <div class="meet-join-row">
+          <input id="meet-room-code-input" type="text" placeholder="WC-XXXXX" maxlength="10" class="meet-field meet-code-field" />
+          <button id="meet-join-btn" class="btn-primary">Join →</button>
         </div>
+      </div>
 
-        <div class="meet-action-card">
-          <h3 class="meet-card-title">🎉 Start a Room</h3>
-          <p class="meet-card-desc">Create a private room, get a code, and share it with friends worldwide. Paste the stream URL inside and everyone watches together.</p>
-          <button id="meet-create-btn" class="btn-primary meet-big-btn">Create Room →</button>
-        </div>
+    </div>
+  </div><!-- /meet-landing -->
 
-        <div class="meet-action-card">
-          <h3 class="meet-card-title">🔗 Join a Room</h3>
-          <p class="meet-card-desc">Got a code from a friend? Enter it below and jump straight into the action — chat, video, and the stream already loaded.</p>
-          <div class="meet-join-row">
-            <input id="meet-room-code-input" type="text" placeholder="WC-XXXXX" maxlength="10" class="meet-field meet-code-field" />
-            <button id="meet-join-btn" class="btn-primary">Join →</button>
+  <!-- In-Room UI (hidden until joined) -->
+  <div id="meet-room" class="meet-room hidden">
+
+    <div class="meet-room-header">
+      <div class="meet-room-id-wrap">
+        <span class="meet-room-label">Room</span>
+        <strong id="meet-room-code-display" class="meet-code-badge"></strong>
+      </div>
+      <div class="meet-share-wrap">
+        <input id="meet-share-url" type="text" readonly class="meet-share-input" />
+        <button id="meet-copy-link-btn" class="meet-copy-btn">📋 Copy Link</button>
+      </div>
+      <div class="meet-room-right">
+        <span id="meet-user-count" class="meet-user-count">0 watching</span>
+        <button id="meet-leave-btn" class="meet-leave-btn">🚪 Leave</button>
+      </div>
+    </div>
+
+    <div id="meet-presence-bar" class="meet-presence-bar"></div>
+
+    <div class="meet-main-layout">
+
+      <!-- Left: video grid + stream -->
+      <div class="meet-left-col">
+        <div id="meet-video-grid" class="meet-video-grid">
+          <div id="meet-local-vid-wrap" class="meet-peer-video meet-local hidden">
+            <video id="meet-local-video" autoplay muted playsinline></video>
+            <div class="meet-vid-label">You</div>
           </div>
         </div>
 
-      </div>
-    </div>
-
-  </section>
-
-  <footer id="footer"></footer>
-</div><!-- /meet-landing-page -->
-
-
-<!-- ═══════════════════════════════════════════════════════════
-     ZOOM-STYLE ROOM UI (shown after joining)
-     ═══════════════════════════════════════════════════════════ -->
-<div id="meet-room-app" class="zroom hidden">
-
-  <!-- Top bar -->
-  <div class="zroom-topbar">
-    <div class="zroom-topbar-left">
-      <span class="zroom-logo">⚽</span>
-      <div class="zroom-meeting-info">
-        <span class="zroom-meeting-title">World Cup Watch Party</span>
-        <span id="zroom-timer" class="zroom-timer">00:00</span>
-      </div>
-    </div>
-    <div class="zroom-topbar-center">
-      <div class="zroom-room-badge-wrap">
-        <span class="zroom-room-label">Room</span>
-        <strong id="zroom-code-display" class="zroom-code-badge"></strong>
-      </div>
-    </div>
-    <div class="zroom-topbar-right">
-      <button id="zroom-copy-btn" class="zroom-top-btn" title="Copy invite link">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-        Copy Link
-      </button>
-      <span id="zroom-user-count" class="zroom-user-count">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        <span id="zroom-count-num">0</span>
-      </span>
-    </div>
-  </div>
-
-  <!-- Main area: gallery + side panel -->
-  <div class="zroom-body">
-
-    <!-- Video gallery -->
-    <div class="zroom-gallery-wrap">
-
-      <!-- Gallery grid -->
-      <div id="zroom-gallery" class="zroom-gallery">
-        <!-- Tiles injected by JS -->
-        <div id="zroom-local-tile" class="ztile ztile-local">
-          <div class="ztile-avatar" id="zroom-local-avatar">
-            <span class="ztile-avatar-initials" id="zroom-local-initials">?</span>
-          </div>
-          <video id="meet-local-video" autoplay muted playsinline class="ztile-video hidden"></video>
-          <div class="ztile-overlay">
-            <span class="ztile-name" id="zroom-local-name">You</span>
-            <span id="zroom-local-mic-icon" class="ztile-mic-off" title="Muted">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M19 11a7 7 0 0 1-14 0M12 1a3 3 0 0 1 3 3v8a3 3 0 0 1-6 0V4a3 3 0 0 1 3-3z"/><line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" stroke-width="2"/></svg>
-            </span>
-          </div>
+        <div class="meet-stream-bar">
+          <span class="meet-stream-icon">📺</span>
+          <input id="meet-stream-input" type="url" placeholder="Paste stream URL — syncs for everyone instantly" class="meet-stream-url-in" />
+          <button id="meet-stream-go" class="meet-stream-go">▶ Sync</button>
         </div>
-      </div>
 
-      <!-- Stream panel (inside gallery area, toggleable) -->
-      <div id="zroom-stream-panel" class="zroom-stream-panel hidden">
-        <div class="zroom-stream-bar">
-          <span class="zroom-stream-icon">📺</span>
-          <input id="meet-stream-input" type="url" placeholder="Paste stream URL — syncs for everyone instantly" class="zroom-stream-url-in" />
-          <div class="stream-presets" id="room-stream-presets"></div>
-          <button id="meet-stream-go" class="zroom-stream-go">▶ Sync</button>
+        <!-- Stream action bar — always visible once a stream is loaded -->
+        <div id="meet-stream-actions" style="display:none;align-items:center;gap:8px;padding:6px 8px;flex-wrap:wrap;border-bottom:1px solid var(--border);">
+          <a id="meet-stream-open-link" href="#" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;background:var(--accent);color:#fff;font-weight:700;font-size:0.78rem;text-decoration:none;">↗ Open Stream</a>
+          <button id="meet-stream-theater-btn" style="padding:5px 12px;background:var(--bg-hover);border:1px solid var(--border);color:var(--text);font-size:0.78rem;font-weight:700;cursor:pointer;" title="Theater mode — enlarge the stream in-page">🔳 Theater</button>
+          <button id="meet-stream-fs-btn" style="padding:5px 12px;background:var(--bg-hover);border:1px solid var(--border);color:var(--text);font-size:0.78rem;font-weight:700;cursor:pointer;" title="Fullscreen the stream / shared screen">⛶ Fullscreen</button>
+          <button id="meet-stream-expand-btn" style="padding:5px 12px;background:var(--bg-hover);border:1px solid var(--border);color:var(--text);font-size:0.78rem;font-weight:700;cursor:pointer;" title="Open in tab-share overlay">📺 Tab Share</button>
+          <button id="meet-stream-share-focused-btn" style="padding:5px 12px;background:#7c3aed;border:none;color:#fff;font-size:0.78rem;font-weight:700;cursor:pointer;" title="Share just this stream with room via WebRTC">📤 Share Stream</button>
+          <span id="meet-stream-status" style="font-size:0.75rem;color:#f97316;flex:1;"></span>
         </div>
-        <div id="meet-stream-frame-wrap" class="zroom-stream-frame hidden">
+
+        <!-- Stream presets inside room -->
+        <div class="stream-presets" id="room-stream-presets" style="padding:6px 0;"></div>
+
+        <div id="meet-stream-frame-wrap" class="meet-stream-frame-wrap hidden">
+          <!-- Who's sharing badge -->
+          <div id="meet-screen-badge" style="display:none;position:absolute;top:10px;left:10px;z-index:5;align-items:center;gap:6px;padding:5px 12px;background:rgba(124,58,237,0.92);color:#fff;font-size:0.78rem;font-weight:700;border-radius:20px;backdrop-filter:blur(4px);box-shadow:0 2px 10px rgba(0,0,0,0.4);"></div>
+          <!-- Peer screen share video (shown instead of iframe when someone shares screen) -->
+          <video id="meet-peer-screen-video" autoplay playsinline style="display:none;width:100%;height:100%;object-fit:contain;background:#000;"></video>
           <iframe id="meet-stream-iframe" src="about:blank" allowfullscreen allow="autoplay; fullscreen; picture-in-picture" frameborder="0" title="Room stream"></iframe>
         </div>
+
+        <!-- Fullscreen stream overlay (for sharing just the stream as a tab) -->
+        <div id="meet-fullscreen-overlay" style="display:none;position:fixed;inset:0;background:#000;z-index:9999;flex-direction:column;">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 16px;background:rgba(0,0,0,0.8);flex-shrink:0;">
+            <span style="color:#fff;font-size:0.85rem;opacity:0.7;">Now share this tab → your room sees only the stream</span>
+            <div style="display:flex;gap:10px;">
+              <button id="meet-fs-share-btn" style="padding:8px 18px;background:var(--accent);border:none;color:#fff;font-weight:700;font-size:0.85rem;cursor:pointer;border-radius:4px;">📤 Share This Tab</button>
+              <button id="meet-fs-close-btn" style="padding:8px 16px;background:rgba(255,255,255,0.15);border:none;color:#fff;font-size:0.85rem;cursor:pointer;border-radius:4px;">✕ Close</button>
+            </div>
+          </div>
+          <iframe id="meet-fullscreen-iframe" src="about:blank" style="flex:1;width:100%;border:0;" allowfullscreen allow="autoplay; fullscreen; picture-in-picture"></iframe>
+        </div>
+
+        <div id="meet-emoji-rain" class="meet-emoji-rain" aria-hidden="true"></div>
       </div>
 
-      <!-- Emoji rain overlay -->
-      <div id="meet-emoji-rain" class="meet-emoji-rain" aria-hidden="true"></div>
-
-      <!-- Presence strip (hoverable at top) -->
-      <div id="meet-presence-bar" class="zroom-presence-strip"></div>
-
-    </div><!-- /zroom-gallery-wrap -->
-
-    <!-- Side panel: Chat or Participants -->
-    <div id="zroom-side-panel" class="zroom-side-panel hidden">
-      <div class="zroom-panel-tabs">
-        <button class="zroom-tab active" id="zroom-tab-chat" onclick="switchTab('chat')">💬 Chat</button>
-        <button class="zroom-tab" id="zroom-tab-people" onclick="switchTab('people')">👥 People</button>
-        <button class="zroom-panel-close" onclick="closeSidePanel()" title="Close">✕</button>
-      </div>
-
-      <!-- Chat tab -->
-      <div id="zroom-panel-chat" class="zroom-panel-body">
-        <div id="meet-messages" class="meet-messages zroom-messages"></div>
-        <div class="zroom-chat-footer">
-          <div class="zroom-chat-input-row">
-            <input id="meet-msg-input" type="text" placeholder="Say something… ⚽" maxlength="200" class="zroom-msg-input" />
-            <button id="meet-send-btn" class="zroom-send-btn">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
-            </button>
-          </div>
-          <!-- Emoji row inside chat -->
-          <div class="zroom-chat-emojis">
-            <button class="emoji-reaction-btn" data-emoji="⚽">⚽</button>
-            <button class="emoji-reaction-btn" data-emoji="🔥">🔥</button>
-            <button class="emoji-reaction-btn" data-emoji="❤️">❤️</button>
-            <button class="emoji-reaction-btn" data-emoji="😱">😱</button>
-            <button class="emoji-reaction-btn" data-emoji="🎉">🎉</button>
-            <button class="emoji-reaction-btn" data-emoji="👏">👏</button>
-            <button class="emoji-reaction-btn" data-emoji="🏆">🏆</button>
-            <button class="emoji-reaction-btn" data-emoji="🚀">🚀</button>
-          </div>
+      <!-- Right: chat -->
+      <div class="meet-right-col">
+        <div class="meet-chat-header">💬 Room Chat</div>
+        <div id="meet-messages" class="meet-messages"></div>
+        <div class="meet-chat-input-wrap">
+          <input id="meet-msg-input" type="text" placeholder="Say something… ⚽" maxlength="200" class="meet-msg-input" />
+          <button id="meet-send-btn" class="meet-send-btn">Send</button>
         </div>
       </div>
 
-      <!-- People tab -->
-      <div id="zroom-panel-people" class="zroom-panel-body hidden">
-        <div id="zroom-people-list" class="zroom-people-list"></div>
+    </div><!-- /meet-main-layout -->
+
+    <!-- Controls -->
+    <div class="meet-controls-bar">
+      <div class="meet-media-group">
+        <button id="meet-mic-btn" class="meet-media-btn">🔇 Muted</button>
+        <button id="meet-cam-btn" class="meet-media-btn">📷 Cam Off</button>
+        <button id="meet-screen-btn" class="meet-media-btn" title="Share your screen — all users in the room see it live via WebRTC">🖥️ Share Screen</button>
       </div>
-
-    </div><!-- /zroom-side-panel -->
-
-  </div><!-- /zroom-body -->
-
-  <!-- ── Bottom control bar (Zoom-style) ── -->
-  <div class="zroom-controls">
-
-    <div class="zroom-ctrl-group zroom-ctrl-left">
-      <div class="zroom-ctrl-item">
-        <button id="meet-mic-btn" class="zctrl-btn zctrl-muted" title="Unmute">
-          <span class="zctrl-icon">
-            <!-- Mic muted icon -->
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-              <path d="M12 1a3 3 0 0 1 3 3v8a3 3 0 0 1-6 0V4a3 3 0 0 1 3-3z"/>
-              <path d="M19 11a7 7 0 0 1-14 0"/>
-              <line x1="12" y1="19" x2="12" y2="23"/>
-              <line x1="8" y1="23" x2="16" y2="23"/>
-              <line x1="1" y1="1" x2="23" y2="23"/>
-            </svg>
-          </span>
-          <span class="zctrl-label">Unmute</span>
-        </button>
-      </div>
-
-      <div class="zroom-ctrl-item">
-        <button id="meet-cam-btn" class="zctrl-btn zctrl-muted" title="Start Video">
-          <span class="zctrl-icon">
-            <!-- Cam off icon -->
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-              <path d="M16 16v1a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2"/>
-              <polygon points="23 7 16 12 23 17 23 7"/>
-              <line x1="1" y1="1" x2="23" y2="23"/>
-            </svg>
-          </span>
-          <span class="zctrl-label">Start Video</span>
-        </button>
-      </div>
-
-      <div class="zroom-ctrl-item">
-        <button id="zroom-stream-btn" class="zctrl-btn" title="Watch Stream" onclick="toggleStreamPanel()">
-          <span class="zctrl-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-              <rect x="2" y="7" width="20" height="15" rx="2"/>
-              <polyline points="17 2 12 7 7 2"/>
-            </svg>
-          </span>
-          <span class="zctrl-label">Stream</span>
-        </button>
+      <div class="meet-reactions-group">
+        <button class="emoji-reaction-btn" data-emoji="⚽">⚽</button>
+        <button class="emoji-reaction-btn" data-emoji="🔥">🔥</button>
+        <button class="emoji-reaction-btn" data-emoji="❤️">❤️</button>
+        <button class="emoji-reaction-btn" data-emoji="😱">😱</button>
+        <button class="emoji-reaction-btn" data-emoji="🎉">🎉</button>
+        <button class="emoji-reaction-btn" data-emoji="👏">👏</button>
+        <button class="emoji-reaction-btn" data-emoji="🚀">🚀</button>
+        <button class="emoji-reaction-btn" data-emoji="💪">💪</button>
+        <button class="emoji-reaction-btn" data-emoji="🏆">🏆</button>
+        <button class="emoji-reaction-btn" data-emoji="😭">😭</button>
+        <button class="emoji-reaction-btn" data-emoji="🤩">🤩</button>
+        <button class="emoji-reaction-btn" data-emoji="💥">💥</button>
       </div>
     </div>
 
-    <div class="zroom-ctrl-group zroom-ctrl-center">
-      <!-- Reactions popover trigger -->
-      <div class="zroom-ctrl-item zroom-reactions-wrap">
-        <button class="zctrl-btn" title="Reactions" onclick="toggleReactionsPopover()">
-          <span class="zctrl-icon">😊</span>
-          <span class="zctrl-label">React</span>
-        </button>
-        <div id="zroom-reactions-popover" class="zroom-reactions-popover hidden">
-          <button class="emoji-reaction-btn" data-emoji="⚽">⚽</button>
-          <button class="emoji-reaction-btn" data-emoji="🔥">🔥</button>
-          <button class="emoji-reaction-btn" data-emoji="❤️">❤️</button>
-          <button class="emoji-reaction-btn" data-emoji="😱">😱</button>
-          <button class="emoji-reaction-btn" data-emoji="🎉">🎉</button>
-          <button class="emoji-reaction-btn" data-emoji="👏">👏</button>
-          <button class="emoji-reaction-btn" data-emoji="🏆">🏆</button>
-          <button class="emoji-reaction-btn" data-emoji="💪">💪</button>
-          <button class="emoji-reaction-btn" data-emoji="🚀">🚀</button>
-          <button class="emoji-reaction-btn" data-emoji="😭">😭</button>
-          <button class="emoji-reaction-btn" data-emoji="🤩">🤩</button>
-          <button class="emoji-reaction-btn" data-emoji="💥">💥</button>
-        </div>
-      </div>
-    </div>
+  </div><!-- /meet-room -->
 
-    <div class="zroom-ctrl-group zroom-ctrl-right">
-      <div class="zroom-ctrl-item">
-        <button class="zctrl-btn" id="zroom-chat-btn" title="Chat" onclick="toggleSidePanel('chat')">
-          <span class="zctrl-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-            </svg>
-          </span>
-          <span class="zctrl-label">Chat</span>
-          <span id="zroom-chat-badge" class="zctrl-badge hidden">0</span>
-        </button>
-      </div>
-      <div class="zroom-ctrl-item">
-        <button class="zctrl-btn" id="zroom-people-btn" title="Participants" onclick="toggleSidePanel('people')">
-          <span class="zctrl-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-              <circle cx="9" cy="7" r="4"/>
-              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-            </svg>
-          </span>
-          <span class="zctrl-label">Participants</span>
-        </button>
-      </div>
-      <div class="zroom-ctrl-item">
-        <button id="meet-leave-btn" class="zctrl-btn zctrl-leave" title="Leave">
-          <span class="zctrl-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-              <polyline points="16 17 21 12 16 7"/>
-              <line x1="21" y1="12" x2="9" y2="12"/>
-            </svg>
-          </span>
-          <span class="zctrl-label">Leave</span>
-        </button>
-      </div>
-    </div>
+</section>
 
-  </div><!-- /zroom-controls -->
-
-</div><!-- /meet-room-app -->
-
-<!-- Hidden share input for clipboard copy -->
-<input id="meet-share-url" type="text" readonly style="position:absolute;left:-9999px;top:-9999px;" />
+<footer id="footer"></footer>
 
 <script src="js/data.js"></script>
 <script src="js/predictions.js"></script>
@@ -316,12 +186,6 @@
 <script src="js/supabase-client.js"></script>
 <script src="js/meet.js"></script>
 <script>
-let _sidePanelOpen = false;
-let _sidePanelTab  = 'chat';
-let _streamPanelOpen = false;
-let _reactionsOpen = false;
-let _unreadChat = 0;
-
 document.addEventListener("DOMContentLoaded", () => {
   buildNav("meet");
   buildFooter("footer");
@@ -330,20 +194,13 @@ document.addEventListener("DOMContentLoaded", () => {
   buildStreamPresets("meet-page-presets");
   buildStreamPresets("room-stream-presets", true);
 
+  // Check URL for room code (direct join link)
   const params = new URLSearchParams(window.location.search);
   const code = params.get("room");
   if (code) {
     const input = document.getElementById("meet-room-code-input");
     if (input) { input.value = code; }
   }
-
-  // Close popover on outside click
-  document.addEventListener("click", e => {
-    if (!e.target.closest(".zroom-reactions-wrap")) {
-      document.getElementById("zroom-reactions-popover")?.classList.add("hidden");
-      _reactionsOpen = false;
-    }
-  });
 });
 
 function populateMeetTeamSelector() {
@@ -368,76 +225,6 @@ function loadPresetStream(url) {
     document.getElementById("meet-stream-go")?.click();
   }
 }
-
-function toggleSidePanel(tab) {
-  const panel = document.getElementById("zroom-side-panel");
-  const chatBtn   = document.getElementById("zroom-chat-btn");
-  const peopleBtn = document.getElementById("zroom-people-btn");
-  if (_sidePanelOpen && _sidePanelTab === tab) {
-    closeSidePanel();
-    return;
-  }
-  _sidePanelOpen = true;
-  _sidePanelTab  = tab;
-  panel?.classList.remove("hidden");
-  switchTab(tab);
-  if (tab === 'chat') {
-    _unreadChat = 0;
-    const badge = document.getElementById("zroom-chat-badge");
-    if (badge) { badge.textContent = "0"; badge.classList.add("hidden"); }
-    chatBtn?.classList.add("zctrl-active");
-    peopleBtn?.classList.remove("zctrl-active");
-  } else {
-    peopleBtn?.classList.add("zctrl-active");
-    chatBtn?.classList.remove("zctrl-active");
-  }
-}
-
-function closeSidePanel() {
-  _sidePanelOpen = false;
-  document.getElementById("zroom-side-panel")?.classList.add("hidden");
-  document.getElementById("zroom-chat-btn")?.classList.remove("zctrl-active");
-  document.getElementById("zroom-people-btn")?.classList.remove("zctrl-active");
-}
-
-function switchTab(tab) {
-  _sidePanelTab = tab;
-  document.getElementById("zroom-tab-chat")?.classList.toggle("active", tab === "chat");
-  document.getElementById("zroom-tab-people")?.classList.toggle("active", tab === "people");
-  document.getElementById("zroom-panel-chat")?.classList.toggle("hidden", tab !== "chat");
-  document.getElementById("zroom-panel-people")?.classList.toggle("hidden", tab !== "people");
-  if (tab === "chat") {
-    _unreadChat = 0;
-    const badge = document.getElementById("zroom-chat-badge");
-    if (badge) { badge.textContent = "0"; badge.classList.add("hidden"); }
-    const msgs = document.getElementById("meet-messages");
-    if (msgs) msgs.scrollTop = msgs.scrollHeight;
-  }
-}
-
-function toggleStreamPanel() {
-  _streamPanelOpen = !_streamPanelOpen;
-  const panel = document.getElementById("zroom-stream-panel");
-  panel?.classList.toggle("hidden", !_streamPanelOpen);
-  document.getElementById("zroom-stream-btn")?.classList.toggle("zctrl-active", _streamPanelOpen);
-}
-
-function toggleReactionsPopover() {
-  _reactionsOpen = !_reactionsOpen;
-  document.getElementById("zroom-reactions-popover")?.classList.toggle("hidden", !_reactionsOpen);
-}
-
-// Track unread messages when chat is closed
-window._onNewMsg = function() {
-  if (!_sidePanelOpen || _sidePanelTab !== "chat") {
-    _unreadChat++;
-    const badge = document.getElementById("zroom-chat-badge");
-    if (badge) {
-      badge.textContent = _unreadChat > 9 ? "9+" : String(_unreadChat);
-      badge.classList.remove("hidden");
-    }
-  }
-};
 </script>
 </body>
 </html>

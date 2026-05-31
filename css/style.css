@@ -2797,19 +2797,20 @@ button { cursor: pointer; }
 }
 
 /* ============================================================
-   Meet Rooms — Zoom / Google Meet Style
+   Meet Rooms
    ============================================================ */
 :root {
   --meet-accent:  var(--accent);
   --meet-bg-tint: rgba(229,9,20,0.05);
   --meet-badge:   var(--accent);
-  --zroom-bg:     #1c1c1e;
-  --zroom-tile-bg:#2c2c2e;
-  --zroom-bar:    #1a1a1c;
-  --zroom-border: rgba(255,255,255,0.10);
 }
 
-/* ── Alert ───────────────────────────────────────────────── */
+#meet {
+  padding: 60px 5% 80px;
+  background: linear-gradient(180deg, var(--meet-bg-tint) 0%, transparent 100%);
+  transition: background 0.6s ease;
+}
+
 .meet-alert {
   max-width: 680px;
   margin: 0 auto 18px;
@@ -2827,12 +2828,6 @@ button { cursor: pointer; }
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s;
-  position: fixed;
-  top: 80px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 10000;
-  white-space: nowrap;
 }
 .meet-alert.visible { opacity: 1; pointer-events: auto; }
 
@@ -2894,9 +2889,12 @@ button { cursor: pointer; }
 }
 
 .meet-big-btn { width: 100%; padding: 14px; font-size: 1rem; margin-top: auto; }
+
 .meet-join-row { display: flex; gap: 8px; }
 .meet-join-row .meet-field { flex: 1; }
+
 .meet-theme-hint { font-size: 0.73rem; color: var(--text-dim); margin: 0; }
+
 .meet-themes-row { display: flex; gap: 6px; flex-wrap: wrap; }
 
 .theme-chip {
@@ -2915,315 +2913,204 @@ button { cursor: pointer; }
 }
 .theme-chip:hover { transform: scale(1.25); border-color: rgba(255,255,255,0.6); }
 
-/* ══════════════════════════════════════════════════════════
-   ZOOM-STYLE ROOM
-   ══════════════════════════════════════════════════════════ */
+/* ── In-Room ─────────────────────────────────────────────── */
+.meet-room { max-width: 1400px; margin: 0 auto; }
 
-/* Full-page container */
-.zroom {
-  position: fixed;
-  inset: 0;
-  background: var(--zroom-bg);
-  display: flex;
-  flex-direction: column;
-  z-index: 200;
-  font-family: inherit;
-}
-.zroom.hidden { display: none; }
-
-/* ── Top bar ─────────────────────────────────────────────── */
-.zroom-topbar {
-  height: 58px;
-  min-height: 58px;
-  background: var(--zroom-bar);
-  border-bottom: 1px solid var(--zroom-border);
+.meet-room-header {
   display: flex;
   align-items: center;
-  padding: 0 20px;
-  gap: 16px;
-  z-index: 10;
-  flex-shrink: 0;
+  gap: 14px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 12px 18px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
 }
 
-.zroom-topbar-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex: 1;
-}
+.meet-room-id-wrap { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 
-.zroom-logo {
-  font-size: 1.5rem;
-  line-height: 1;
-}
-
-.zroom-meeting-info {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
-
-.zroom-meeting-title {
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: var(--text);
-}
-
-.zroom-timer {
-  font-size: 0.72rem;
-  color: var(--text-dim);
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.5px;
-}
-
-.zroom-topbar-center {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.zroom-room-badge-wrap {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.zroom-room-label {
-  font-size: 0.72rem;
+.meet-room-label {
+  font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.8px;
   color: var(--text-dim);
 }
 
-.zroom-code-badge {
+.meet-code-badge {
   background: var(--meet-accent);
   color: #fff;
-  padding: 4px 12px;
+  padding: 5px 14px;
   border-radius: 6px;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   font-weight: 900;
   letter-spacing: 2px;
 }
 
-.zroom-topbar-right {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.meet-share-wrap { display: flex; gap: 8px; flex: 1; min-width: 0; }
+
+.meet-share-input {
   flex: 1;
-  justify-content: flex-end;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.10);
+  color: var(--text-dim);
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-family: inherit;
+  outline: none;
+  min-width: 0;
 }
 
-.zroom-top-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+.meet-copy-btn {
   background: rgba(255,255,255,0.07);
-  border: 1px solid var(--zroom-border);
+  border: 1px solid rgba(255,255,255,0.14);
   color: var(--text);
-  padding: 7px 14px;
-  border-radius: 8px;
+  padding: 8px 14px;
+  border-radius: 6px;
   font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
+  white-space: nowrap;
   transition: background 0.2s;
 }
-.zroom-top-btn:hover { background: rgba(255,255,255,0.13); }
+.meet-copy-btn:hover { background: rgba(255,255,255,0.12); }
 
-.zroom-user-count {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: var(--meet-accent);
-}
+.meet-room-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; margin-left: auto; }
 
-/* ── Body: gallery + side panel ──────────────────────────── */
-.zroom-body {
-  flex: 1;
-  display: flex;
-  overflow: hidden;
-  position: relative;
-}
+.meet-user-count { font-size: 0.82rem; font-weight: 700; color: var(--meet-accent); }
 
-/* ── Gallery wrap ────────────────────────────────────────── */
-.zroom-gallery-wrap {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  position: relative;
-  padding: 16px;
-  gap: 12px;
-}
-
-/* Gallery grid: fills available space, auto-fits tiles */
-.zroom-gallery {
-  flex: 1;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  grid-auto-rows: 1fr;
-  gap: 10px;
-  overflow: hidden;
-}
-
-/* Single tile: dark card with video or avatar */
-.ztile {
-  position: relative;
-  background: var(--zroom-tile-bg);
-  border-radius: 12px;
-  overflow: hidden;
-  border: 2px solid transparent;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 160px;
-  transition: border-color 0.3s;
-}
-
-.ztile-local {
-  border-color: rgba(255,255,255,0.10);
-}
-
-.ztile-speaking {
-  border-color: #2ecc71 !important;
-  box-shadow: 0 0 0 2px rgba(46,204,113,0.3);
-}
-
-.ztile-avatar {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  background: var(--meet-accent);
-  flex-shrink: 0;
-}
-
-.ztile-avatar-initials {
-  font-size: 1.8rem;
-  font-weight: 800;
-  color: #fff;
-  text-transform: uppercase;
-  line-height: 1;
-}
-
-.ztile-video {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.ztile-overlay {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 8px 12px;
-  background: linear-gradient(transparent, rgba(0,0,0,0.65));
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.ztile-name {
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: #fff;
-  flex: 1;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.ztile-mic-off {
+.meet-leave-btn {
+  background: rgba(229,9,20,0.10);
+  border: 1px solid rgba(229,9,20,0.28);
   color: #ff4444;
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
 }
+.meet-leave-btn:hover { background: rgba(229,9,20,0.22); }
 
-.ztile-mic-on {
-  color: #2ecc71;
+/* Presence strip */
+.meet-presence-bar {
   display: flex;
-  align-items: center;
-  flex-shrink: 0;
-}
-
-/* Presence strip at top of gallery */
-.zroom-presence-strip {
-  display: flex;
-  gap: 6px;
+  gap: 8px;
   flex-wrap: wrap;
-  flex-shrink: 0;
+  padding: 8px 2px;
+  margin-bottom: 10px;
+  min-height: 42px;
 }
 
 .meet-user-chip {
   display: flex;
   align-items: center;
   gap: 6px;
-  background: rgba(255,255,255,0.07);
+  background: rgba(255,255,255,0.05);
   border: 1px solid rgba(255,255,255,0.10);
   border-radius: 20px;
-  padding: 4px 10px;
-  font-size: 0.75rem;
+  padding: 5px 12px;
+  font-size: 0.79rem;
   font-weight: 600;
 }
 .meet-user-me {
   border-color: var(--meet-accent);
-  background: rgba(229,9,20,0.12);
+  background: rgba(229,9,20,0.09);
   color: var(--meet-accent);
 }
 
-/* ── Stream panel ────────────────────────────────────────── */
-.zroom-stream-panel {
-  background: rgba(0,0,0,0.5);
-  border: 1px solid var(--zroom-border);
-  border-radius: 12px;
-  padding: 10px 12px;
+/* Main layout */
+.meet-main-layout {
+  display: grid;
+  grid-template-columns: 1fr 350px;
+  gap: 14px;
+  min-height: 500px;
+}
+
+/* Left column */
+.meet-left-col {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  flex-shrink: 0;
-  max-height: 50vh;
+  gap: 10px;
+  position: relative;
 }
-.zroom-stream-panel.hidden { display: none; }
 
-.zroom-stream-bar {
+/* Peer video grid */
+.meet-video-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  background: rgba(0,0,0,0.25);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px;
+  padding: 8px;
+  min-height: 56px;
+}
+
+.meet-video-grid:empty::after {
+  content: "Mic / camera peers appear here when voice or video is on";
+  color: var(--text-dim);
+  font-size: 0.76rem;
+  padding: 10px;
+  align-self: center;
+}
+
+.meet-peer-video {
+  position: relative;
+  background: #0e0e16;
+  border-radius: 8px;
+  overflow: hidden;
+  width: 160px;
+  height: 120px;
+  flex-shrink: 0;
+  border: 2px solid rgba(255,255,255,0.08);
+}
+.meet-peer-video video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.meet-local { border-color: var(--meet-accent); }
+
+.meet-vid-label {
+  position: absolute;
+  bottom: 5px;
+  left: 8px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.9);
+}
+
+/* Stream bar inside room */
+.meet-stream-bar {
   display: flex;
   align-items: center;
   gap: 8px;
-  flex-wrap: wrap;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 10px;
+  padding: 4px 4px 4px 14px;
 }
 
-.zroom-stream-icon { font-size: 1.1rem; flex-shrink: 0; }
+.meet-stream-icon { font-size: 1rem; flex-shrink: 0; }
 
-.zroom-stream-url-in {
+.meet-stream-url-in {
   flex: 1;
-  min-width: 180px;
-  background: rgba(255,255,255,0.07);
-  border: 1px solid var(--zroom-border);
+  background: transparent;
+  border: none;
   outline: none;
   color: var(--text);
-  font-size: 0.85rem;
+  font-size: 0.88rem;
   font-family: inherit;
-  padding: 9px 13px;
-  border-radius: 8px;
-  transition: border-color 0.2s;
+  padding: 10px 0;
+  min-width: 0;
 }
-.zroom-stream-url-in:focus { border-color: var(--meet-accent); }
-.zroom-stream-url-in::placeholder { color: var(--text-dim); }
+.meet-stream-url-in::placeholder { color: var(--text-dim); }
 
-.zroom-stream-go {
+.meet-stream-go {
   background: var(--meet-accent);
   color: #fff;
   border: none;
-  padding: 9px 18px;
+  padding: 11px 18px;
   border-radius: 8px;
   font-size: 0.85rem;
   font-weight: 700;
@@ -3231,98 +3118,123 @@ button { cursor: pointer; }
   flex-shrink: 0;
   transition: filter 0.2s;
 }
-.zroom-stream-go:hover { filter: brightness(1.15); }
+.meet-stream-go:hover { filter: brightness(1.15); }
 
-.zroom-stream-frame {
-  flex: 1;
+.meet-stream-frame-wrap {
+  position: relative;
   border-radius: 10px;
   overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.08);
   background: #000;
-  min-height: 220px;
+  flex: 1;
+  min-height: 300px;
 }
-.zroom-stream-frame.hidden { display: none; }
-.zroom-stream-frame iframe {
+.meet-stream-frame-wrap iframe {
   width: 100%;
   height: 100%;
-  min-height: 220px;
+  min-height: 300px;
   border: none;
   display: block;
 }
 
-/* ── Side panel ──────────────────────────────────────────── */
-.zroom-side-panel {
+/* ── Theater mode — enlarge the stream in-page (Zoom/Meet feel) ── */
+.meet-theater .meet-main-layout {
+  grid-template-columns: 1fr;
+}
+.meet-theater .meet-right-col {
+  position: fixed;
+  top: 80px;
+  right: 16px;
   width: 340px;
-  min-width: 300px;
-  background: var(--zroom-bar);
-  border-left: 1px solid var(--zroom-border);
-  display: flex;
-  flex-direction: column;
+  max-width: calc(100vw - 32px);
+  height: 70vh;
+  max-height: none;
+  z-index: 1200;
+  background: #14141c;
+  box-shadow: 0 12px 48px rgba(0,0,0,0.6);
+  border-radius: 12px;
   overflow: hidden;
-  flex-shrink: 0;
-  transition: width 0.25s ease;
 }
-.zroom-side-panel.hidden { display: none; }
+.meet-theater .meet-video-grid {
+  max-height: 132px;
+  overflow-x: auto;
+  flex-wrap: nowrap;
+}
+.meet-theater .meet-stream-frame-wrap {
+  min-height: 72vh;
+}
 
-.zroom-panel-tabs {
-  display: flex;
+/* ── Emoji reactions overlay — anchored to the call/stream area ── */
+.meet-emoji-rain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 50;
+  overflow: hidden;
+}
+
+.emoji-float {
+  position: absolute;
+  bottom: 4%;
+  animation: floatUp ease-out forwards;
+  user-select: none;
+  line-height: 1;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5));
+}
+
+@keyframes floatUp {
+  0%   { transform: translateY(0) scale(0.7) rotate(0deg); opacity: 1; }
+  60%  { opacity: 1; }
+  100% { transform: translateY(-78vh) scale(1.3) rotate(20deg); opacity: 0; }
+}
+
+/* Labelled reaction pill (who reacted) */
+.emoji-pill {
+  position: absolute;
+  bottom: 2%;
+  display: inline-flex;
   align-items: center;
-  border-bottom: 1px solid var(--zroom-border);
-  flex-shrink: 0;
-  padding: 0 4px;
+  gap: 6px;
+  padding: 5px 12px 5px 8px;
+  background: rgba(20,20,28,0.82);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 22px;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 4px 18px rgba(0,0,0,0.45);
+  animation: pillRise ease-out forwards;
+  user-select: none;
+  white-space: nowrap;
+}
+.emoji-pill-self { border-color: var(--meet-accent); }
+.emoji-pill-flag  { font-size: 1.1rem; line-height: 1; }
+.emoji-pill-emoji { font-size: 1.3rem; line-height: 1; }
+
+@keyframes pillRise {
+  0%   { transform: translateY(20px) scale(0.85); opacity: 0; }
+  15%  { transform: translateY(0) scale(1);       opacity: 1; }
+  75%  { opacity: 1; }
+  100% { transform: translateY(-46vh) scale(0.95); opacity: 0; }
 }
 
-.zroom-tab {
-  flex: 1;
-  padding: 14px 12px;
-  background: none;
-  border: none;
-  border-bottom: 2px solid transparent;
-  color: var(--text-dim);
-  font-size: 0.84rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: color 0.2s, border-color 0.2s;
-  font-family: inherit;
-}
-.zroom-tab.active {
-  color: var(--meet-accent);
-  border-bottom-color: var(--meet-accent);
-}
-.zroom-tab:hover { color: var(--text); }
-
-.zroom-panel-close {
-  background: none;
-  border: none;
-  color: var(--text-dim);
-  font-size: 1rem;
-  cursor: pointer;
-  padding: 8px 10px;
-  border-radius: 6px;
-  flex-shrink: 0;
-  transition: color 0.2s, background 0.2s;
-}
-.zroom-panel-close:hover { color: var(--text); background: rgba(255,255,255,0.06); }
-
-.zroom-panel-body {
-  flex: 1;
+/* Right column: chat */
+.meet-right-col {
   display: flex;
   flex-direction: column;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
   overflow: hidden;
+  max-height: 680px;
 }
-.zroom-panel-body.hidden { display: none; }
 
-/* Chat inside panel */
-.zroom-messages {
-  flex: 1;
-  overflow-y: auto;
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  scroll-behavior: smooth;
+.meet-chat-header {
+  padding: 12px 16px;
+  font-weight: 700;
+  font-size: 0.88rem;
+  border-bottom: 1px solid var(--border);
+  background: rgba(255,255,255,0.03);
+  flex-shrink: 0;
 }
-.zroom-messages::-webkit-scrollbar { width: 4px; }
-.zroom-messages::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.14); border-radius: 4px; }
 
 .meet-messages {
   flex: 1;
@@ -3346,8 +3258,8 @@ button { cursor: pointer; }
   font-size: 0.83rem;
   word-break: break-word;
 }
-.meet-msg-self  { align-self: flex-end;  background: rgba(229,9,20,0.18);   border: 1px solid rgba(229,9,20,0.28); }
-.meet-msg-other { align-self: flex-start; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.10); }
+.meet-msg-self  { align-self: flex-end;  background: rgba(229,9,20,0.14);   border: 1px solid rgba(229,9,20,0.22); }
+.meet-msg-other { align-self: flex-start; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); }
 .meet-msg-flag  { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
 .meet-msg-body  { display: flex; flex-direction: column; gap: 2px; flex: 1; }
 .meet-msg-nick  { font-size: 0.7rem; font-weight: 700; color: var(--meet-accent); }
@@ -3358,292 +3270,116 @@ button { cursor: pointer; }
   align-self: center;
   font-size: 0.71rem;
   color: var(--text-dim);
-  background: rgba(255,255,255,0.05);
+  background: rgba(255,255,255,0.04);
   border-radius: 20px;
   padding: 3px 12px;
   text-align: center;
 }
 
-.zroom-chat-footer {
-  border-top: 1px solid var(--zroom-border);
-  padding: 10px 12px;
+.meet-chat-input-wrap {
   display: flex;
-  flex-direction: column;
   gap: 8px;
+  padding: 10px 12px;
+  border-top: 1px solid var(--border);
   flex-shrink: 0;
 }
 
-.zroom-chat-input-row {
-  display: flex;
-  gap: 8px;
-}
-
-.zroom-msg-input {
+.meet-msg-input {
   flex: 1;
-  background: rgba(255,255,255,0.07);
-  border: 1px solid var(--zroom-border);
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
   color: var(--text);
   padding: 10px 14px;
-  border-radius: 24px;
+  border-radius: 8px;
   font-size: 0.87rem;
   font-family: inherit;
   outline: none;
   min-width: 0;
   transition: border-color 0.2s;
 }
-.zroom-msg-input:focus { border-color: var(--meet-accent); }
+.meet-msg-input:focus { border-color: var(--meet-accent); }
 
-.zroom-send-btn {
+.meet-send-btn {
   background: var(--meet-accent);
   color: #fff;
   border: none;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.87rem;
   cursor: pointer;
   flex-shrink: 0;
   transition: filter 0.2s;
 }
-.zroom-send-btn:hover { filter: brightness(1.2); }
+.meet-send-btn:hover { filter: brightness(1.15); }
 
-.zroom-chat-emojis {
+/* Controls bar */
+.meet-controls-bar {
   display: flex;
-  gap: 4px;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-top: 10px;
   flex-wrap: wrap;
 }
 
-/* People list */
-.zroom-people-list {
-  flex: 1;
-  overflow-y: auto;
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
+.meet-media-group { display: flex; gap: 8px; flex-shrink: 0; }
 
-.zroom-person-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 10px;
+.meet-media-btn {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.14);
+  color: var(--text-dim);
+  padding: 10px 16px;
   border-radius: 8px;
-  background: rgba(255,255,255,0.04);
-}
-
-.zroom-person-avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: var(--meet-accent);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.9rem;
-  font-weight: 800;
-  color: #fff;
-  flex-shrink: 0;
-}
-
-.zroom-person-name {
-  font-size: 0.84rem;
+  font-size: 0.85rem;
   font-weight: 600;
-  color: var(--text);
-  flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  cursor: pointer;
+  transition: all 0.2s;
   white-space: nowrap;
 }
-
-.zroom-person-flag {
-  font-size: 1.1rem;
-}
-
-/* ── Controls bar (bottom) ───────────────────────────────── */
-.zroom-controls {
-  height: 82px;
-  min-height: 82px;
-  background: var(--zroom-bar);
-  border-top: 1px solid var(--zroom-border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 24px;
-  gap: 12px;
-  flex-shrink: 0;
-  z-index: 10;
-}
-
-.zroom-ctrl-group {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.zroom-ctrl-left  { flex: 1; justify-content: flex-start; }
-.zroom-ctrl-center { flex-shrink: 0; }
-.zroom-ctrl-right { flex: 1; justify-content: flex-end; }
-
-.zroom-ctrl-item {
-  position: relative;
-}
-
-/* Zoom-style control button */
-.zctrl-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid transparent;
-  color: var(--text);
-  min-width: 68px;
-  padding: 10px 12px;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: background 0.2s, border-color 0.2s, color 0.2s;
-  font-family: inherit;
-  position: relative;
-}
-.zctrl-btn:hover { background: rgba(255,255,255,0.12); }
-
-.zctrl-btn.zctrl-active {
-  background: rgba(229,9,20,0.14);
-  border-color: rgba(229,9,20,0.35);
-  color: var(--meet-accent);
-}
-
-/* Muted = red tint */
-.zctrl-btn.zctrl-muted {
-  color: #ff5555;
-}
-.zctrl-btn.zctrl-muted .zctrl-icon svg { stroke: #ff5555; }
-
-/* On = green tint */
-.zctrl-btn.zctrl-on {
+.meet-media-btn:hover    { background: rgba(255,255,255,0.10); color: var(--text); }
+.meet-media-btn.media-active {
+  background: rgba(46,204,113,0.14);
+  border-color: rgba(46,204,113,0.38);
   color: #2ecc71;
 }
-.zctrl-btn.zctrl-on .zctrl-icon svg { stroke: #2ecc71; }
 
-/* Leave button */
-.zctrl-btn.zctrl-leave {
-  background: rgba(229,9,20,0.14);
-  border-color: rgba(229,9,20,0.35);
-  color: #ff4444;
-}
-.zctrl-btn.zctrl-leave:hover {
-  background: rgba(229,9,20,0.28);
-}
-
-.zctrl-icon {
+.meet-reactions-group {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.3rem;
-  line-height: 1;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-left: auto;
 }
-.zctrl-icon svg { stroke: currentColor; }
-
-.zctrl-label {
-  font-size: 0.67rem;
-  font-weight: 600;
-  white-space: nowrap;
-  text-transform: none;
-}
-
-/* Notification badge */
-.zctrl-badge {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  background: var(--meet-accent);
-  color: #fff;
-  font-size: 0.6rem;
-  font-weight: 800;
-  min-width: 16px;
-  height: 16px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 4px;
-  line-height: 1;
-}
-.zctrl-badge.hidden { display: none; }
-
-/* Reactions popover */
-.zroom-reactions-popover {
-  position: absolute;
-  bottom: calc(100% + 10px);
-  left: 50%;
-  transform: translateX(-50%);
-  background: #2c2c2e;
-  border: 1px solid var(--zroom-border);
-  border-radius: 16px;
-  padding: 10px;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 4px;
-  z-index: 100;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-  min-width: 160px;
-}
-.zroom-reactions-popover.hidden { display: none; }
 
 .emoji-reaction-btn {
   background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 10px;
-  padding: 8px;
-  font-size: 1.2rem;
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 1.15rem;
   cursor: pointer;
   line-height: 1;
   transition: transform 0.12s, background 0.15s;
-  text-align: center;
 }
-.emoji-reaction-btn:hover  { transform: scale(1.3); background: rgba(255,255,255,0.12); }
-.emoji-reaction-btn:active { transform: scale(0.85); }
-
-/* Emoji rain */
-.meet-emoji-rain {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 9999;
-  overflow: hidden;
-}
-
-.emoji-float {
-  position: absolute;
-  bottom: -10%;
-  animation: floatUp ease-out forwards;
-  user-select: none;
-  line-height: 1;
-}
-
-@keyframes floatUp {
-  0%   { transform: translateY(0) scale(0.7) rotate(0deg); opacity: 1; }
-  60%  { opacity: 1; }
-  100% { transform: translateY(-90vh) scale(1.3) rotate(20deg); opacity: 0; }
-}
+.emoji-reaction-btn:hover  { transform: scale(1.35); background: rgba(255,255,255,0.10); }
+.emoji-reaction-btn:active { transform: scale(0.88); }
 
 /* ── Responsive ──────────────────────────────────────────── */
 @media (max-width: 960px) {
-  .meet-landing-grid { grid-template-columns: 1fr; }
-  .zroom-side-panel { width: 100%; position: absolute; right: 0; top: 0; bottom: 0; z-index: 20; }
-  .zroom-gallery { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+  .meet-landing-grid  { grid-template-columns: 1fr; }
+  .meet-main-layout   { grid-template-columns: 1fr; }
+  .meet-right-col     { max-height: 420px; }
+  .meet-reactions-group { margin-left: 0; }
 }
 
 @media (max-width: 600px) {
-  .zroom-topbar-center { display: none; }
-  .zroom-controls { padding: 0 10px; gap: 4px; }
-  .zctrl-btn { min-width: 52px; padding: 8px 8px; }
-  .zctrl-label { font-size: 0.6rem; }
-  .zroom-gallery { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+  .meet-room-header { flex-wrap: wrap; }
+  .meet-share-wrap  { order: 3; width: 100%; }
+  .meet-room-right  { margin-left: 0; }
+  .meet-controls-bar { flex-direction: column; align-items: flex-start; }
 }
 
 /* ============================================================
