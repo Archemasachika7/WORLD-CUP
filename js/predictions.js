@@ -19,7 +19,7 @@ const Predictions = (() => {
       scores[p.teamId].formBoost     += ((p.goals||0) + 0.7*(p.assists||0)) * 0.01 * w;
       if (lm.tier === 1) scores[p.teamId].top5Count++;
       else               scores[p.teamId].nonTop5Count++;
-    });
+    }).filter(Boolean);
 
     AWARDS.forEach(a => {
       if (a.teamId && scores[a.teamId]) {
@@ -145,12 +145,12 @@ const Predictions = (() => {
     if (!h || !a) return "";
     const diff = hG - aG;
     if (min === 0) return "Pre-match — move the sliders to see live probability shift";
-    if (hWin > 0.75) return `${h.name} in complete control`;
-    if (aWin > 0.75) return `${a.name} heading for the win`;
+    if (hWin > 0.75) return `${h.flag} ${h.name} in complete control`;
+    if (aWin > 0.75) return `${a.flag} ${a.name} heading for the win`;
     if (Math.abs(diff) === 0 && min > 75) return "Late-game stalemate — penalty shootout looms";
     if (Math.abs(diff) === 1 && min > 70) return "Nervy finish — one goal can flip everything";
-    if (diff > 0) return `${h.name} are ahead — holding on`;
-    if (diff < 0) return `${a.name} are ahead — ${h.name} chasing`;
+    if (diff > 0) return `${h.flag} ${h.name} are ahead — holding on`;
+    if (diff < 0) return `${a.flag} ${a.name} are ahead — ${h.flag} ${h.name} chasing`;
     return "Tight encounter — any team can win";
   }
 

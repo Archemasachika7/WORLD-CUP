@@ -4,278 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Teams — World Cup 2026</title>
-  <meta name="description" content="All 48 teams at FIFA World Cup 2026 — real flags, squads, player photos, FIFA rankings." />
+  <meta name="description" content="All 48 teams at FIFA World Cup 2026 — real flags, squads, FIFA rankings, confederation filter." />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚽</text></svg>" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Teko:wght@400;500;600;700&family=Syncopate:wght@400;700&display=swap" />
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/animations.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css" />
-<style>
-/* ══════════════════════════════════════════════
-   EA FC TEAM VIEWER — Pack Opening + Pitch View
-══════════════════════════════════════════════ */
-#fc-viewer {
-  display: none; position: fixed; inset: 0;
-  z-index: 3000; background: #06060f; flex-direction: column;
-}
-#fc-viewer.open { display: flex; }
-
-#fc-close-btn {
-  position: absolute; top: 14px; right: 18px; z-index: 3100;
-  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18);
-  color: #fff; width: 38px; height: 38px; border-radius: 50%;
-  font-size: 1rem; cursor: pointer; transition: background .2s;
-  display: flex; align-items: center; justify-content: center;
-}
-#fc-close-btn:hover { background: rgba(229,9,20,.55); }
-
-.fc-screen { flex:1; display:flex; flex-direction:column; overflow:hidden; min-height:0; }
-
-/* ── Pack Screen ── */
-#fc-pack-screen {
-  align-items: center; justify-content: space-between;
-  padding: 56px 20px 24px; gap: 14px; overflow-y: auto;
-  background:
-    radial-gradient(ellipse 80% 50% at 50% 0%, rgba(80,0,140,.38) 0%, transparent 68%),
-    radial-gradient(ellipse 60% 40% at 50% 100%, rgba(180,80,0,.18) 0%, transparent 60%),
-    #06060f;
-}
-.fc-pack-header { text-align:center; animation: fcFadeDown .5s ease both; }
-@keyframes fcFadeDown {
-  from { opacity:0; transform:translateY(-22px); }
-  to   { opacity:1; transform:translateY(0); }
-}
-#fc-team-name-disp {
-  font-size: clamp(1.3rem,4.5vw,2rem); font-weight:900;
-  letter-spacing:5px; color:#fff;
-  text-shadow: 0 0 40px rgba(255,215,0,.55); margin:10px 0 4px;
-}
-.fc-pack-label { font-size:.67rem; letter-spacing:6px; color:rgba(255,215,0,.65); font-weight:700; }
-
-/* Cards row */
-#fc-cards-row { display:flex; flex-wrap:wrap; justify-content:center; gap:9px; width:100%; max-width:1100px; align-content:center; }
-
-.fc-pack-footer { display:flex; justify-content:center; min-height:56px; align-items:center; }
-#fc-view-pitch-btn {
-  background: linear-gradient(135deg,#e50914,#ff4500); color:#fff; border:none;
-  padding:13px 36px; border-radius:30px; font-size:.95rem; font-weight:800;
-  letter-spacing:2px; cursor:pointer; box-shadow:0 4px 24px rgba(229,9,20,.5);
-  transition:transform .2s,box-shadow .2s;
-  animation: fcBtnPop .5s cubic-bezier(0.34,1.56,0.64,1) both;
-}
-@keyframes fcBtnPop { from{opacity:0;transform:scale(0.4)} to{opacity:1;transform:scale(1)} }
-#fc-view-pitch-btn:hover { transform:translateY(-2px) scale(1.04); box-shadow:0 8px 32px rgba(229,9,20,.7); }
-
-/* ── EA FC Card ── */
-.fc-card {
-  width:96px; height:134px; perspective:700px;
-  flex-shrink:0; position:relative;
-  animation: fcCardRise .42s cubic-bezier(0.34,1.56,0.64,1) both;
-}
-@keyframes fcCardRise { from{opacity:0;transform:translateY(50px) scale(.75)} to{opacity:1;transform:translateY(0) scale(1)} }
-.fc-card-inner {
-  width:100%; height:100%; transform-style:preserve-3d;
-  transition:transform .65s cubic-bezier(0.4,0,0.2,1); position:relative;
-}
-.fc-card.flipped .fc-card-inner { transform:rotateY(180deg); }
-.fc-card-back, .fc-card-front {
-  position:absolute; inset:0; border-radius:9px;
-  backface-visibility:hidden; -webkit-backface-visibility:hidden;
-}
-.fc-card-back {
-  background:linear-gradient(150deg,#0b102e,#1a237e,#0b102e);
-  border:2px solid rgba(100,149,237,.3);
-  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
-}
-.fc-card-back-emblem { font-size:1.8rem; opacity:.55; }
-.fc-card-back-wc { font-size:.52rem; font-weight:900; letter-spacing:2px; color:rgba(255,255,255,.35); text-align:center; line-height:1.3; }
-.fc-card-front { transform:rotateY(180deg); overflow:hidden; display:flex; flex-direction:column; }
-
-/* Tier colours */
-.tier-icon     { background:linear-gradient(150deg,#0d0020,#3a0070,#8000cc,#c77dff); border:2px solid #c77dff; }
-.tier-toty     { background:linear-gradient(150deg,#1a0a00,#8b5f00,#ffd700,#fff9c4); border:2px solid #ffd700; }
-.tier-gold-rare{ background:linear-gradient(150deg,#3d2200,#a87800,#ffc107,#fff8e1); border:2px solid #ffc107; }
-.tier-gold     { background:linear-gradient(150deg,#2a1a00,#7a5600,#c49a00,#e8c84a); border:2px solid #c49a00; }
-.tier-silver   { background:linear-gradient(150deg,#1a1a1a,#555,#a0a0a0,#d8d8d8);   border:2px solid #aaa; }
-.tier-bronze   { background:linear-gradient(150deg,#1c0a00,#6b3a1f,#a0703f,#d4a060); border:2px solid #a0703f; }
-
-/* Squad confirmed/projected badge */
-.fc-squad-badge {
-  position:absolute; top:5px; right:6px; z-index:6;
-  font-size:.5rem; font-weight:900; padding:1px 4px;
-  border-radius:3px; letter-spacing:.5px; line-height:1.4;
-}
-.fc-squad-badge.confirmed { background:rgba(46,204,113,.9); color:#fff; }
-.fc-squad-badge.projected  { background:rgba(255,193,7,.85); color:#000; }
-
-.fc-card-shine {
-  position:absolute; inset:0;
-  background:linear-gradient(135deg,rgba(255,255,255,.18) 0%,transparent 50%,rgba(255,255,255,.06) 100%);
-  border-radius:inherit; pointer-events:none; z-index:5;
-}
-.fc-card-top { display:flex; flex-direction:column; align-items:flex-start; padding:5px 6px 0; gap:0; position:relative; z-index:2; }
-.fc-card-rating { font-size:1.35rem; font-weight:900; color:#fff; line-height:1; text-shadow:0 2px 8px rgba(0,0,0,.6); }
-.fc-card-pos  { font-size:.5rem; font-weight:800; color:rgba(255,255,255,.88); letter-spacing:1px; }
-.fc-card-nation { font-size:.82rem; margin-top:1px; }
-.fc-card-photo-wrap { flex:1; display:flex; align-items:center; justify-content:center; overflow:hidden; }
-.fc-card-photo {
-  width:64px; height:64px; border-radius:50%;
-  object-fit:cover; object-position:top center;
-  border:2px solid rgba(255,255,255,.4); background:rgba(0,0,0,.3);
-}
-.fc-card-info { padding:2px 5px 5px; text-align:center; position:relative; z-index:2; }
-.fc-card-name { font-size:.6rem; font-weight:900; color:#fff; letter-spacing:.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.fc-card-club { font-size:.46rem; color:rgba(255,255,255,.6); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.fc-card-stats { display:flex; justify-content:center; gap:4px; margin-top:2px; font-size:.44rem; color:rgba(255,255,255,.8); font-weight:600; }
-
-/* Active pulse (before flip) */
-.fc-card.fc-card-active { animation: fcPulse .4s ease-in-out infinite alternate !important; }
-@keyframes fcPulse {
-  from { transform:scale(1);   box-shadow:0 0  0  rgba(255,215,0,0); }
-  to   { transform:scale(1.1); box-shadow:0 0 30px rgba(255,215,0,.85),0 0 60px rgba(255,100,0,.35); }
-}
-.fc-glow-icon { box-shadow:0 0 24px rgba(180,90,255,.9),0 0 48px rgba(255,215,0,.4); }
-.fc-glow-gold { box-shadow:0 0 18px rgba(255,200,0,.8),0 0 36px rgba(255,140,0,.35); }
-
-/* Particles */
-.fc-particle {
-  position:fixed; border-radius:50%; pointer-events:none; z-index:4000;
-  animation: fcPart var(--dur,1.2s) var(--delay,0s) ease-out forwards;
-}
-@keyframes fcPart {
-  0%   { opacity:1; transform:translate(0,0) scale(1); }
-  100% { opacity:0; transform:translate(var(--tx,0),var(--ty,-80px)) scale(.2); }
-}
-
-/* ── Pitch Screen ── */
-#fc-pitch-screen {
-  flex-direction:column; align-items:center;
-  background:#071207; padding:52px 16px 16px;
-  overflow-y:auto; gap:12px;
-}
-.fc-pitch-topbar {
-  display:flex; align-items:center; justify-content:space-between;
-  width:100%; max-width:460px;
-}
-#fc-formation-label { font-size:.95rem; font-weight:900; letter-spacing:2px; color:#fff; }
-#fc-squad-status-lbl { font-size:.65rem; color:rgba(255,255,255,.45); margin-top:1px; }
-#fc-back-btn {
-  background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.18);
-  color:#fff; padding:6px 14px; border-radius:6px; font-size:.78rem;
-  font-weight:700; cursor:pointer; transition:background .2s;
-}
-#fc-back-btn:hover { background:rgba(255,255,255,.18); }
-
-.fc-pitch-wrap { flex:1; display:flex; justify-content:center; align-items:center; width:100%; }
-.fc-pitch-field {
-  position:relative; width:min(100%,370px); aspect-ratio:3/4;
-  background:
-    repeating-linear-gradient(0deg,rgba(0,0,0,.07) 0px,rgba(0,0,0,.07) 36px,transparent 36px,transparent 72px),
-    linear-gradient(180deg,#1b5e20 0%,#2e7d32 40%,#1b5e20 70%,#2e7d32 100%);
-  border:3px solid rgba(255,255,255,.65); border-radius:4px;
-}
-/* Pitch markings */
-.fcp-center-line { position:absolute; top:50%; left:5%; right:5%; height:2px; background:rgba(255,255,255,.5); transform:translateY(-50%); }
-.fcp-center-circle {
-  position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
-  width:20%; aspect-ratio:1; border:2px solid rgba(255,255,255,.45); border-radius:50%;
-}
-.fcp-center-dot {
-  position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
-  width:5px; height:5px; background:rgba(255,255,255,.6); border-radius:50%;
-}
-.fcp-penalty { position:absolute; left:25%; right:25%; height:17%; border:2px solid rgba(255,255,255,.45); }
-.fcp-penalty.top { top:2px; border-top:none; }
-.fcp-penalty.bot { bottom:2px; border-bottom:none; }
-.fcp-goal { position:absolute; left:40%; right:40%; height:6%; border:2px solid rgba(255,255,255,.45); }
-.fcp-goal.top { top:2px; border-top:none; }
-.fcp-goal.bot { bottom:2px; border-bottom:none; }
-
-/* Player tokens */
-.fc-pitch-player {
-  position:absolute; transform:translate(-50%,-50%);
-  display:flex; flex-direction:column; align-items:center; gap:2px;
-  cursor:pointer; z-index:2;
-  animation: fcTokenIn .4s cubic-bezier(0.34,1.56,0.64,1) both;
-}
-@keyframes fcTokenIn {
-  from { opacity:0; transform:translate(-50%,-50%) scale(0); }
-  to   { opacity:1; transform:translate(-50%,-50%) scale(1); }
-}
-.fc-pitch-player:hover .fc-pp-wrap { transform:scale(1.2); }
-.fc-pp-wrap {
-  position:relative; width:40px; height:40px; border-radius:50%;
-  overflow:hidden; border:3px solid #fff; background:#222;
-  transition:transform .2s; flex-shrink:0;
-}
-.fc-pp-wrap[data-pos="GK"] { border-color:#fdd835; }
-.fc-pp-wrap[data-pos="DF"] { border-color:#42a5f5; }
-.fc-pp-wrap[data-pos="MF"] { border-color:#66bb6a; }
-.fc-pp-wrap[data-pos="FW"] { border-color:#ef5350; }
-.fc-pp-photo { width:100%; height:100%; object-fit:cover; object-position:top center; }
-.fc-pp-rating {
-  position:absolute; bottom:-1px; right:-3px;
-  background:rgba(0,0,0,.85); color:#ffd700;
-  font-size:.45rem; font-weight:900; padding:1px 3px; border-radius:3px; line-height:1;
-}
-.fc-pp-name {
-  font-size:.52rem; font-weight:800; color:#fff;
-  text-shadow:0 1px 4px rgba(0,0,0,1),0 0 6px rgba(0,0,0,.9);
-  white-space:nowrap; background:rgba(0,0,0,.55);
-  padding:1px 4px; border-radius:3px; max-width:70px; overflow:hidden; text-overflow:ellipsis;
-}
-.fc-pp-pos { font-size:.42rem; font-weight:800; padding:1px 3px; border-radius:2px; letter-spacing:.5px; }
-.fc-pp-pos.GK { background:#fdd835; color:#000; }
-.fc-pp-pos.DF { background:#42a5f5; color:#fff; }
-.fc-pp-pos.MF { background:#66bb6a; color:#fff; }
-.fc-pp-pos.FW { background:#ef5350; color:#fff; }
-
-/* ── Mobile: pack screen scrolls, cards shrink ── */
-@media (max-width:600px) {
-  #fc-pack-screen { padding:50px 12px 16px; gap:10px; overflow-y:auto; }
-  .fc-pack-header  { margin-bottom:0; }
-  #fc-team-name-disp { letter-spacing:3px; }
-  .fc-pack-label   { letter-spacing:4px; font-size:.6rem; }
-  #fc-cards-row    { gap:7px; }
-  .fc-pack-footer  { min-height:44px; }
-  #fc-view-pitch-btn { padding:11px 28px; font-size:.85rem; letter-spacing:1px; }
-}
-@media (max-width:480px) {
-  .fc-card          { width:74px; height:105px; }
-  .fc-card-rating   { font-size:1rem; }
-  .fc-card-photo    { width:48px; height:48px; }
-  .fc-card-name     { font-size:.55rem; }
-  .fc-card-club     { display:none; }
-  .fc-card-stats    { font-size:.42rem; gap:3px; }
-}
-@media (max-width:360px) {
-  .fc-card          { width:64px; height:90px; }
-  .fc-card-rating   { font-size:.9rem; }
-  .fc-card-photo    { width:40px; height:40px; }
-  #fc-cards-row     { gap:5px; }
-}
-/* ── Mobile: pitch ── */
-@media (max-width:600px) {
-  #fc-pitch-screen   { padding:50px 10px 10px; gap:8px; }
-  .fc-pitch-topbar   { max-width:100%; }
-  #fc-formation-label{ font-size:.78rem; letter-spacing:1px; }
-  #fc-squad-status-lbl{ font-size:.58rem; }
-  #fc-back-btn       { padding:5px 10px; font-size:.72rem; }
-  .fc-pitch-field    { width:min(100%,320px); }
-  .fc-pp-wrap        { width:34px; height:34px; }
-  .fc-pp-name        { font-size:.46rem; max-width:58px; }
-  .fc-pp-rating      { font-size:.38rem; padding:1px 2px; }
-  .fc-pp-pos         { font-size:.38rem; }
-}
-@media (max-width:360px) {
-  .fc-pitch-field    { width:min(100%,280px); }
-  .fc-pp-wrap        { width:28px; height:28px; border-width:2px; }
-  .fc-pp-name        { display:none; }
-}
-</style>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>@keyframes playerIn{0%{opacity:0;transform:translate(-50%,-50%) scale(.2) rotate(-8deg)}100%{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(0)}} @keyframes pulseGlow{0%,100%{box-shadow:0 0 0 rgba(255,255,255,.1)}50%{box-shadow:0 0 18px rgba(255,255,255,.22)}}</style>
 </head>
 <body>
 
@@ -284,7 +17,7 @@
 <div class="page-hero" style="padding:100px 40px 40px;max-width:1200px;margin:0 auto;">
   <span class="section-tag">All 48 Nations</span>
   <h1 class="section-title" style="font-size:2.5rem;margin-top:8px">The 2026 World Cup Teams</h1>
-  <p class="section-desc">Click any team for full squad, real player photos, formation & analysis. Filter by confederation or search by name.</p>
+  <p class="section-desc">Click any team for full squad, stats, and analysis. Filter by confederation or search by name.</p>
 </div>
 
 <!-- Filter bar -->
@@ -302,6 +35,7 @@
 
 <div id="teams-grid" style="max-width:1200px;margin:0 auto;padding:0 40px 40px;"></div>
 
+
 <footer id="footer"></footer>
 
 <!-- Modal -->
@@ -312,55 +46,9 @@
   </div>
 </div>
 
-<!-- ══ EA FC Team Viewer ══ -->
-<div id="fc-viewer">
-  <button id="fc-close-btn" onclick="closeFCViewer()">✕</button>
-
-  <!-- Screen 1: Pack Opening -->
-  <div id="fc-pack-screen" class="fc-screen">
-    <div class="fc-pack-header">
-      <div id="fc-team-flag-disp"></div>
-      <div id="fc-team-name-disp"></div>
-      <div class="fc-pack-label">⚽ &nbsp; S Q U A D &nbsp; R E V E A L &nbsp; ⚽</div>
-    </div>
-    <div id="fc-cards-row"></div>
-    <div class="fc-pack-footer">
-      <button id="fc-view-pitch-btn" onclick="showFCPitch()" style="display:none">
-        🏟️ &nbsp; VIEW ON PITCH
-      </button>
-    </div>
-  </div>
-
-  <!-- Screen 2: Formation Pitch -->
-  <div id="fc-pitch-screen" class="fc-screen" style="display:none">
-    <div class="fc-pitch-topbar">
-      <button id="fc-back-btn" onclick="showFCPack()">← CARDS</button>
-      <div style="text-align:center">
-        <div id="fc-formation-label"></div>
-        <div id="fc-squad-status-lbl"></div>
-      </div>
-      <div style="width:64px"></div>
-    </div>
-    <div class="fc-pitch-wrap">
-      <div class="fc-pitch-field">
-        <div class="fcp-center-line"></div>
-        <div class="fcp-center-circle"></div>
-        <div class="fcp-center-dot"></div>
-        <div class="fcp-penalty top"></div>
-        <div class="fcp-penalty bot"></div>
-        <div class="fcp-goal top"></div>
-        <div class="fcp-goal bot"></div>
-        <div id="fc-pitch"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
 <script src="js/data.js"></script>
 <script src="js/predictions.js"></script>
-<script src="js/supabase-client.js"></script>
 <script src="js/shared.js"></script>
-<script src="js/auth.js"></script>
 <script>
 let teamsViewMode = "conf";
 let activeConf = "ALL";
@@ -376,9 +64,8 @@ document.addEventListener("DOMContentLoaded", () => {
   initScrollAnimations();
 });
 
-// ---- Filters ----
 function buildConfFilters() {
-  const confs = ["ALL","UEFA","CONMEBOL","CONCACAF","AFC","CAF","OFC"];
+  const confs = ["ALL", "UEFA", "CONMEBOL", "CONCACAF", "AFC", "CAF", "OFC"];
   const container = document.getElementById("conf-filters");
   container.innerHTML = confs.map(c => `
     <button class="tab-btn conf-filter-btn ${c==='ALL'?'active':''}" data-conf="${c}">${c}</button>
@@ -426,19 +113,20 @@ function filteredTeams() {
   });
 }
 
-// ---- Render ----
 function renderTeams() {
   const container = document.getElementById("teams-grid");
   const teams = filteredTeams();
-  if (teamsViewMode === "conf") renderByConf(container, teams);
-  else renderByGroup(container, teams);
+
+  if (teamsViewMode === "conf") {
+    renderByConf(container, teams);
+  } else {
+    renderByGroup(container, teams);
+  }
 
   container.querySelectorAll(".team-card").forEach(c =>
-    c.addEventListener("click", () => openFCViewer(c.dataset.id))
+    c.addEventListener("click", () => openTeamModal(c.dataset.id))
   );
   initScrollAnimations();
-  // Async: load star player photos on cards
-  loadPhotosIntoImgs('.star-pill img[data-player]');
 }
 
 function renderByConf(container, teams) {
@@ -468,7 +156,7 @@ function renderByGroup(container, teams) {
     html += `<div class="conf-section">
       <h3 class="conf-title">Group ${g}</h3>
       <div class="group-table-view">
-        ${gt.map(renderGroupRow).join('')}
+        ${gt.map(t => renderGroupRow(t)).join('')}
       </div>
     </div>`;
   });
@@ -476,16 +164,19 @@ function renderByGroup(container, teams) {
 }
 
 function renderGroupRow(t) {
+  const sq = Predictions.SQ[t.id];
   const squad = SQUADS[t.id] || {};
   const badge = squad.status === "ANNOUNCED" ? '✅' : squad.status === "PRELIMINARY" ? '⚠️' : '❓';
   return `
-    <div class="team-card group-row-card" data-id="${t.id}" style="display:flex;align-items:center;gap:16px;padding:14px 18px;border-radius:10px;cursor:pointer;margin-bottom:6px;">
-      <div style="font-size:0;flex-shrink:0;">${flagImg(t.id, 40)}</div>
+    <div class="team-card group-row-card" data-id="${t.id}" style="display:flex;align-items:center;gap:16px;padding:16px 20px;border-radius:10px;cursor:pointer;">
+      ${flagImg(t.id, 40)}
       <div style="flex:1">
-        <div style="font-weight:700;font-size:0.95rem">${t.name}</div>
-        <div style="font-size:0.78rem;color:var(--text-dim)">${t.conf} &bull; FIFA #${t.ranking} &bull; Elo ${t.elo}</div>
+        <div style="font-weight:700;font-size:1rem">${t.name}</div>
+        <div style="font-size:0.8rem;color:var(--text-dim)">${t.conf} &bull; FIFA #${t.ranking} &bull; Elo ${t.elo}</div>
       </div>
-      <span class="sq-badge ${squad.status==='ANNOUNCED'?'sq-confirmed':squad.status==='PRELIMINARY'?'sq-preliminary':'sq-pending'}">${badge} ${squad.status}</span>
+      <div style="text-align:right;font-size:0.8rem">
+        <span class="sq-badge ${squad.status==='ANNOUNCED'?'sq-confirmed':squad.status==='PRELIMINARY'?'sq-preliminary':'sq-pending'}">${badge} ${squad.status}</span>
+      </div>
       ${t.isHost ? '<span class="host-badge">HOST</span>' : ''}
     </div>`;
 }
@@ -493,578 +184,148 @@ function renderGroupRow(t) {
 function renderTeamCard(t) {
   const sq = Predictions.SQ[t.id];
   const score = sq?.score || 7.5;
-  const top5  = sq?.top5Count || 0;
+  const top5 = sq?.top5Count || 0;
+  const stars = Math.min(5, Math.max(1, Math.round((score - 7.0) / 2.5 * 5)));
   const squad = SQUADS[t.id] || {};
-  const eloPct = Math.round(((t.elo - 1680) / 330) * 100).toFixed(0);
-
   const badge = squad.status === "ANNOUNCED"
-    ? '<span class="sq-badge sq-confirmed" style="margin-top:6px">✓ Announced</span>'
+    ? '<span class="sq-badge sq-confirmed">✓ Announced</span>'
     : squad.status === "PRELIMINARY"
-    ? '<span class="sq-badge sq-preliminary" style="margin-top:6px">~ Preliminary</span>'
-    : '<span class="sq-badge sq-pending" style="margin-top:6px">? Pending</span>';
-
-  // Find the top-rated tracked player for this team
-  const starPlayer = PLAYERS.filter(p => p.teamId === t.id).sort((a,b) => b.rating - a.rating)[0];
-  const starOverlay = starPlayer ? `
-    <div class="star-overlay">
-      <div class="star-pill">
-        <img src="${_photoPlaceholder}" data-player="${starPlayer.name}" alt="${starPlayer.name}" />
-        <div>
-          <div class="star-pill-name">${starPlayer.name.split(' ').slice(-1)[0]}</div>
-          <div class="star-pill-stat">⭐ ${starPlayer.rating}${starPlayer.goals ? ` &bull; ⚽${starPlayer.goals}G` : starPlayer.cs ? ` &bull; 🧤${starPlayer.cs}CS` : ''}</div>
-        </div>
-      </div>
-    </div>` : '';
-
+    ? '<span class="sq-badge sq-preliminary">~ Preliminary</span>'
+    : '<span class="sq-badge sq-pending">? Unannounced</span>';
   return `
-    <div class="team-card card-enter" data-id="${t.id}" style="padding-bottom:${starPlayer?'44px':'20px'}">
+    <div class="team-card card-enter" data-id="${t.id}">
       ${t.isHost ? '<span class="host-badge">HOST</span>' : ''}
       ${t.isDebut ? '<span class="host-badge" style="background:var(--accent2)">DEBUT</span>' : ''}
-      <div style="display:flex;justify-content:center;align-items:center;height:56px;font-size:0;margin-bottom:8px;">${flagImg(t.id, 64)}</div>
+      <div class="team-flag-lg" style="font-size:0;">${flagImg(t.id, 72)}</div>
       <div class="team-name">${t.name}</div>
       <div class="team-group">Group ${t.group} &bull; FIFA #${t.ranking}</div>
-      <div class="tc-elo-bar-wrap" title="Elo: ${t.elo}">
-        <div class="tc-elo-bar" style="width:${eloPct}%"></div>
-      </div>
-      <div style="font-size:0.67rem;color:var(--text-dim);margin-bottom:4px">Elo ${t.elo} &bull; ${top5} top-5 player${top5!==1?'s':''}</div>
+      <div class="team-top5">${top5} top-5 league player${top5!==1?'s':''}</div>
+      <div class="team-stars">${"★".repeat(stars)}${"☆".repeat(5-stars)}</div>
       ${badge}
-      ${starOverlay}
     </div>`;
 }
 
-// ============================================================
-//  MODAL — Tabbed (Overview | Squad | Formation | Key Players)
-// ============================================================
+// ---- Team Modal ----
 function openTeamModal(teamId) {
   const data = Predictions.getTeamAnalysis(teamId);
   if (!data) return;
   const { team, players, awards, squad, sq, probableXI, composite, strengths, weaknesses } = data;
+  const teamFlag = team.flag || "🏳️";
   const modal = document.getElementById("modal");
   const body  = document.getElementById("modal-body");
 
-  // ── Header
-  const headerHtml = `
-    <div class="modal-header" style="margin-bottom:16px;">
-      <div style="font-size:0;flex-shrink:0;">${flagImg(team.id, 72)}</div>
-      <div>
-        <h2 style="font-size:1.5rem;font-weight:900;margin-bottom:3px">${team.name}</h2>
-        <p class="modal-sub">Group ${team.group} &bull; FIFA #${team.ranking} &bull; ${team.conf} &bull; Elo ${team.elo}</p>
-        ${team.isHost ? '<span class="host-badge" style="position:static;display:inline-block;margin-top:4px">HOST NATION</span>' : ''}
-        ${team.isDebut ? '<span class="host-badge" style="position:static;display:inline-block;margin-top:4px;background:var(--accent2)">WORLD CUP DEBUT</span>' : ''}
-      </div>
-    </div>`;
-
-  // ── Tabs
-  const tabsHtml = `
-    <div class="modal-tabs">
-      <button class="modal-tab-btn active" data-tab="overview">📊 Overview</button>
-      <button class="modal-tab-btn" data-tab="squad">👥 Squad</button>
-      <button class="modal-tab-btn" data-tab="formation">⚽ Formation</button>
-      <button class="modal-tab-btn" data-tab="players">⭐ Key Players</button>
-    </div>`;
-
-  // ── Tab: Overview
   const squadStatusHtml = `
     <div class="squad-status-bar ${squad.status==='ANNOUNCED'?'sq-bar-green':squad.status==='PRELIMINARY'?'sq-bar-yellow':'sq-bar-grey'}">
       <span class="sq-status-icon">${squad.status==='ANNOUNCED'?'✅':squad.status==='PRELIMINARY'?'⚠️':'❓'}</span>
       <div>
-        <strong>Squad: ${squad.status}</strong>${squad.date?` — ${squad.date}`:' — pending June 2 FIFA deadline'}${squad.squadSize?` • ${squad.squadSize} players`:''}
+        <strong>Squad: ${squad.status}</strong>${squad.date?` — ${squad.date}`:' — pending June 2 FIFA deadline'}${squad.squadSize?` • ${squad.squadSize} players`:' • 26/27 players (TBD)'}
         <div class="sq-note">${squad.note}</div>
       </div>
     </div>`;
 
-  const overviewHtml = `
-    <div id="tab-overview" class="modal-tab-pane active">
-      ${squadStatusHtml}
-      <div class="modal-scores">
-        <div class="score-box"><div class="score-val">${sq.score.toFixed(2)}</div><div class="score-lbl">Squad Score</div></div>
-        <div class="score-box"><div class="score-val">${Math.round(composite*100)}%</div><div class="score-lbl">Composite</div></div>
-        <div class="score-box"><div class="score-val">${sq.top5Count}</div><div class="score-lbl">Top-5 Players</div></div>
-        <div class="score-box"><div class="score-val">${sq.awardBonus.toFixed(1)}</div><div class="score-lbl">Award Bonus</div></div>
-      </div>
-      ${awards.length ? `
-        <h3 class="modal-section-title">🏆 Season Honours</h3>
-        <ul class="awards-list">${awards.map(a=>`<li>🏅 <b>${a.award}</b> — ${a.winner}</li>`).join("")}</ul>` : ''}
-      <div class="strengths-weaknesses" style="margin-top:16px;">
-        <div>
-          <h3 class="modal-section-title green-title">Strengths</h3>
-          <ul style="list-style:none;display:flex;flex-direction:column;gap:6px;font-size:0.84rem;">
-            ${strengths.map(s=>`<li>✅ ${s}</li>`).join("")||"<li style='color:var(--text-dim)'>—</li>"}
-          </ul>
-        </div>
-        <div>
-          <h3 class="modal-section-title red-title">Concerns</h3>
-          <ul style="list-style:none;display:flex;flex-direction:column;gap:6px;font-size:0.84rem;">
-            ${weaknesses.map(w=>`<li>⚠️ ${w}</li>`).join("")||"<li style='color:var(--text-dim)'>—</li>"}
-          </ul>
-        </div>
-      </div>
-    </div>`;
-
-  // ── Tab: Squad (players by position with photos)
-  const squadHtml = `<div id="tab-squad" class="modal-tab-pane">${renderSquadTab(squad, players)}</div>`;
-
-  // ── Tab: Formation
-  const formationHtml = `
-    <div id="tab-formation" class="modal-tab-pane">
-      <div style="margin-bottom:10px;font-size:0.8rem;color:var(--text-dim)">
-        ${squad.status==='ANNOUNCED' ? '✅ Based on announced squad — rating-weighted selection' : '⚠️ Projected XI — awaiting full squad announcement'}
-      </div>
-      ${renderProbableXI(probableXI)}
-    </div>`;
-
-  // ── Tab: Key Players (from PLAYERS data)
-  const keyPlayersHtml = `<div id="tab-players" class="modal-tab-pane">${renderKeyPlayersTab(players)}</div>`;
-
-  body.innerHTML = headerHtml + tabsHtml + overviewHtml + squadHtml + formationHtml + keyPlayersHtml;
-
-  // Wire tab switching
-  body.querySelectorAll('.modal-tab-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      body.querySelectorAll('.modal-tab-btn').forEach(b => b.classList.remove('active'));
-      body.querySelectorAll('.modal-tab-pane').forEach(p => p.classList.remove('active'));
-      btn.classList.add('active');
-      body.querySelector(`#tab-${btn.dataset.tab}`).classList.add('active');
-    });
-  });
-
-  modal.classList.add("open");
-
-  // Async load all player photos in this modal
-  loadPhotosIntoImgs('#modal-body img[data-player]');
-}
-
-// ---- Squad Tab ----
-function renderSquadTab(squad, trackedPlayers) {
-  if (!squad.players?.length) {
-    return `<p class="muted-text" style="padding:20px 0">Squad not yet announced — FIFA deadline June 2, 2026.</p>`;
-  }
-  const positions = ["GK","DF","MF","FW"];
-  const labels = { GK:"Goalkeepers", DF:"Defenders", MF:"Midfielders", FW:"Forwards" };
-  const posCls = { GK:"spos-gk", DF:"spos-df", MF:"spos-mf", FW:"spos-fw" };
-  const trackedMap = new Map(trackedPlayers.map(p => [p.name.toLowerCase(), p]));
-
-  let html = '';
-  positions.forEach(pos => {
-    const ps = squad.players.filter(p => p.pos === pos);
-    if (!ps.length) return;
-    html += `<div class="pos-group-title">${labels[pos]}</div>`;
-    ps.forEach(p => {
-      const tracked = trackedMap.get(p.name.toLowerCase());
-      const lm = LEAGUE_META[p.league] || LEAGUE_META["Other"];
-      html += `
-        <div class="squad-row">
-          <img class="squad-photo" src="${_photoPlaceholder}" data-player="${p.name}" alt="${p.name}" />
-          <div class="squad-pos-dot ${posCls[pos]}">${pos}</div>
-          <div style="flex:1;min-width:0;">
-            <div class="sr-name">${p.name}</div>
-            <div class="sr-club" style="display:flex;align-items:center;gap:4px"><span style="font-size:0">${flagImgFromEmoji(lm.nation, 16)}</span> ${p.club} <span class="sr-league">· ${lm.name}</span></div>
-          </div>
-          ${tracked ? `<div style="text-align:right;flex-shrink:0;font-size:0.72rem;">
-            <div style="color:var(--gold);font-weight:700">⭐ ${tracked.rating}</div>
-            ${tracked.goals ? `<div style="color:var(--text-dim)">⚽${tracked.goals}G ${tracked.assists}A</div>` : ''}
-          </div>` : ''}
-          ${lm.tier > 1 ? `<span class="weight-chip">×${lm.weight}</span>` : ''}
-        </div>`;
-    });
-  });
-  return html;
-}
-
-// ---- Key Players Tab ----
-function renderKeyPlayersTab(players) {
-  if (!players.length) {
-    return `<p class="muted-text" style="padding:20px 0">No tracked top-league players for this squad yet.</p>`;
-  }
-  const sorted = [...players].sort((a,b) => {
-    const wa = (LEAGUE_META[a.league]||{weight:0.45}).weight;
-    const wb = (LEAGUE_META[b.league]||{weight:0.45}).weight;
-    return (b.rating*wb) - (a.rating*wa);
-  });
-
-  const cardsHtml = `
-    <div class="key-players-grid">
-      ${sorted.map(p => {
+  const announcedPlayersHtml = squad.players?.length ? `
+    <h3 class="modal-section-title">Official Squad (Confirmed)</h3>
+    <div class="squad-player-grid">
+      ${squad.players.map(p => {
         const lm = LEAGUE_META[p.league] || LEAGUE_META["Other"];
-        const eff = (p.rating * lm.weight).toFixed(1);
-        return `
-          <div class="kp-card">
-            <img class="kp-photo" src="${_photoPlaceholder}" data-player="${p.name}" alt="${p.name}" />
-            <div class="kp-name">${p.name}</div>
-            <div class="kp-rating">⭐ ${p.rating}</div>
-            <div class="kp-stat">${p.goals ? `⚽${p.goals}G ${p.assists}A` : p.cs ? `🧤${p.cs}CS` : p.pos}</div>
-            <div class="kp-club" style="display:flex;align-items:center;justify-content:center;gap:3px"><span style="font-size:0">${flagImgFromEmoji(lm.nation, 14)}</span> ${p.club.split(' ').slice(0,2).join(' ')}</div>
-            ${p.award ? `<div style="font-size:0.6rem;color:var(--gold);margin-top:3px">🏆</div>` : ''}
-          </div>`;
-      }).join('')}
-    </div>`;
+        return `<div class="squad-player-chip ${lm.tier===1?'tier1':'tier2'}">
+          <span>${p.name}</span>
+          <small>${lm.nation} ${p.club}</small>
+          ${lm.tier>1?`<span class="weight-chip">×${lm.weight}</span>`:''}
+        </div>`;
+      }).join("")}
+    </div>` : '';
 
-  const tableHtml = `
-    <h3 class="modal-section-title" style="margin-top:20px">2025-26 Season Stats</h3>
+  const statsHtml = players.length ? `
+    <h3 class="modal-section-title">2025-26 Season Stats</h3>
     <div class="player-list">
-      ${sorted.map(p => {
+      ${players.map(p => {
         const lm = LEAGUE_META[p.league] || LEAGUE_META["Other"];
         const eff = (p.rating * lm.weight).toFixed(2);
         return `<div class="player-row">
-          <span class="player-nation" style="font-size:0">${flagImgFromEmoji(p.nation, 20)}</span>
+          <span class="player-nation">${p.nation}</span>
           <span class="player-name">${p.name}</span>
-          <span class="player-club ${lm.tier===1?'':'non-top5'}" style="display:inline-flex;align-items:center;gap:3px"><span style="font-size:0">${flagImgFromEmoji(lm.nation, 16)}</span> ${p.club}</span>
+          <span class="player-club ${lm.tier===1?'':'non-top5'}">${lm.nation} ${p.club}</span>
           <span class="player-stats">${p.goals?`⚽ ${p.goals}G ${p.assists}A`:p.cs?`🧤 ${p.cs} CS`:`🛡️ ${p.pos}`}</span>
-          <span class="player-rating">⭐ ${p.rating} <small>(eff ${eff})</small></span>
+          <span class="player-rating">⭐ ${p.rating} <small>(×${lm.weight}→${eff})</small></span>
           ${p.award?`<span class="player-award">🏆 ${p.award}</span>`:''}
         </div>`;
-      }).join('')}
+      }).join("")}
+    </div>` : '<p class="muted-text">No tracked top-league players for this squad yet.</p>';
+
+  body.innerHTML = `
+    <div class="modal-header">
+      <span class="modal-flag-lg">${flagImg(team.id, 80)}</span>
+      <div>
+        <h2>${team.name}</h2>
+        <p class="modal-sub">Group ${team.group} &bull; FIFA #${team.ranking} &bull; ${team.conf} &bull; Elo ${team.elo}</p>
+      </div>
+    </div>
+    ${squadStatusHtml}
+    <div class="modal-scores">
+      <div class="score-box"><div class="score-val">${sq.score.toFixed(2)}</div><div class="score-lbl">Squad Score</div></div>
+      <div class="score-box"><div class="score-val">${Math.round(composite*100)}%</div><div class="score-lbl">Composite</div></div>
+      <div class="score-box"><div class="score-val">${sq.top5Count}</div><div class="score-lbl">Top-5 Players</div></div>
+      <div class="score-box"><div class="score-val">${sq.awardBonus.toFixed(1)}</div><div class="score-lbl">Award Bonus</div></div>
+    </div>
+    ${announcedPlayersHtml}
+    ${awards.length?`
+    <h3 class="modal-section-title">Season Honours</h3>
+    <ul class="awards-list">${awards.map(a=>`<li>🏅 <b>${a.award}</b> — ${a.winner}</li>`).join("")}</ul>`:''}
+    ${statsHtml}
+    <h3 class="modal-section-title">${teamFlag} Probable XI (${squad.status==='ANNOUNCED'?'Rating-based from announced squad':'Projected (awaiting full announcement)'})</h3>
+    ${renderProbableXI({probableXI})}
+    <div class="strengths-weaknesses">
+      <div><h3 class="modal-section-title green-title">Strengths</h3><ul>${strengths.map(s=>`<li>✅ ${s}</li>`).join("")||"<li>—</li>"}</ul></div>
+      <div><h3 class="modal-section-title red-title">Concerns</h3><ul>${weaknesses.map(w=>`<li>⚠️ ${w}</li>`).join("")||"<li>—</li>"}</ul></div>
     </div>`;
 
-  return cardsHtml + tableHtml;
+  modal.classList.add("open");
 }
 
-// ---- Probable XI Formation ----
-function renderProbableXI(xi) {
-  if (!xi || !xi.players || xi.players.length < 11) {
-    return `<p class="muted-text">Probable XI unavailable until enough squad players are announced.</p>`;
-  }
-
-  const slots = [
-    {pos:"GK",x:50,y:88},
-    {pos:"DF",x:15,y:70},{pos:"DF",x:38,y:72},{pos:"DF",x:62,y:72},{pos:"DF",x:85,y:70},
-    {pos:"MF",x:25,y:50},{pos:"MF",x:50,y:48},{pos:"MF",x:75,y:50},
-    {pos:"FW",x:20,y:28},{pos:"FW",x:50,y:22},{pos:"FW",x:80,y:28}
-  ];
-  const byPos = {GK:[],DF:[],MF:[],FW:[]};
-  xi.players.forEach(p => byPos[p.pos]?.push(p));
-  const placed = [];
-  ["GK","DF","MF","FW"].forEach(pos => {
-    slots.filter(s=>s.pos===pos).forEach((sl,i) => {
-      const pl = byPos[pos][i];
-      if (pl) placed.push({...pl, x:sl.x, y:sl.y});
-    });
-  });
-
-  const nodes = placed.map((p, i) => `
-    <div class="fm-node" style="left:${p.x}%;top:${p.y}%;animation-delay:${i*60}ms">
-      <img class="fm-photo" src="${_photoPlaceholder}" data-player="${p.name}" alt="${p.name}" />
-      <div class="fm-label" title="${p.name}">${p.name.split(' ').slice(-1)[0]}</div>
-      <div class="fm-rating">⭐${p.rating}</div>
-    </div>`).join('');
-
-  return `
-    <div class="fm-wrap">
-      <svg class="fm-lines" viewBox="0 0 100 100" preserveAspectRatio="none">
-        <line x1="0" y1="50" x2="100" y2="50" stroke="rgba(255,255,255,.18)" stroke-width="0.5"/>
-        <rect x="25" y="70" width="50" height="25" stroke="rgba(255,255,255,.2)" stroke-width="0.5" fill="none"/>
-        <rect x="38" y="80" width="24" height="15" stroke="rgba(255,255,255,.2)" stroke-width="0.5" fill="none"/>
-        <circle cx="50" cy="50" r="12" stroke="rgba(255,255,255,.18)" stroke-width="0.5" fill="none"/>
-        <rect x="25" y="5" width="50" height="25" stroke="rgba(255,255,255,.18)" stroke-width="0.5" fill="none"/>
-        <rect x="38" y="5" width="24" height="12" stroke="rgba(255,255,255,.18)" stroke-width="0.5" fill="none"/>
-        <circle cx="50" cy="50" r="1" fill="rgba(255,255,255,.35)"/>
-      </svg>
-      ${nodes}
-    </div>`;
-}
-
-// ---- Modal close ----
 document.addEventListener("click", e => {
   if (e.target.id === "modal" || e.target.id === "modal-close")
     document.getElementById("modal").classList.remove("open");
 });
 
-// ---- Scroll animations ----
 function initScrollAnimations() {
   const obs = new IntersectionObserver(entries => entries.forEach(e => {
-    if (e.isIntersecting) e.target.classList.add("visible","card-visible");
+    if (e.isIntersecting) e.target.classList.add("visible", "card-visible");
   }), { threshold: 0.05 });
-  document.querySelectorAll(".card-enter,.section-fade").forEach(el => obs.observe(el));
+  document.querySelectorAll(".card-enter, .section-fade").forEach(el => obs.observe(el));
 }
 
-// ══════════════════════════════════════════════════════════════
-//  EA FC TEAM VIEWER  —  Pack Opening + Green Pitch Formation
-// ══════════════════════════════════════════════════════════════
-let _fcTeam   = null;
-let _fcLineup = [];
 
-/* Squad-first probable XI builder:
-   1. Start with official squad call-up list (SQUADS)
-   2. Enrich each player with tracked season stats (PLAYERS)
-   3. Estimate rating for squad players without tracked data — no league penalty
-   4. Pick best XI by raw rating */
-function _buildFCLineup(teamId) {
-  const squad      = SQUADS[teamId] || { status:'UNANNOUNCED', players:[] };
-  const trackedArr = PLAYERS.filter(p => p.teamId === teamId);
-  const trackedMap = new Map(trackedArr.map(p => [p.name.toLowerCase(), p]));
 
-  // Honest baseline for squad players not in our stats database
-  // No league weight penalty — Saudi/MLS players aren't worse humans
-  function baselineRating(league) {
-    const lm = LEAGUE_META[league] || LEAGUE_META['Other'];
-    if (lm.tier === 1 && lm.weight >= 0.95) return 7.8; // Top-5 European league
-    if (lm.tier === 1)                       return 7.5; // Liga Portugal, etc.
-    if (lm.tier === 2)                       return 7.2; // Saudi Pro, MLS, Jupiler
-    return 6.8;                                          // Other leagues
-  }
 
-  let pool = [];
 
-  if (squad.players && squad.players.length > 0) {
-    // PRIMARY PATH: use official squad call-up
-    pool = squad.players.map(sp => {
-      const tp     = trackedMap.get(sp.name.toLowerCase());
-      const rating = tp ? tp.rating : baselineRating(sp.league);
-      return {
-        name:    sp.name,
-        pos:     sp.pos,
-        club:    sp.club,      // club from squad call-up (most accurate)
-        league:  sp.league,
-        rating,
-        goals:   tp?.goals   || 0,
-        assists: tp?.assists  || 0,
-        cs:      tp?.cs       || 0,
-        nation:  tp?.nation   || '🌍',
-        tracked: !!tp,         // true = has real season stats
-        inSquad: true,
-      };
-    });
-  } else {
-    // FALLBACK: squad not announced — use tracked players only
-    pool = trackedArr.map(p => ({
-      ...p,
-      inSquad: false,
-      tracked: true,
-    }));
-  }
+function playerPhoto(name){
+  return `https://images.weserv.nl/?url=${encodeURIComponent('upload.wikimedia.org/wikipedia/commons/thumb/8/89/Portrait_Placeholder.png/96px-Portrait_Placeholder.png')}`;
+}
 
-  // Pick XI purely by raw rating (no discounting)
-  const byPos = { GK:[], DF:[], MF:[], FW:[] };
-  pool.forEach(p => { if (byPos[p.pos]) byPos[p.pos].push(p); });
-  Object.values(byPos).forEach(a => a.sort((a, b) => b.rating - a.rating));
-
-  let xi = [
-    ...byPos.GK.slice(0, 1),
-    ...byPos.DF.slice(0, 4),
-    ...byPos.MF.slice(0, 3),
-    ...byPos.FW.slice(0, 3),
+function renderProbableXI(team){
+  const xi = team.probableXI;
+  if (!xi || !xi.players || xi.players.length < 11) return `<p class="muted-text">Probable XI unavailable until enough squad players are announced.</p>`;
+  const slots = [
+    {pos:"GK",x:50,y:88},{pos:"DF",x:18,y:72},{pos:"DF",x:39,y:72},{pos:"DF",x:61,y:72},{pos:"DF",x:82,y:72},
+    {pos:"MF",x:30,y:52},{pos:"MF",x:50,y:50},{pos:"MF",x:70,y:52},
+    {pos:"FW",x:22,y:30},{pos:"FW",x:50,y:24},{pos:"FW",x:78,y:30}
   ];
-
-  // Fill if short (e.g. squad has few players of a position)
-  if (xi.length < 11) {
-    const used  = new Set(xi.map(p => p.name));
-    const extra = pool.filter(p => !used.has(p.name)).sort((a, b) => b.rating - a.rating);
-    xi = [...xi, ...extra].slice(0, 11);
-  }
-  return xi;
-}
-
-function _fcTier(r) {
-  if (r >= 9.0) return 'icon';
-  if (r >= 8.7) return 'toty';
-  if (r >= 8.3) return 'gold-rare';
-  if (r >= 7.9) return 'gold';
-  if (r >= 7.5) return 'silver';
-  return 'bronze';
-}
-
-function _fcShort(name) {
-  const p = name.split(' ');
-  const last = p[p.length - 1];
-  return last.length > 11 ? last.slice(0,11).toUpperCase() : last.toUpperCase();
-}
-
-/* ── Main entry point ── */
-function openFCViewer(teamId) {
-  const team = TEAMS.find(t => t.id === teamId);
-  if (!team) return;
-  _fcTeam   = team;
-  _fcLineup = _buildFCLineup(teamId);
-
-  document.getElementById('fc-pack-screen').style.display  = 'flex';
-  document.getElementById('fc-pitch-screen').style.display = 'none';
-  document.getElementById('fc-view-pitch-btn').style.display = 'none';
-  document.getElementById('fc-cards-row').innerHTML = '';
-  document.getElementById('fc-team-flag-disp').innerHTML    = flagImg(teamId, 68);
-  document.getElementById('fc-team-name-disp').textContent  = team.name.toUpperCase();
-
-  document.getElementById('fc-viewer').classList.add('open');
-  document.body.style.overflow = 'hidden';
-  _buildAndRevealCards(_fcLineup);
-}
-
-/* ── Build all card DOM nodes, then auto-flip ── */
-function _buildAndRevealCards(players) {
-  const row = document.getElementById('fc-cards-row');
-  players.forEach((p, i) => {
-    const tier = _fcTier(p.rating || 7.5);
-    const rStr = p.rating ? p.rating.toFixed(1) : '?';
-    const card = document.createElement('div');
-    card.className = 'fc-card';
-    card.dataset.idx = i;
-    card.style.animationDelay = `${i * 0.09}s`;
-    const squadBadge = p.inSquad
-      ? `<span class="fc-squad-badge confirmed" title="Official squad call-up">✓</span>`
-      : `<span class="fc-squad-badge projected" title="Projected — squad unannounced">~</span>`;
-    const statLine = p.tracked
-      ? (p.goals ? `⚽${p.goals} 🅰${p.assists}` : p.cs ? `🧤${p.cs} CS` : p.pos)
-      : `${p.pos} · ${(p.club||'').split(' ').slice(0,2).join(' ')}`;
-
-    card.innerHTML = `
-      <div class="fc-card-inner">
-        <div class="fc-card-back">
-          <div class="fc-card-back-emblem">⚽</div>
-          <div class="fc-card-back-wc">WC<br>2026</div>
-        </div>
-        <div class="fc-card-front tier-${tier}">
-          <div class="fc-card-shine"></div>
-          ${squadBadge}
-          <div class="fc-card-top">
-            <div class="fc-card-rating">${rStr}</div>
-            <div class="fc-card-pos">${p.pos}</div>
-            <div class="fc-card-nation" style="font-size:0">${flagImgFromEmoji(p.nation || '🌍', 18)}</div>
-          </div>
-          <div class="fc-card-photo-wrap">
-            <img class="fc-card-photo" src="${_photoPlaceholder}"
-              data-player="${p.name}" alt="${p.name}" />
-          </div>
-          <div class="fc-card-info">
-            <div class="fc-card-name">${_fcShort(p.name)}</div>
-            <div class="fc-card-club">${(p.club||'').split(' ').slice(0,2).join(' ')}</div>
-            <div class="fc-card-stats">${statLine}</div>
-          </div>
-        </div>
-      </div>`;
-    row.appendChild(card);
-  });
-  _autoFlipCards(players);
-}
-
-/* ── Staggered auto-flip with EA FC timing feel ── */
-function _autoFlipCards(players) {
-  const HIGHLIGHT_MS = 420;
-  const GAP_MS       = 490;
-  players.forEach((p, i) => {
-    const base = 700 + i * GAP_MS;
-    setTimeout(() => {
-      const card = document.querySelector(`.fc-card[data-idx="${i}"]`);
-      if (card) card.classList.add('fc-card-active');
-    }, base);
-    setTimeout(() => {
-      const card = document.querySelector(`.fc-card[data-idx="${i}"]`);
-      if (!card) return;
-      card.classList.remove('fc-card-active');
-      card.classList.add('flipped');
-      loadPhotosIntoImgs(`#fc-cards-row .fc-card[data-idx="${i}"] img[data-player]`);
-      const tier = _fcTier(p.rating || 7.5);
-      if (tier === 'icon' || tier === 'toty') {
-        _fcParticles(card, 18);
-        setTimeout(() => card.classList.add('fc-glow-icon'), 200);
-      } else if (tier === 'gold-rare') {
-        _fcParticles(card, 9);
-        setTimeout(() => card.classList.add('fc-glow-gold'), 200);
-      }
-      if (i === players.length - 1) {
-        setTimeout(() => { document.getElementById('fc-view-pitch-btn').style.display = 'block'; }, 700);
-      }
-    }, base + HIGHLIGHT_MS);
-  });
-}
-
-/* ── Gold particle burst on high-rated reveals ── */
-function _fcParticles(el, n) {
-  const r   = el.getBoundingClientRect();
-  const cx  = r.left + r.width  / 2;
-  const cy  = r.top  + r.height / 2;
-  const cols = ['#ffd700','#ff6b35','#fff','#ff3c3c','#00d4ff','#b400ff','#00ff88'];
-  for (let i = 0; i < n; i++) {
-    const p   = document.createElement('div');
-    p.className = 'fc-particle';
-    const sz  = 3 + Math.random() * 7;
-    const col = cols[Math.floor(Math.random() * cols.length)];
-    const tx  = (Math.random() - 0.5) * 210;
-    const ty  = -(40 + Math.random() * 170);
-    p.style.cssText =
-      `left:${cx+(Math.random()-.5)*28}px;top:${cy}px;`+
-      `width:${sz}px;height:${sz}px;background:${col};`+
-      `box-shadow:0 0 ${sz*1.5}px ${col};`+
-      `--tx:${tx}px;--ty:${ty}px;`+
-      `--dur:${.7+Math.random()*.9}s;--delay:${Math.random()*.28}s`;
-    document.body.appendChild(p);
-    setTimeout(() => p.remove(), 1900);
-  }
-}
-
-/* ── Switch to pitch view ── */
-function showFCPitch() {
-  document.getElementById('fc-pack-screen').style.display  = 'none';
-  document.getElementById('fc-pitch-screen').style.display = 'flex';
-  _renderFCPitch(_fcTeam, _fcLineup);
-}
-
-function showFCPack() {
-  document.getElementById('fc-pitch-screen').style.display = 'none';
-  document.getElementById('fc-pack-screen').style.display  = 'flex';
-}
-
-/* ── Render players on the green pitch ── */
-function _renderFCPitch(team, players) {
-  const defs  = players.filter(p => p.pos === 'DF').length;
-  const mids  = players.filter(p => p.pos === 'MF').length;
-  const fwds  = players.filter(p => p.pos === 'FW').length;
-  const squad = SQUADS[team.id];
-  const statusNote =
-    squad?.status === 'ANNOUNCED'   ? `✅ Official squad · ${squad.date}` :
-    squad?.status === 'PRELIMINARY' ? '⚠️ Preliminary squad' :
-                                      '❓ Projected — squad unannounced';
-
-  document.getElementById('fc-formation-label').textContent =
-    `${team.name.toUpperCase()}  ·  ${defs}-${mids}-${fwds}`;
-  document.getElementById('fc-squad-status-lbl').textContent = statusNote;
-
-  /* Build position slots for the detected formation */
-  function makeSlots() {
-    const s = [{ pos:'GK', x:50, y:87 }];
-    const push = (n, pos, y) => {
-      const sp = 78 / (n + 1);
-      for (let i = 0; i < n; i++) s.push({ pos, x: 11 + sp * (i + 1), y });
-    };
-    push(defs || 4, 'DF', 68);
-    push(mids || 3, 'MF', 48);
-    push(fwds || 3, 'FW', 22);
-    return s;
-  }
-
-  const slots  = makeSlots();
-  const byPos  = { GK:[], DF:[], MF:[], FW:[] };
-  players.forEach(p => { if (byPos[p.pos]) byPos[p.pos].push(p); });
-
-  const placed = [];
-  ['GK','DF','MF','FW'].forEach(pos => {
-    slots.filter(s => s.pos === pos).forEach((sl, i) => {
-      if (byPos[pos][i]) placed.push({ ...byPos[pos][i], x:sl.x, y:sl.y });
+  const byPos = {GK:[],DF:[],MF:[],FW:[]};
+  xi.players.forEach(p=>byPos[p.pos]?.push(p));
+  const placed=[];
+  ["GK","DF","MF","FW"].forEach(pos=>{
+    slots.filter(s=>s.pos===pos).forEach((sl,i)=>{
+      const pl=byPos[pos][i]; if(pl) placed.push({...pl,x:sl.x,y:sl.y});
     });
   });
-
-  document.getElementById('fc-pitch').innerHTML = placed.map((p, i) => `
-    <div class="fc-pitch-player" style="left:${p.x}%;top:${p.y}%;animation-delay:${i * 0.07}s">
-      <div class="fc-pp-wrap" data-pos="${p.pos}">
-        <img class="fc-pp-photo" src="${_photoPlaceholder}"
-          data-player="${p.name}" alt="${p.name}" />
-        <div class="fc-pp-rating">${p.rating ? p.rating.toFixed(1) : '?'}</div>
-      </div>
-      <div class="fc-pp-name">${_fcShort(p.name)}</div>
-      <div class="fc-pp-pos ${p.pos}">${p.pos}</div>
-    </div>`).join('');
-
-  setTimeout(() => loadPhotosIntoImgs('#fc-pitch img[data-player]'), 80);
+  return `<div style="position:relative;height:460px;border-radius:14px;background:linear-gradient(180deg,#2a7d3a,#1f5f2d);border:2px solid rgba(255,255,255,.25);overflow:hidden;">
+      <div style="position:absolute;inset:10px;border:2px solid rgba(255,255,255,.35);border-radius:8px"></div>
+      <div style="position:absolute;left:50%;top:10px;bottom:10px;width:2px;background:rgba(255,255,255,.25)"></div>
+      ${placed.map((p,i)=>`<div style="position:absolute;left:${p.x}%;top:${p.y}%;transform:translate(-50%,-50%) scale(.3);animation:playerIn .65s ease forwards ${i*70}ms, pulseGlow 1.8s ease-in-out infinite ${i*120}ms;background:rgba(9,20,29,.8);border:1px solid rgba(255,255,255,.36);padding:4px 8px;border-radius:999px;white-space:nowrap;font-size:.72rem;display:flex;align-items:center;gap:6px;"><img src="${playerPhoto(p.name)}" alt="${p.name}" style="width:22px;height:22px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,.35)" loading="lazy"/><b>${p.pos}</b> ${p.name} <small>${team.flag||"🏳️"} ⭐${p.rating}</small></div>`).join("")}
+    </div>`;
 }
 
-/* ── Close ── */
-function closeFCViewer() {
-  document.getElementById('fc-viewer').classList.remove('open');
-  document.body.style.overflow = '';
-}
-
-/* Close on Escape key */
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closeFCViewer();
-});
 </script>
 </body>
 </html>

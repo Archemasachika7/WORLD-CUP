@@ -6,13 +6,8 @@
   <title>Player Stats — World Cup 2026</title>
   <meta name="description" content="Real 2025-26 player stats for FIFA World Cup 2026 — EA FC-style cards and table view." />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚽</text></svg>" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Teko:wght@400;500;600;700&family=Syncopate:wght@400;700&display=swap" />
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/animations.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css" />
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 <body>
 
@@ -41,34 +36,13 @@
   <button class="tab-btn" data-sort="rating">Rating</button>
 </div>
 
-<!-- Live tournament leaders (populates once WC 2026 kicks off via API-Football) -->
-<section id="tourney-leaders" class="section section-fade" style="max-width:1200px;margin:0 auto;padding:0 40px 40px;display:none;">
-  <div class="section-header">
-    <span class="section-tag">🔴 Live · World Cup 2026</span>
-    <h2 class="section-title">Tournament Leaders</h2>
-    <p class="section-desc">Live goals &amp; assists from the tournament — updates automatically as matches are played.</p>
-  </div>
-  <div class="leaders-grid">
-    <div class="leaders-col">
-      <h3 class="leaders-col-title">⚽ Top Scorers</h3>
-      <div id="lead-scorers" class="leaders-list"></div>
-    </div>
-    <div class="leaders-col">
-      <h3 class="leaders-col-title">🅰️ Top Assists</h3>
-      <div id="lead-assists" class="leaders-list"></div>
-    </div>
-  </div>
-</section>
-
 <div id="stats-container" style="max-width:1200px;margin:0 auto;padding:0 40px 80px;"></div>
 
 <footer id="footer"></footer>
 
 <script src="js/data.js"></script>
 <script src="js/predictions.js"></script>
-<script src="js/supabase-client.js"></script>
 <script src="js/shared.js"></script>
-<script src="js/auth.js"></script>
 <script>
 let statsView = "cards";
 let statsSort = "eff";
@@ -80,56 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initStatsViewToggle();
   initSortButtons();
   initScrollAnimations();
-  loadTourneyLeaders();
 });
-
-// ---- Live tournament leaders (goals + assists) from /api/stats ----
-async function loadTourneyLeaders() {
-  const section = document.getElementById("tourney-leaders");
-  if (!section) return;
-  try {
-    const [scRes, asRes] = await Promise.all([
-      fetch("/api/stats?type=scorers"),
-      fetch("/api/stats?type=assists"),
-    ]);
-    const sc = await scRes.json();
-    const as = await asRes.json();
-
-    const scorers = (sc.data || []).filter(p => p.value > 0);
-    const assists = (as.data || []).filter(p => p.value > 0);
-
-    // Nothing to show yet (tournament not started or no key) — keep hidden
-    if (!scorers.length && !assists.length) return;
-
-    document.getElementById("lead-scorers").innerHTML =
-      scorers.length ? scorers.slice(0, 10).map((p, i) => leaderRow(p, i, "goals")).join("")
-                     : `<p class="leaders-empty">No goals yet.</p>`;
-    document.getElementById("lead-assists").innerHTML =
-      assists.length ? assists.slice(0, 10).map((p, i) => leaderRow(p, i, "assists")).join("")
-                     : `<p class="leaders-empty">No assists yet.</p>`;
-
-    section.style.display = "";
-    document.querySelectorAll("#tourney-leaders .card-enter").forEach(el => el.classList.add("visible"));
-  } catch (_) {
-    // Network/API error — silently leave section hidden, static stats remain
-  }
-}
-
-function leaderRow(p, i, stat) {
-  const val = stat === "goals" ? p.goals : p.assists;
-  const sub = stat === "goals" ? `${p.assists} ast` : `${p.goals} gls`;
-  return `
-    <div class="leader-row card-enter">
-      <span class="leader-rank">${i + 1}</span>
-      <img class="leader-photo" src="${p.photo || ''}" alt="${p.name || ''}" loading="lazy"
-           onerror="this.style.visibility='hidden'" />
-      <div class="leader-info">
-        <strong>${p.name || '—'}</strong>
-        <small>${p.team || ''} · ${p.appearances} apps · ${sub}</small>
-      </div>
-      <span class="leader-val">${val}</span>
-    </div>`;
-}
 
 function initStatsViewToggle() {
   document.getElementById("view-cards-btn").addEventListener("click", () => {
@@ -175,7 +100,7 @@ function renderStats() {
 
   let html = `<div class="awards-banner"><h3>🏆 2025-26 Season Honours</h3><div class="awards-scroll">
     ${AWARDS.map(a => `<div class="award-chip">
-      <div class="award-nation" style="font-size:0;flex-shrink:0">${flagImgFromEmoji(a.nation, 32)}</div>
+      <span class="award-nation">${a.nation}</span>
       <div><strong>${a.winner}</strong><br><small>${a.award}</small></div>
     </div>`).join("")}
   </div></div>`;
@@ -194,7 +119,7 @@ function renderStats() {
     Object.entries(byLeague).forEach(([league, players]) => {
       const lm = LEAGUE_META[league] || {};
       html += `<div class="league-section">
-        <h3 class="league-title" style="display:flex;align-items:center;gap:8px"><span style="font-size:0">${flagImgFromEmoji(lm.nation, 24)}</span> ${lm.name} <span class="weight-tag">Weight: ${lm.weight}</span></h3>
+        <h3 class="league-title">${lm.nation} ${lm.name} <span class="weight-tag">Weight: ${lm.weight}</span></h3>
         ${playerTable(players)}
       </div>`;
     });
@@ -208,8 +133,6 @@ function renderStats() {
 
   container.innerHTML = html;
   initScrollAnimations();
-  // Async load player photos into EA cards
-  loadPhotosIntoImgs('#stats-container img[data-player]');
 }
 
 function renderEaCard(p) {
@@ -223,25 +146,18 @@ function renderEaCard(p) {
   const stat1val = p.pos === "GK" ? p.cs  : p.pos === "DF" ? p.ga  : p.goals;
   const stat2lbl = p.pos === "GK" ? "RTG" : "AST";
   const stat2val = p.pos === "GK" ? p.rating : p.assists;
-  // Only show WC team flag if it differs from player's nationality flag
-  const natCode = (() => { try { const cps=[...p.nation].map(c=>c.codePointAt(0)); return cps.filter(cp=>cp>=0x1F1E6&&cp<=0x1F1FF).map(cp=>String.fromCharCode(cp-0x1F1E6+65)).join('').toLowerCase(); } catch(e){return '';} })();
-  const wcCode  = wct ? (FLAG_CODES[wct.id] || '') : '';
-  const showWcFlag = wct && wcCode && wcCode !== natCode;
   return `
     <div class="ea-card ea-${tier} card-enter" title="${p.name} — ${p.club}">
       <div class="ea-top">
         <div class="ea-ovr">${ovr}</div>
         <div class="ea-pos">${p.pos}</div>
-        <div class="ea-nation" style="font-size:0">${flagImgFromEmoji(p.nation, 18)}</div>
-        ${showWcFlag ? `<div class="ea-wcteam" style="font-size:0;">${flagImg(wct.id, 20)}</div>` : ''}
+        <div class="ea-nation">${p.nation}</div>
+        ${wct ? `<div class="ea-wcteam" style="font-size:0;">${flagImg(wct.id, 20)}</div>` : ''}
       </div>
-      <div class="ea-photo-ring">
-        <img src="${_photoPlaceholder}" data-player="${p.name}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;object-position:top" />
-        <div class="ea-photo-fallback" id="efb_${p.name.replace(/\s+/g,'_').replace(/[^a-zA-Z_]/g,'')}">${posIcon}</div>
-      </div>
+      <div class="ea-silhouette">${posIcon}</div>
       <div class="ea-name">${p.name.toUpperCase().split(" ").pop()}</div>
       <div class="ea-fullname">${p.name}</div>
-      <div class="ea-club" style="display:flex;align-items:center;gap:3px"><span style="font-size:0">${flagImgFromEmoji(lm.nation, 14)}</span> ${p.club}</div>
+      <div class="ea-club">${lm.nation} ${p.club}</div>
       <div class="ea-stats">
         <div class="ea-stat"><span class="ea-sv">${stat1val||"—"}</span><span class="ea-sl">${stat1lbl}</span></div>
         <div class="ea-stat"><span class="ea-sv">${stat2val||"—"}</span><span class="ea-sl">${stat2lbl}</span></div>
@@ -269,8 +185,8 @@ function playerTable(players) {
       const wct = p.teamId ? TEAMS.find(t => t.id === p.teamId) : null;
       return `<tr class="${p.award?'award-row':''}">
         <td><strong>${p.name}</strong>${p.award?' 🏆':''}</td>
-        <td><span class="league-pill ${lm.tier===1?'tier1-pill':'tier2-pill'}" style="font-size:0;vertical-align:middle">${flagImgFromEmoji(lm.nation, 18)}</span> ${p.club}</td>
-        <td style="font-size:0">${flagImgFromEmoji(p.nation, 20)}</td>
+        <td><span class="league-pill ${lm.tier===1?'tier1-pill':'tier2-pill'}">${lm.nation}</span> ${p.club}</td>
+        <td>${p.nation}</td>
         <td>${wct ? flagImg(wct.id, 24) : '—'}</td>
         <td>${p.goals||'—'}</td>
         <td>${p.assists||'—'}</td>

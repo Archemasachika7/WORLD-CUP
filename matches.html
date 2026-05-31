@@ -6,13 +6,8 @@
   <title>Matches — World Cup 2026</title>
   <meta name="description" content="Full FIFA World Cup 2026 match schedule with win probability and H2H predictor." />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚽</text></svg>" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Teko:wght@400;500;600;700&family=Syncopate:wght@400;700&display=swap" />
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/animations.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css" />
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 <body>
 
@@ -29,15 +24,6 @@
 </div>
 
 <div id="matches-list" style="max-width:1200px;margin:0 auto;padding:0 40px 40px;"></div>
-
-<section class="section section-fade" id="standings-section" style="max-width:1200px;margin:0 auto;padding:0 40px 40px;">
-  <div class="section-header">
-    <span class="section-tag">📊 Group Stage</span>
-    <h2 class="section-title">Points Tables</h2>
-    <p class="section-desc">Live standings — updates automatically as results come in. Top 2 of each group (plus best third-placed) advance.</p>
-  </div>
-  <div id="standings-grid" class="standings-grid"></div>
-</section>
 
 <!-- Live In-Play Predictor -->
 <section class="section section-fade" id="live-predictor-section" style="max-width:1200px;margin:0 auto;padding:0 40px 80px;">
@@ -61,71 +47,15 @@
 
 <script src="js/data.js"></script>
 <script src="js/predictions.js"></script>
-<script src="js/supabase-client.js"></script>
 <script src="js/shared.js"></script>
-<script src="js/auth.js"></script>
-<script src="js/live.js"></script>
 <script>
 document.addEventListener("DOMContentLoaded", () => {
   buildNav("matches");
   buildFooter("footer");
   renderMatches();
-  renderStandings();
   renderLivePredictor();
   initScrollAnimations();
-  initLiveData();   // start API-Football polling
 });
-
-// ---- Group standings (computed live from match results) ----
-function renderStandings() {
-  const grid = document.getElementById("standings-grid");
-  if (!grid || typeof MATCHES === "undefined") return;
-
-  // Init a row per team, grouped by their group letter
-  const groups = {};
-  TEAMS.forEach(t => {
-    if (!t.group) return;
-    (groups[t.group] ||= {});
-    groups[t.group][t.id] = { id: t.id, name: t.name, P:0, W:0, D:0, L:0, GF:0, GA:0, Pts:0 };
-  });
-
-  // Tally finished matches (both scores present)
-  MATCHES.forEach(m => {
-    if (m.homeScore == null || m.awayScore == null) return;
-    const g = TEAMS.find(t => t.id === m.home)?.group;
-    const row = groups[g]?.[m.home], opp = groups[g]?.[m.away];
-    if (!row || !opp) return;
-    row.P++; opp.P++;
-    row.GF += m.homeScore; row.GA += m.awayScore;
-    opp.GF += m.awayScore; opp.GA += m.homeScore;
-    if (m.homeScore > m.awayScore)      { row.W++; opp.L++; row.Pts += 3; }
-    else if (m.homeScore < m.awayScore) { opp.W++; row.L++; opp.Pts += 3; }
-    else                                { row.D++; opp.D++; row.Pts++; opp.Pts++; }
-  });
-
-  const letters = Object.keys(groups).sort();
-  grid.innerHTML = letters.map(letter => {
-    const rows = Object.values(groups[letter]).sort((a,b) =>
-      b.Pts - a.Pts || (b.GF-b.GA)-(a.GF-a.GA) || b.GF - a.GF || a.name.localeCompare(b.name));
-    return `
-      <div class="standings-card">
-        <div class="standings-head">Group ${letter}</div>
-        <table class="standings-table">
-          <thead><tr><th>#</th><th>Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GD</th><th>Pts</th></tr></thead>
-          <tbody>
-            ${rows.map((r, i) => `
-              <tr class="${i < 2 ? 'qualify' : (i === 2 ? 'playoff' : '')}">
-                <td>${i+1}</td>
-                <td class="st-team">${flagImg(r.id, 22)}<span>${r.name}</span></td>
-                <td>${r.P}</td><td>${r.W}</td><td>${r.D}</td><td>${r.L}</td>
-                <td>${r.GF-r.GA > 0 ? '+' : ''}${r.GF-r.GA}</td>
-                <td class="st-pts">${r.Pts}</td>
-              </tr>`).join("")}
-          </tbody>
-        </table>
-      </div>`;
-  }).join("");
-}
 
 function renderMatches() {
   const container = document.getElementById("matches-list");
@@ -153,22 +83,21 @@ function displayMatches(group) {
     const away = TEAMS.find(t => t.id === m.away);
     if (!home || !away) return "";
     const prob = Predictions.getProbability(m.home, m.away);
-    const k    = formatKickoffLocal(m.date, m.time);
+    const dt   = new Date(m.date + "T" + m.time);
+    const ds   = dt.toLocaleDateString("en-US", {weekday:"short", month:"short", day:"numeric"});
     return `
       <div class="match-card card-enter" data-match="${m.id}">
         <div class="match-stage">${m.stage}</div>
-        <div class="match-date">${k.date} ${k.time} ${k.tz} &bull; ${m.venue}</div>
+        <div class="match-date">${ds} ${m.time} &bull; ${m.venue}</div>
         <div class="match-teams">
           <div class="match-team">
             ${flagImg(home.id, 48)}
             <span class="mname-sm">${home.name}</span>
           </div>
           <div class="match-center">
-            ${m.isLive
-              ? `<span class="live-score-badge"><span class="live-dot"></span>${m.homeScore}–${m.awayScore}<br><small class="live-elapsed">${m.status === "HT" ? "HT" : (m.elapsed ? m.elapsed + "'" : "LIVE")}</small></span>`
-              : m.homeScore !== null
-                ? `<span class="final-score">${m.homeScore}–${m.awayScore}${m.penHome !== null ? `<br><small class="pen-note">(${m.penHome}–${m.penAway} pens)</small>` : ""}</span>`
-                : `<span class="vs-badge">VS</span>`}
+            ${m.homeScore !== null
+              ? `<span class="final-score">${m.homeScore}–${m.awayScore}</span>`
+              : `<span class="vs-badge">VS</span>`}
           </div>
           <div class="match-team">
             ${flagImg(away.id, 48)}
@@ -200,14 +129,10 @@ function openMatchModal(match) {
   const away = TEAMS.find(t => t.id === match.away);
   const prob = Predictions.getProbability(match.home, match.away);
   const body = document.getElementById("modal-body");
-  const k    = formatKickoffLocal(match.date, match.time);
+  const dt   = new Date(match.date + "T" + match.time).toLocaleDateString("en-US",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
   body.innerHTML = `
     <div class="match-modal-header">
-      <h2>${match.stage}</h2>
-      <p>${k.date} &bull; ${k.time} ${k.tz} (your time)</p>
-      <p>📍 ${match.venue}</p>
-      ${match.isLive ? `<p class="modal-live-badge"><span class="live-dot"></span> LIVE &mdash; ${match.status === "HT" ? "Half Time" : match.elapsed ? match.elapsed + "' played" : "In Progress"}</p>` : ""}
-      ${match.isFinished && match.homeScore !== null ? `<p class="modal-result">Full Time: <strong>${home.name} ${match.homeScore}–${match.awayScore} ${away.name}</strong>${match.penHome !== null ? ` (${match.penHome}–${match.penAway} pens)` : ""}</p>` : ""}
+      <h2>${match.stage}</h2><p>${dt} &bull; ${match.time}</p><p>📍 ${match.venue}</p>
     </div>
     <div class="big-matchup">
       <div class="bm-team">${flagImg(home.id, 80)}<br><strong>${home.name}</strong><br><small>FIFA #${home.ranking} &bull; Elo ${home.elo}</small></div>

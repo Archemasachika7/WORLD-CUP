@@ -6,12 +6,8 @@
   <title>Meet Rooms — World Cup 2026</title>
   <meta name="description" content="Real-time World Cup watch party meet rooms — live chat, voice, video, and synced streams." />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚽</text></svg>" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Teko:wght@400;500;600;700&family=Syncopate:wght@400;700&display=swap" />
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/animations.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 <body>
@@ -99,41 +95,15 @@
 
         <div class="meet-stream-bar">
           <span class="meet-stream-icon">📺</span>
-          <input id="meet-stream-input" type="url" placeholder="Paste stream URL — syncs for everyone instantly" class="meet-stream-url-in" />
+          <input id="meet-stream-input" type="url" placeholder="Paste stream URL — syncs for everyone in this room instantly" class="meet-stream-url-in" />
           <button id="meet-stream-go" class="meet-stream-go">▶ Sync</button>
         </div>
 
-        <!-- Stream action bar — always visible once a stream is loaded -->
-        <div id="meet-stream-actions" style="display:none;align-items:center;gap:8px;padding:6px 8px;flex-wrap:wrap;border-bottom:1px solid var(--border);">
-          <a id="meet-stream-open-link" href="#" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;background:var(--accent);color:#fff;font-weight:700;font-size:0.78rem;text-decoration:none;">↗ Open Stream</a>
-          <button id="meet-stream-theater-btn" style="padding:5px 12px;background:var(--bg-hover);border:1px solid var(--border);color:var(--text);font-size:0.78rem;font-weight:700;cursor:pointer;" title="Theater mode — enlarge the stream in-page">🔳 Theater</button>
-          <button id="meet-stream-fs-btn" style="padding:5px 12px;background:var(--bg-hover);border:1px solid var(--border);color:var(--text);font-size:0.78rem;font-weight:700;cursor:pointer;" title="Fullscreen the stream / shared screen">⛶ Fullscreen</button>
-          <button id="meet-stream-expand-btn" style="padding:5px 12px;background:var(--bg-hover);border:1px solid var(--border);color:var(--text);font-size:0.78rem;font-weight:700;cursor:pointer;" title="Open in tab-share overlay">📺 Tab Share</button>
-          <button id="meet-stream-share-focused-btn" style="padding:5px 12px;background:#7c3aed;border:none;color:#fff;font-size:0.78rem;font-weight:700;cursor:pointer;" title="Share just this stream with room via WebRTC">📤 Share Stream</button>
-          <span id="meet-stream-status" style="font-size:0.75rem;color:#f97316;flex:1;"></span>
-        </div>
-
         <!-- Stream presets inside room -->
-        <div class="stream-presets" id="room-stream-presets" style="padding:6px 0;"></div>
+        <div class="stream-presets" id="room-stream-presets" style="padding:8px 0;"></div>
 
         <div id="meet-stream-frame-wrap" class="meet-stream-frame-wrap hidden">
-          <!-- Who's sharing badge -->
-          <div id="meet-screen-badge" style="display:none;position:absolute;top:10px;left:10px;z-index:5;align-items:center;gap:6px;padding:5px 12px;background:rgba(124,58,237,0.92);color:#fff;font-size:0.78rem;font-weight:700;border-radius:20px;backdrop-filter:blur(4px);box-shadow:0 2px 10px rgba(0,0,0,0.4);"></div>
-          <!-- Peer screen share video (shown instead of iframe when someone shares screen) -->
-          <video id="meet-peer-screen-video" autoplay playsinline style="display:none;width:100%;height:100%;object-fit:contain;background:#000;"></video>
           <iframe id="meet-stream-iframe" src="about:blank" allowfullscreen allow="autoplay; fullscreen; picture-in-picture" frameborder="0" title="Room stream"></iframe>
-        </div>
-
-        <!-- Fullscreen stream overlay (for sharing just the stream as a tab) -->
-        <div id="meet-fullscreen-overlay" style="display:none;position:fixed;inset:0;background:#000;z-index:9999;flex-direction:column;">
-          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 16px;background:rgba(0,0,0,0.8);flex-shrink:0;">
-            <span style="color:#fff;font-size:0.85rem;opacity:0.7;">Now share this tab → your room sees only the stream</span>
-            <div style="display:flex;gap:10px;">
-              <button id="meet-fs-share-btn" style="padding:8px 18px;background:var(--accent);border:none;color:#fff;font-weight:700;font-size:0.85rem;cursor:pointer;border-radius:4px;">📤 Share This Tab</button>
-              <button id="meet-fs-close-btn" style="padding:8px 16px;background:rgba(255,255,255,0.15);border:none;color:#fff;font-size:0.85rem;cursor:pointer;border-radius:4px;">✕ Close</button>
-            </div>
-          </div>
-          <iframe id="meet-fullscreen-iframe" src="about:blank" style="flex:1;width:100%;border:0;" allowfullscreen allow="autoplay; fullscreen; picture-in-picture"></iframe>
         </div>
 
         <div id="meet-emoji-rain" class="meet-emoji-rain" aria-hidden="true"></div>
@@ -156,7 +126,6 @@
       <div class="meet-media-group">
         <button id="meet-mic-btn" class="meet-media-btn">🔇 Muted</button>
         <button id="meet-cam-btn" class="meet-media-btn">📷 Cam Off</button>
-        <button id="meet-screen-btn" class="meet-media-btn" title="Share your screen — all users in the room see it live via WebRTC">🖥️ Share Screen</button>
       </div>
       <div class="meet-reactions-group">
         <button class="emoji-reaction-btn" data-emoji="⚽">⚽</button>
@@ -206,8 +175,8 @@ document.addEventListener("DOMContentLoaded", () => {
 function populateMeetTeamSelector() {
   const sel = document.getElementById("meet-team-select");
   if (!sel) return;
-  sel.innerHTML = '<option value="⚽" data-id="">Neutral</option>' +
-    TEAMS.map(t => `<option value="${t.flag}" data-id="${t.id}">${t.name}</option>`).join("");
+  sel.innerHTML = '<option value="⚽" data-id="">⚽ Neutral</option>' +
+    TEAMS.map(t => `<option value="${t.flag}" data-id="${t.id}">${t.flag} ${t.name}</option>`).join("");
 }
 
 function buildStreamPresets(containerId, compact) {

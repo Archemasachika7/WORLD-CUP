@@ -6,12 +6,8 @@
   <title>Games — World Cup 2026</title>
   <meta name="description" content="Fun World Cup 2026 games — score predictor, quiz, and penalty shootout simulator." />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚽</text></svg>" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Teko:wght@400;500;600;700&family=Syncopate:wght@400;700&display=swap" />
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/animations.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css" />
 </head>
 <body>
 
@@ -30,9 +26,6 @@
     <button class="game-tab-btn active" data-game="predictor">⚽ Score Predictor</button>
     <button class="game-tab-btn" data-game="quiz">🧠 WC Quiz</button>
     <button class="game-tab-btn" data-game="shootout">🥅 Penalty Shootout</button>
-    <button class="game-tab-btn" data-game="bracket">🏆 Bracket Predictor</button>
-    <button class="game-tab-btn" data-game="lineup">📋 Lineup Builder</button>
-    <button class="game-tab-btn" data-game="packs">🎴 Pack Opening</button>
   </div>
 
   <!-- Game 1: Score Predictor -->
@@ -59,7 +52,7 @@
 
       <div class="predictor-matchup">
         <div class="predictor-team-side">
-          <span id="pred-home-flag" class="predictor-team-flag"><span class="fi fi-gb-eng" style="width:48px;height:36px;display:block;margin:0 auto;border-radius:4px"></span></span>
+          <span id="pred-home-flag" class="predictor-team-flag">🏴󠁧󠁢󠁥󠁮󠁧󠁿</span>
           <div style="font-weight:700;font-size:0.9rem;" id="pred-home-name">Team 1</div>
         </div>
         <div class="predictor-score-side">
@@ -79,7 +72,7 @@
           <div class="predictor-vs-label">Your Prediction</div>
         </div>
         <div class="predictor-team-side">
-          <span id="pred-away-flag" class="predictor-team-flag"><span class="fi fi-fr" style="width:48px;height:36px;display:block;margin:0 auto;border-radius:4px"></span></span>
+          <span id="pred-away-flag" class="predictor-team-flag">🇫🇷</span>
           <div style="font-weight:700;font-size:0.9rem;" id="pred-away-name">Team 2</div>
         </div>
       </div>
@@ -131,125 +124,13 @@
     </div>
   </div>
 
-  <!-- Game 4: Bracket Predictor (auth + saved to Supabase) -->
-  <div id="game-bracket" class="game-panel">
-    <div style="max-width:640px;margin:0 auto">
-      <div style="text-align:center;margin-bottom:24px">
-        <h2 style="font-size:1.4rem;font-weight:800;margin-bottom:8px">🏆 Tournament Bracket Predictor</h2>
-        <p style="color:var(--text-dim);font-size:0.88rem">Sign in, pick your favourite nation and your final-four predictions — saved to your account so you can come back anytime.</p>
-      </div>
-
-      <!-- Signed-out: email magic-link login -->
-      <div id="bracket-auth" class="predictor-game-card" style="text-align:center;">
-        <h3 style="font-weight:800;margin-bottom:6px">🔐 Sign in to save your bracket</h3>
-        <p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:18px">We'll email you a magic link — no password needed.</p>
-        <div style="display:flex;gap:8px;max-width:380px;margin:0 auto;flex-wrap:wrap;justify-content:center;">
-          <input id="bracket-email" type="email" placeholder="you@email.com" style="flex:1;min-width:200px;padding:11px 14px;background:var(--bg-hover);border:1px solid var(--border);border-radius:8px;color:var(--text);" />
-          <button id="bracket-login-btn" class="btn-primary" style="padding:11px 22px;">Send link →</button>
-        </div>
-        <p id="bracket-auth-msg" style="font-size:0.82rem;margin-top:14px;min-height:18px;"></p>
-      </div>
-
-      <!-- Signed-in: prediction form -->
-      <div id="bracket-form" class="predictor-game-card" style="display:none;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:8px;">
-          <span style="font-size:0.85rem;color:var(--text-dim);">Signed in as <strong id="bracket-user-email" style="color:var(--text)"></strong></span>
-          <button id="bracket-logout-btn" style="font-size:0.78rem;padding:5px 12px;background:var(--bg-hover);border:1px solid var(--border);color:var(--text);border-radius:6px;">Sign out</button>
-        </div>
-
-        <label class="bracket-label">⭐ Favourite Nation</label>
-        <select id="bracket-favorite" class="bracket-select"></select>
-
-        <label class="bracket-label">🥇 Champion</label>
-        <select id="bracket-champion" class="bracket-select"></select>
-
-        <label class="bracket-label">🥈 Runner-up</label>
-        <select id="bracket-runnerup" class="bracket-select"></select>
-
-        <button id="bracket-save-btn" class="btn-primary" style="width:100%;margin-top:20px;padding:13px;">💾 Save my bracket</button>
-        <p id="bracket-save-msg" style="font-size:0.82rem;margin-top:12px;text-align:center;min-height:18px;"></p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Game 5: Lineup Builder -->
-  <div id="game-lineup" class="game-panel">
-    <div style="text-align:center;margin-bottom:18px">
-      <h2 style="font-size:1.4rem;font-weight:800;margin-bottom:8px">📋 Build Your XI</h2>
-      <p style="color:var(--text-dim);font-size:0.88rem">Pick a nation and formation, then tap a position and choose a player from the squad. Save or share your lineup.</p>
-    </div>
-
-    <div class="lineup-controls">
-      <select id="lineup-team" class="bracket-select" style="max-width:220px"></select>
-      <select id="lineup-formation" class="bracket-select" style="max-width:160px"></select>
-      <button id="lineup-clear-btn" class="lineup-btn">♻ Clear</button>
-      <button id="lineup-save-btn" class="lineup-btn lineup-btn-primary">💾 Save</button>
-      <button id="lineup-share-btn" class="lineup-btn">🔗 Copy</button>
-    </div>
-
-    <p id="lineup-note" style="text-align:center;color:var(--text-dim);font-size:0.8rem;margin:8px 0;min-height:16px;"></p>
-
-    <div class="lineup-layout">
-      <div id="lineup-pitch" class="lineup-pitch"></div>
-      <div class="lineup-bench">
-        <div class="lineup-bench-head">Squad</div>
-        <div id="lineup-bench-list" class="lineup-bench-list"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Game 6: Pack Opening -->
-  <div id="game-packs" class="game-panel">
-    <div style="text-align:center;margin-bottom:18px">
-      <h2 style="font-size:1.4rem;font-weight:800;margin-bottom:8px">🎴 Open a Player Pack</h2>
-      <p style="color:var(--text-dim);font-size:0.88rem">Choose a pack and reveal your pull. Chase the gold rares and special walkouts!</p>
-    </div>
-
-    <!-- Pack selection -->
-    <div id="packs-store" class="packs-store"></div>
-
-    <!-- Opening stage -->
-    <div id="packs-stage" class="packs-stage" style="display:none;">
-      <button id="packs-back-btn" class="lineup-btn" style="position:absolute;left:0;top:0;">← Back</button>
-      <div id="packs-pack-wrap" class="packs-pack-wrap">
-        <div id="packs-pack" class="packs-pack">
-          <div class="packs-pack-shine"></div>
-          <div class="packs-pack-label">TAP TO OPEN</div>
-        </div>
-      </div>
-      <div id="packs-reveal" class="packs-reveal" style="display:none;"></div>
-      <div id="packs-actions" class="packs-actions" style="display:none;">
-        <button id="packs-again-btn" class="lineup-btn lineup-btn-primary">🎴 Open Another</button>
-        <button id="packs-store-btn" class="lineup-btn">🏪 Back to Store</button>
-      </div>
-      <div id="packs-confetti" class="packs-confetti" aria-hidden="true"></div>
-    </div>
-  </div>
-
-</div>
-
-<!-- Player picker -->
-<div id="lineup-picker" class="lineup-picker-overlay" style="display:none;">
-  <div class="lineup-picker-box">
-    <div class="lineup-picker-head">
-      <span id="lineup-picker-title">Choose a player</span>
-      <button id="lineup-picker-close" class="lineup-picker-close">✕</button>
-    </div>
-    <div id="lineup-picker-list" class="lineup-picker-list"></div>
-  </div>
 </div>
 
 <footer id="footer"></footer>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="js/data.js"></script>
 <script src="js/predictions.js"></script>
 <script src="js/shared.js"></script>
-<script src="js/auth.js"></script>
-<script src="js/supabase-client.js"></script>
 <script src="js/games.js"></script>
-<script src="js/bracket.js"></script>
-<script src="js/lineup.js"></script>
-<script src="js/packs.js"></script>
 </body>
 </html>

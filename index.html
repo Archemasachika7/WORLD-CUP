@@ -6,25 +6,13 @@
   <title>World Cup 2026 — Live Hub</title>
   <meta name="description" content="FIFA World Cup 2026 — live stream + watch party, all 48 teams, real 2025-26 stats, in-play predictor." />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚽</text></svg>" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Teko:wght@400;500;600;700&family=Syncopate:wght@400;700&display=swap" />
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/animations.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 <body>
 
 <nav id="main-nav"></nav>
-
-<!-- Live news ticker -->
-<div id="news-ticker" class="news-ticker" aria-label="Latest World Cup headlines">
-  <span class="news-ticker-tag">🔴 LIVE</span>
-  <div class="news-ticker-viewport">
-    <div id="news-ticker-track" class="news-ticker-track"></div>
-  </div>
-</div>
 
 <!-- ======================================================
      Hero
@@ -43,16 +31,16 @@
     </div>
     <h1 class="hero-title">
       The Greatest<br>Show on Earth<br>
-      <span class="wc-year"><span class="fi fi-us" style="width:24px;height:18px;display:inline-block;vertical-align:middle;border-radius:2px;margin-right:4px"></span><span class="fi fi-ca" style="width:24px;height:18px;display:inline-block;vertical-align:middle;border-radius:2px;margin-right:4px"></span><span class="fi fi-mx" style="width:24px;height:18px;display:inline-block;vertical-align:middle;border-radius:2px;margin-right:4px"></span>&nbsp;2026</span>
+      <span class="wc-year">🇺🇸 🇨🇦 🇲🇽 &nbsp;2026</span>
     </h1>
     <p class="hero-subtitle">
       48 nations. 104 matches. Real 2025-26 stats, live in-play probability,
       meet rooms, games and streaming all in one hub.
     </p>
     <div class="hero-hosts">
-      <span class="host-pill" style="gap:8px"><span class="fi fi-us" style="width:20px;height:14px;display:inline-block;vertical-align:middle;border-radius:2px"></span> United States</span>
-      <span class="host-pill" style="gap:8px"><span class="fi fi-ca" style="width:20px;height:14px;display:inline-block;vertical-align:middle;border-radius:2px"></span> Canada</span>
-      <span class="host-pill" style="gap:8px"><span class="fi fi-mx" style="width:20px;height:14px;display:inline-block;vertical-align:middle;border-radius:2px"></span> Mexico</span>
+      <span class="host-pill">🇺🇸 United States</span>
+      <span class="host-pill">🇨🇦 Canada</span>
+      <span class="host-pill">🇲🇽 Mexico</span>
       <span class="host-pill">📅 June 11 – July 19, 2026</span>
     </div>
     <div class="hero-actions">
@@ -74,17 +62,6 @@
 </section>
 
 <!-- ======================================================
-     Next Match Spotlight
-     ====================================================== -->
-<section class="section section-fade" id="next-match-section" style="display:none">
-  <div class="section-header">
-    <span class="section-tag">⚡ Kicking Off Next</span>
-    <h2 class="section-title">Next Match</h2>
-  </div>
-  <div id="next-match-card" class="next-match-card"></div>
-</section>
-
-<!-- ======================================================
      Host Cities
      ====================================================== -->
 <section class="section section-fade" id="host-cities">
@@ -95,7 +72,7 @@
   </div>
   <div class="host-cities-grid">
     <div class="host-city-card card-enter">
-      <div class="host-city-flag"><span class="fi fi-us" style="width:80px;height:60px;display:block;margin:0 auto;border-radius:4px"></span></div>
+      <div class="host-city-flag">🇺🇸</div>
       <div class="host-city-name">United States</div>
       <div style="color:var(--text-dim);font-size:0.85rem;margin-bottom:12px">11 Venues</div>
       <div class="host-city-venues">11</div>
@@ -103,7 +80,7 @@
       <p style="font-size:0.8rem;color:var(--text-dim);margin-top:12px">MetLife • AT&T • SoFi • Levi's • Hard Rock and more</p>
     </div>
     <div class="host-city-card card-enter">
-      <div class="host-city-flag"><span class="fi fi-ca" style="width:80px;height:60px;display:block;margin:0 auto;border-radius:4px"></span></div>
+      <div class="host-city-flag">🇨🇦</div>
       <div class="host-city-name">Canada</div>
       <div style="color:var(--text-dim);font-size:0.85rem;margin-bottom:12px">3 Venues</div>
       <div class="host-city-venues">3</div>
@@ -111,7 +88,7 @@
       <p style="font-size:0.8rem;color:var(--text-dim);margin-top:12px">BMO Field (Toronto) • BC Place (Vancouver) • Stade de Montréal</p>
     </div>
     <div class="host-city-card card-enter">
-      <div class="host-city-flag"><span class="fi fi-mx" style="width:80px;height:60px;display:block;margin:0 auto;border-radius:4px"></span></div>
+      <div class="host-city-flag">🇲🇽</div>
       <div class="host-city-name">Mexico</div>
       <div style="color:var(--text-dim);font-size:0.85rem;margin-bottom:12px">3 Venues</div>
       <div class="host-city-venues">3</div>
@@ -203,7 +180,7 @@
         <button class="news-refresh-btn" onclick="API.startNewsAutoRefresh(renderNews)">↻ Refresh</button>
       </div>
     </div>
-    <p class="section-desc">Set a <a href="https://gnews.io" target="_blank" rel="noopener" style="color:var(--accent)">GNews API key</a> as the <code>GNEWS_KEY</code> environment variable in Vercel for live headlines — fetched securely via <code>/api/news</code>.</p>
+    <p class="section-desc">Add a free <a href="https://gnews.io" target="_blank" rel="noopener" style="color:var(--accent)">GNews API key</a> to <code>js/api.js</code> → <code>GNEWS_KEY</code> for live headlines.</p>
   </div>
   <div id="news-grid"></div>
 </section>
@@ -239,10 +216,7 @@
 <script src="js/data.js"></script>
 <script src="js/predictions.js"></script>
 <script src="js/api.js"></script>
-<script src="js/supabase-client.js"></script>
 <script src="js/shared.js"></script>
-<script src="js/auth.js"></script>
-<script src="js/live.js"></script>
 <script>
 document.addEventListener("DOMContentLoaded", () => {
   buildNav("home");
@@ -250,11 +224,8 @@ document.addEventListener("DOMContentLoaded", () => {
   initHeroCountdown();
   initHeroParticles();
   initFavsPreview();
-  initNextMatch();
-  renderNewsSkeleton();
   API.startNewsAutoRefresh(renderNews);
   initScrollAnimations();
-  initLiveData();   // start API-Football polling for Next Match spotlight
 });
 
 // ---- Flip countdown ----
@@ -327,94 +298,7 @@ function initFavsPreview() {
 }
 
 // ---- News ----
-function renderNewsSkeleton() {
-  const container = document.getElementById("news-grid");
-  if (!container) return;
-  container.innerHTML = Array.from({ length: 3 }, (_, i) => `
-    <div class="news-card news-skeleton ${i===0?'news-featured':''}">
-      <div class="news-img skeleton-box"></div>
-      <div class="news-body">
-        <span class="skeleton-line skeleton-tag"></span>
-        <span class="skeleton-line skeleton-title"></span>
-        <span class="skeleton-line"></span>
-        <span class="skeleton-line skeleton-short"></span>
-      </div>
-    </div>`).join('');
-}
-
-// ---- Next Match Spotlight ----
-let _nextMatchTimer;
-function initNextMatch() {
-  if (typeof MATCHES === "undefined") return;
-  const now = Date.now();
-  const upcoming = MATCHES
-    .map(m => ({ m, ts: new Date(`${m.date}T${m.time}:00Z`).getTime() }))
-    .filter(x => !isNaN(x.ts) && x.ts > now)
-    .sort((a, b) => a.ts - b.ts)[0];
-  if (!upcoming) return;
-
-  const { m, ts } = upcoming;
-  const home = TEAMS.find(t => t.id === m.home);
-  const away = TEAMS.find(t => t.id === m.away);
-  if (!home || !away) return;
-  const prob = Predictions.getProbability(m.home, m.away);
-  const k = formatKickoffLocal(m.date, m.time);
-
-  const section = document.getElementById("next-match-section");
-  const card = document.getElementById("next-match-card");
-  if (!card) return;
-  card.innerHTML = `
-    <div class="nm-stage">${m.stage} · ${m.venue}</div>
-    <div class="nm-teams">
-      <div class="nm-team">${flagImg(home.id, 56)}<span>${home.name}</span></div>
-      <div class="nm-vs">
-        <div class="nm-countdown" id="nm-countdown">--:--:--</div>
-        <div class="nm-kickoff">${k.date} · ${k.time} ${k.tz}</div>
-      </div>
-      <div class="nm-team">${flagImg(away.id, 56)}<span>${away.name}</span></div>
-    </div>
-    <div class="nm-prob">
-      <div class="nm-prob-bar">
-        <span class="nm-prob-seg nm-home" style="width:${prob.home}%" title="${home.name} ${prob.home}%"></span>
-        <span class="nm-prob-seg nm-draw" style="width:${prob.draw}%" title="Draw ${prob.draw}%"></span>
-        <span class="nm-prob-seg nm-away" style="width:${prob.away}%" title="${away.name} ${prob.away}%"></span>
-      </div>
-      <div class="nm-prob-labels">
-        <span>${prob.home}% ${home.name}</span>
-        <span>${prob.draw}% Draw</span>
-        <span>${prob.away}% ${away.name}</span>
-      </div>
-    </div>`;
-  if (section) section.style.display = "";
-
-  const tick = () => {
-    const diff = ts - Date.now();
-    const el = document.getElementById("nm-countdown");
-    if (!el) { clearInterval(_nextMatchTimer); return; }
-    if (diff <= 0) { el.textContent = "KICK OFF! ⚽"; clearInterval(_nextMatchTimer); return; }
-    const d = Math.floor(diff / 86400000);
-    const h = Math.floor((diff % 86400000) / 3600000);
-    const mn = Math.floor((diff % 3600000) / 60000);
-    const s = Math.floor((diff % 60000) / 1000);
-    el.textContent = (d > 0 ? `${d}d ` : "") +
-      `${String(h).padStart(2,"0")}:${String(mn).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
-  };
-  tick();
-  _nextMatchTimer = setInterval(tick, 1000);
-}
-
-function renderNewsTicker(articles) {
-  const track = document.getElementById("news-ticker-track");
-  if (!track || !articles?.length) return;
-  const items = articles.map(a =>
-    `<span class="news-ticker-item">${a.title}</span>`
-  ).join('<span class="news-ticker-sep">•</span>');
-  // Duplicate the run so the marquee loops seamlessly
-  track.innerHTML = items + '<span class="news-ticker-sep">•</span>' + items;
-}
-
 function renderNews(articles) {
-  renderNewsTicker(articles);
   const container = document.getElementById("news-grid");
   if (!container) return;
   const lu = document.getElementById("news-last-update");

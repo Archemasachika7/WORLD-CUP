@@ -2,17 +2,10 @@
    World Cup 2026 — Animations
    ============================================================ */
 
-/* ---- 0. Cinematic background slow-zoom ---- */
-@keyframes slowZoom {
-  0%   { transform: scale(1.08); }
-  50%  { transform: scale(1.18); }
-  100% { transform: scale(1.08); }
-}
-
-/* ---- 1. Page Fade-In — instant snap ---- */
+/* ---- 1. Page Fade-In ---- */
 body {
   opacity: 0;
-  transition: opacity 0.15s ease;
+  transition: opacity 0.4s ease;
 }
 body.page-loaded {
   opacity: 1;
@@ -55,10 +48,10 @@ body.page-loaded {
   transform: translateY(0);
 }
 
-/* ---- 4. Countdown Flip — sharp FIFA brand ---- */
+/* ---- 4. Countdown Flip ---- */
 .countdown-flip-wrap {
   display: flex;
-  gap: 4px;
+  gap: 8px;
   align-items: center;
   flex-wrap: wrap;
   justify-content: center;
@@ -77,17 +70,16 @@ body.page-loaded {
   justify-content: center;
   width: 64px;
   height: 64px;
-  background: #0d0d0d;
-  border: 2px solid #333;
-  border-radius: 0;
-  font-family: 'Archivo Black', Impact, sans-serif;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
   font-size: 1.8rem;
   font-weight: 900;
-  color: #FFD700;
+  color: #ffd700;
   font-variant-numeric: tabular-nums;
   position: relative;
   overflow: hidden;
-  transition: transform 0.1s ease;
+  transition: transform 0.15s ease;
 }
 
 .flip-digit.flipping {
@@ -101,10 +93,9 @@ body.page-loaded {
 }
 
 .flip-label {
-  font-family: 'Teko', 'Arial Narrow', sans-serif;
-  font-size: 0.75rem;
+  font-size: 0.65rem;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
+  letter-spacing: 1px;
   color: var(--text-dim);
 }
 
@@ -183,22 +174,27 @@ body.page-loaded {
   60%       { transform: translateY(-4px) scale(1.02);  }
 }
 
-/* ---- Shared Nav Active State — FIFA 2026 ---- */
+/* ---- Shared Nav Active State ---- */
 .nav-link.nav-active {
   color: var(--text) !important;
-  background: rgba(255,0,0,0.15);
   position: relative;
 }
 
 .nav-link.nav-active::after {
   content: '';
   position: absolute;
-  bottom: 0;
+  bottom: -4px;
   left: 0;
   right: 0;
-  height: 3px;
+  height: 2px;
   background: var(--accent);
-  border-radius: 0;
+  border-radius: 2px;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
 }
 
 /* ---- Nav Icon ---- */
@@ -216,11 +212,11 @@ body.page-loaded {
 .nav-hamburger {
   display: none;
   background: none;
-  border: 2px solid rgba(255,255,255,0.25);
+  border: 1px solid rgba(255,255,255,0.2);
   color: var(--text);
   font-size: 1.2rem;
   padding: 6px 10px;
-  border-radius: 0;
+  border-radius: 4px;
   cursor: pointer;
 }
 
@@ -235,9 +231,9 @@ body.page-loaded {
     top: 100%;
     left: 0;
     right: 0;
-    background: #000;
-    border-bottom: 3px solid var(--accent);
-    padding: 8px 0;
+    background: rgba(10,10,15,0.98);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 0;
     gap: 0;
   }
   #nav-links-list.nav-open {
@@ -249,28 +245,28 @@ body.page-loaded {
   #nav-links-list .nav-link {
     display: block;
     padding: 12px 24px;
-    border-bottom: 1px solid #1a1a1a;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
   }
   .nav-cta {
     display: none;
   }
 }
 
-/* ---- Host City Cards — FIFA 2026 brutalist ---- */
+/* ---- Host City Cards ---- */
 .host-cities-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 2px;
+  gap: 24px;
   margin-bottom: 60px;
 }
 
 .host-city-card {
-  background: #0d0d0d;
+  background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: 0;
+  border-radius: var(--radius);
   padding: 32px;
   text-align: center;
-  transition: border-color 0.1s, background 0.1s;
+  transition: transform 0.3s, border-color 0.3s;
   position: relative;
   overflow: hidden;
 }
@@ -279,16 +275,13 @@ body.page-loaded {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
-  height: 4px;
+  height: 3px;
+  background: var(--accent);
 }
 
-.host-city-card:nth-child(1)::before { background: var(--accent); }
-.host-city-card:nth-child(2)::before { background: var(--canada); }
-.host-city-card:nth-child(3)::before { background: var(--accent2); }
-
 .host-city-card:hover {
+  transform: translateY(-4px);
   border-color: var(--accent);
-  background: #111;
 }
 
 .host-city-flag {
@@ -297,17 +290,13 @@ body.page-loaded {
 }
 
 .host-city-name {
-  font-family: 'Archivo Black', Impact, sans-serif;
   font-size: 1.3rem;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
+  font-weight: 800;
   margin-bottom: 8px;
 }
 
 .host-city-venues {
-  font-family: 'Archivo Black', Impact, sans-serif;
-  font-size: 2.2rem;
+  font-size: 2rem;
   font-weight: 900;
   color: var(--accent);
   line-height: 1;
@@ -329,22 +318,23 @@ body.page-loaded {
 }
 
 .quick-nav-tile {
-  background: #0d0d0d;
+  background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: 0;
+  border-radius: var(--radius);
   padding: 28px 24px;
   display: flex;
   align-items: center;
   gap: 16px;
   text-decoration: none;
   color: var(--text);
-  transition: border-color 0.1s, background 0.1s;
+  transition: transform 0.3s, border-color 0.3s, background 0.3s;
   cursor: pointer;
 }
 
 .quick-nav-tile:hover {
+  transform: translateY(-4px);
   border-color: var(--accent);
-  background: #111;
+  background: var(--bg-hover);
 }
 
 .quick-nav-icon {
@@ -353,11 +343,8 @@ body.page-loaded {
 }
 
 .quick-nav-title {
-  font-family: 'Archivo Black', Impact, sans-serif;
-  font-size: 1rem;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
+  font-size: 1.05rem;
+  font-weight: 700;
   margin-bottom: 4px;
 }
 
@@ -376,18 +363,18 @@ body.page-loaded {
 }
 
 .fav-preview-card {
-  background: #0d0d0d;
+  background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: 0;
+  border-radius: var(--radius);
   padding: 20px 16px;
   text-align: center;
   cursor: pointer;
-  transition: border-color 0.1s, background 0.1s;
+  transition: transform 0.3s, border-color 0.3s;
 }
 
 .fav-preview-card:hover {
+  transform: translateY(-4px);
   border-color: var(--accent);
-  background: #111;
 }
 
 .fav-rank {
@@ -410,18 +397,16 @@ body.page-loaded {
 }
 
 .fav-pct {
-  font-family: 'Archivo Black', Impact, sans-serif;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   font-weight: 900;
   color: var(--accent);
 }
 
-/* ---- WC Quiz styles — FIFA brand ---- */
+/* ---- WC Quiz styles ---- */
 .quiz-card {
-  background: #0d0d0d;
+  background: var(--bg-card);
   border: 1px solid var(--border);
-  border-top: 4px solid var(--accent);
-  border-radius: 0;
+  border-radius: var(--radius);
   padding: 40px;
   max-width: 680px;
   margin: 0 auto;
@@ -454,13 +439,10 @@ body.page-loaded {
 }
 
 .quiz-question {
-  font-family: 'Archivo Black', Impact, sans-serif;
   font-size: 1.2rem;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
+  font-weight: 700;
   margin-bottom: 28px;
-  line-height: 1.4;
+  line-height: 1.5;
 }
 
 .quiz-options {
@@ -469,21 +451,19 @@ body.page-loaded {
 }
 
 .quiz-opt-btn {
-  background: #000;
-  border: 2px solid var(--border);
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
   color: var(--text);
   padding: 14px 20px;
-  border-radius: 0;
+  border-radius: 8px;
   text-align: left;
-  font-family: 'Teko', 'Arial Narrow', sans-serif;
-  font-size: 1.05rem;
-  letter-spacing: 0.04em;
+  font-size: 0.95rem;
   cursor: pointer;
-  transition: background 0.1s, border-color 0.1s;
+  transition: background 0.2s, border-color 0.2s;
 }
 
 .quiz-opt-btn:hover:not(:disabled) {
-  background: rgba(255,0,0,0.08);
+  background: rgba(229,9,20,0.12);
   border-color: var(--accent);
 }
 
@@ -520,10 +500,9 @@ body.page-loaded {
 }
 
 .quiz-score-card {
-  background: #0d0d0d;
+  background: var(--bg-card);
   border: 1px solid var(--border);
-  border-top: 4px solid var(--gold);
-  border-radius: 0;
+  border-radius: var(--radius);
   padding: 48px 40px;
   text-align: center;
   max-width: 500px;
@@ -536,8 +515,7 @@ body.page-loaded {
 }
 
 .quiz-score-num {
-  font-family: 'Archivo Black', Impact, sans-serif;
-  font-size: 4rem;
+  font-size: 3.5rem;
   font-weight: 900;
   color: var(--accent);
   line-height: 1;
@@ -546,9 +524,8 @@ body.page-loaded {
 
 /* ---- Penalty Shootout ---- */
 .shootout-field {
-  background: linear-gradient(135deg, #042a04, #0a3d0a);
-  border-radius: 0;
-  border: 2px solid #0a3d0a;
+  background: linear-gradient(135deg, #0a3d0a, #1a5c1a);
+  border-radius: var(--radius);
   padding: 32px;
   max-width: 700px;
   margin: 0 auto;
@@ -562,8 +539,8 @@ body.page-loaded {
   align-items: center;
   gap: 24px;
   margin-bottom: 32px;
-  background: rgba(0,0,0,0.6);
-  border-radius: 0;
+  background: rgba(0,0,0,0.4);
+  border-radius: 8px;
   padding: 16px 24px;
 }
 
@@ -572,7 +549,6 @@ body.page-loaded {
 }
 
 .shoot-score-num {
-  font-family: 'Archivo Black', Impact, sans-serif;
   font-size: 2.5rem;
   font-weight: 900;
   color: var(--gold);
@@ -707,10 +683,9 @@ body.page-loaded {
 
 /* ---- Score Predictor ---- */
 .predictor-game-card {
-  background: #0d0d0d;
+  background: var(--bg-card);
   border: 1px solid var(--border);
-  border-top: 4px solid var(--accent2);
-  border-radius: 0;
+  border-radius: var(--radius);
   padding: 36px;
   max-width: 640px;
   margin: 0 auto;
@@ -782,9 +757,9 @@ body.page-loaded {
 }
 
 .predictor-ai-card {
-  background: #000;
-  border: 2px solid rgba(255,0,0,0.3);
-  border-radius: 0;
+  background: rgba(229,9,20,0.06);
+  border: 1px solid rgba(229,9,20,0.2);
+  border-radius: 8px;
   padding: 20px;
   margin-top: 20px;
 }

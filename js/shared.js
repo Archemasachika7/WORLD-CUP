@@ -10,46 +10,7 @@ const NAV_PAGES = [
   { id: "predictions", href: "predictions.html",  icon: "🔮", label: "Predictions" },
   { id: "meet",        href: "meet.html",         icon: "🏟️", label: "Meet"        },
   { id: "games",       href: "games.html",        icon: "🎮", label: "Games"       },
-  { id: "profile",     href: "profile.html",      icon: "👤", label: "Profile",    navOnly: true },
 ];
-
-// ── Dark / light theme (system-detected, user-overridable) ──
-const THEME_KEY = "wc26_theme";
-
-function preferredColorScheme() {
-  const saved = localStorage.getItem(THEME_KEY);
-  if (saved === "light" || saved === "dark") return saved;
-  return window.matchMedia?.("(prefers-color-scheme: light)").matches ? "light" : "dark";
-}
-
-function setColorScheme(theme) {
-  document.documentElement.setAttribute("data-theme", theme);
-  const btn = document.getElementById("nav-theme-toggle");
-  if (btn) { btn.textContent = theme === "light" ? "☀️" : "🌙"; }
-}
-
-function toggleColorScheme() {
-  const next = document.documentElement.getAttribute("data-theme") === "light" ? "dark" : "light";
-  localStorage.setItem(THEME_KEY, next);
-  setColorScheme(next);
-}
-
-// Apply immediately (before nav builds) to minimise flash
-setColorScheme(preferredColorScheme());
-
-// ── UTC → local kickoff time helper ──
-// Match data stores date ("2026-06-11") + time ("20:00") as UTC.
-// Returns the kickoff rendered in the viewer's own browser timezone.
-function formatKickoffLocal(dateStr, timeStr) {
-  if (!dateStr || !timeStr) return { date: "TBD", time: "", tz: "" };
-  const d = new Date(`${dateStr}T${timeStr}:00Z`);
-  if (isNaN(d.getTime())) return { date: dateStr, time: timeStr, tz: "UTC" };
-  const date = d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
-  const time = d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
-  const tz = new Intl.DateTimeFormat(undefined, { timeZoneName: "short" })
-    .formatToParts(d).find(p => p.type === "timeZoneName")?.value || "";
-  return { date, time, tz };
-}
 
 function buildNav(activePage) {
   const container = document.getElementById("main-nav");
@@ -57,8 +18,8 @@ function buildNav(activePage) {
 
   container.innerHTML = `
     <div class="nav-logo">
-      <img src="img/your-logo.png" alt="FIFA World Cup 2026 logo" style="height:44px;width:auto" loading="lazy" onerror="this.style.display='none'" />
-      <span>World Cup <span class="logo-wc">2026</span></span>
+      <img src="https://upload.wikimedia.org/wikipedia/en/thumb/8/86/2026_FIFA_World_Cup_logo.svg/120px-2026_FIFA_World_Cup_logo.svg.png" alt="FIFA World Cup 2026 logo" style="height:40px;width:auto;border-radius:6px" loading="lazy" />
+      <span>FIFA World Cup <span class="logo-wc">2026</span></span>
     </div>
     <button class="nav-hamburger" id="nav-hamburger" aria-label="Menu">☰</button>
     <ul class="nav-links" id="nav-links-list">
@@ -71,12 +32,8 @@ function buildNav(activePage) {
         </li>
       `).join("")}
     </ul>
-    <button class="nav-theme-toggle" id="nav-theme-toggle" aria-label="Toggle dark/light mode" title="Toggle dark/light mode">🌙</button>
-    <a class="nav-user-btn nav-avatar-guest" id="nav-user-btn" href="auth.html" title="Sign in"><span class="nav-avatar-initials">👤</span><span class="nav-avatar-name">Sign In</span></a>
     <a class="nav-cta" href="meet.html">🏟️ Meet Rooms</a>
   `;
-  setColorScheme(document.documentElement.getAttribute("data-theme") || preferredColorScheme());
-  document.getElementById("nav-theme-toggle")?.addEventListener("click", toggleColorScheme);
 
   // Scroll effect
   window.addEventListener("scroll", () => {
@@ -135,160 +92,7 @@ const STREAM_PRESETS = [
   { label: "⚡ beIN Sports", url: "https://www.beinsports.com" },
 ];
 
-// ── Cinematic player background cycler ─────────────────
-const BG_PLAYERS = [
-  // Portugal first — Ronaldo leads, then squad
-  "Cristiano Ronaldo",
-  "Bruno Fernandes",
-  "Rafael Leão",
-  "Bernardo Silva",
-  "Rúben Dias",
-  "João Félix",
-  "Diogo Costa",
-  "Pedro Neto",
-  // World stars
-  "Lionel Messi",
-  "Kylian Mbappé",
-  "Vinicius Junior",
-  "Jude Bellingham",
-  "Rodri",
-  "Lamine Yamal",
-  "Erling Haaland",
-];
-
-function _makeBgLayer() {
-  const el = document.createElement("div");
-  el.setAttribute("aria-hidden", "true");
-  el.className = "wc-bg-layer";
-  Object.assign(el.style, {
-    position:           "fixed",
-    inset:              "0",
-    backgroundSize:     "cover",
-    backgroundPosition: "center 20%",
-    backgroundRepeat:   "no-repeat",
-    filter:             "blur(14px) brightness(0.28)",
-    transform:          "scale(1.08)",
-    zIndex:             "-1",
-    opacity:            "0",
-    transition:         "opacity 2.5s ease-in-out",
-    animation:          "slowZoom 40s ease-in-out infinite",
-    pointerEvents:      "none",
-  });
-  document.body.prepend(el);
-  return el;
-}
-
-function startBgCycler() {
-  if (typeof getPlayerPhoto !== "function") return;
-  if (window.location.pathname.includes("meet")) return;
-  if (window.location.pathname.includes("auth")) return;
-  const layerA = _makeBgLayer();
-  const layerB = _makeBgLayer();
-  let active = layerA, idle = layerB, idx = 0;
-
-  async function tick() {
-    const name = BG_PLAYERS[idx % BG_PLAYERS.length];
-    idx++;
-    try {
-      const url = await getPlayerPhoto(name);
-      if (!url || (typeof _photoPlaceholder !== "undefined" && url === _photoPlaceholder)) return;
-      idle.style.backgroundImage = `url('${url}')`;
-      void idle.offsetHeight; // force reflow so transition fires
-      idle.style.opacity  = "0.75";
-      active.style.opacity = "0";
-      [active, idle] = [idle, active];
-    } catch {}
-  }
-
-  tick();
-  setInterval(tick, 12000);
-}
-
-// Scroll progress bar (host-nation tricolour) — injected on every page
-function initScrollProgress() {
-  let bar = document.getElementById("scroll-progress");
-  if (!bar) {
-    bar = document.createElement("div");
-    bar.id = "scroll-progress";
-    document.body.appendChild(bar);
-  }
-  const update = () => {
-    const h = document.documentElement;
-    const max = h.scrollHeight - h.clientHeight;
-    bar.style.width = max > 0 ? (h.scrollTop / max) * 100 + "%" : "0";
-  };
-  window.addEventListener("scroll", update, { passive: true });
-  window.addEventListener("resize", update);
-  update();
-}
-
-// Site anthem — floating play/pause button. "A Triangle of Fire".
-// Browser autoplay policy needs a user gesture, so playback starts on first click.
-// Play state + position persist across pages via sessionStorage for seamless nav.
-const ANTHEM_SRC   = "audio/triangle-of-fire.mp3";
-const ANTHEM_STATE = "wc26_anthem_playing";
-const ANTHEM_TIME  = "wc26_anthem_time";
-
-function initAnthem() {
-  if (document.getElementById("anthem-toggle")) return;
-  if (window.location.pathname.includes("meet")) return;  // don't clash with call audio
-
-  const audio = new Audio(ANTHEM_SRC);
-  audio.loop = true;
-  audio.preload = "none";
-  audio.volume = 0.55;
-
-  // Resume from where the last page left off
-  const savedTime = parseFloat(sessionStorage.getItem(ANTHEM_TIME) || "0");
-  if (savedTime > 0) audio.currentTime = savedTime;
-
-  const btn = document.createElement("button");
-  btn.id = "anthem-toggle";
-  btn.className = "anthem-toggle";
-  btn.setAttribute("aria-label", "Play World Cup anthem");
-  btn.title = "A Triangle of Fire — World Cup 2026 anthem";
-  btn.innerHTML = `<span class="anthem-icon">♪</span><span class="anthem-eq"><i></i><i></i><i></i><i></i></span>`;
-  document.body.appendChild(btn);
-
-  function setPlaying(on) {
-    btn.classList.toggle("playing", on);
-    btn.setAttribute("aria-label", on ? "Pause World Cup anthem" : "Play World Cup anthem");
-    sessionStorage.setItem(ANTHEM_STATE, on ? "1" : "0");
-  }
-
-  btn.addEventListener("click", () => {
-    if (audio.paused) {
-      audio.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
-    } else {
-      audio.pause();
-      setPlaying(false);
-    }
-  });
-
-  // Persist position so the next page resumes smoothly
-  setInterval(() => {
-    if (!audio.paused) sessionStorage.setItem(ANTHEM_TIME, String(audio.currentTime));
-  }, 1000);
-  window.addEventListener("pagehide", () => {
-    sessionStorage.setItem(ANTHEM_TIME, String(audio.currentTime));
-  });
-
-  // Continue playing across navigations if it was on (after first gesture this page)
-  if (sessionStorage.getItem(ANTHEM_STATE) === "1") {
-    const resume = () => {
-      audio.play().then(() => setPlaying(true)).catch(() => {});
-      document.removeEventListener("click", resume);
-      document.removeEventListener("keydown", resume);
-    };
-    document.addEventListener("click", resume, { once: true });
-    document.addEventListener("keydown", resume, { once: true });
-  }
-}
-
 // Page fade-in on load
 document.addEventListener("DOMContentLoaded", () => {
   document.body.classList.add("page-loaded");
-  startBgCycler();
-  initScrollProgress();
-  initAnthem();
 });

@@ -190,7 +190,7 @@ const PLAYERS = [
   { name:"Ousmane Dembélé",      club:"PSG",              league:"Ligue1",     nation:"🇫🇷", pos:"FW", goals:16, assists:18, ga:0,  cs:0,  rating:8.6, teamId:"fra", award:"Ligue 1 Player of Year 2025-26" },
   { name:"Bradley Barcola",      club:"PSG",              league:"Ligue1",     nation:"🇫🇷", pos:"FW", goals:20, assists:9,  ga:0,  cs:0,  rating:8.5, teamId:"fra", award:"Ligue 1 Top Scorer 2025-26" },
   { name:"Désiré Doué",          club:"PSG",              league:"Ligue1",     nation:"🇫🇷", pos:"MF", goals:14, assists:10, ga:0,  cs:0,  rating:8.3, teamId:"fra" },
-  { name:"Gianluigi Donnarumma", club:"Manchester City",  league:"EPL",        nation:"🇮🇹", pos:"GK", goals:0,  assists:0,  ga:21, cs:19, rating:8.6 },
+  { name:"Gianluigi Donnarumma", club:"PSG",              league:"Ligue1",     nation:"🇫🇷", pos:"GK", goals:0,  assists:0,  ga:21, cs:19, rating:8.6, teamId:"fra" },
   { name:"Achraf Hakimi",        club:"PSG",              league:"Ligue1",     nation:"🇲🇦", pos:"DF", goals:5,  assists:10, ga:0,  cs:0,  rating:8.5, teamId:"mar" },
   { name:"Endrick",              club:"Lyon",             league:"Ligue1",     nation:"🇧🇷", pos:"FW", goals:12, assists:6,  ga:0,  cs:0,  rating:8.0, teamId:"bra" },
 
@@ -343,7 +343,7 @@ const SQUADS = {
     players: [
       // GK
       { name:"Mike Maignan",          pos:"GK", club:"AC Milan",          league:"SerieA"     },
-      { name:"Alban Lafont",           pos:"GK", club:"Nantes",            league:"Ligue1"     },
+      { name:"Gianluigi Donnarumma",  pos:"GK", club:"PSG",               league:"Ligue1"     },
       { name:"Brice Samba",           pos:"GK", club:"Nottm Forest",       league:"EPL"        },
       // DF
       { name:"William Saliba",        pos:"DF", club:"Arsenal",            league:"EPL"        },
@@ -444,7 +444,7 @@ const SQUADS = {
       { name:"Cristiano Ronaldo", pos:"FW", club:"Al-Nassr",          league:"SaudiPro"     },
       { name:"Rafael Leão",       pos:"FW", club:"AC Milan",          league:"SerieA"       },
       { name:"Gonçalo Ramos",     pos:"FW", club:"PSG",               league:"Ligue1"       },
-      { name:"Francisco Trincão", pos:"FW", club:"Sporting CP",       league:"LigaPortugal" },
+      { name:"Diogo Jota",        pos:"FW", club:"Liverpool",         league:"EPL"          },
     ]
   },
 
@@ -592,7 +592,7 @@ const NEWS_KEY   = "wc2026_news";
 const NEWS_TTL   = 6 * 60 * 60 * 1000;
 const STREAM_KEY = "wc2026_stream";
 
-// ---- Real Flag Images via flag-icons CSS library ----
+// ---- Real Flag Images via flagcdn.com ----
 const FLAG_CODES = {
   mex:"mx", zaf:"za", kor:"kr", cze:"cz", can:"ca", bih:"ba", qat:"qa",
   sui:"ch", bra:"br", mar:"ma", hai:"ht", sco:"gb-sct", usa:"us", par:"py",
@@ -606,239 +606,7 @@ const FLAG_CODES = {
 function flagImg(teamId, size=32) {
   const code = FLAG_CODES[teamId];
   const team = TEAMS.find(t => t.id === teamId);
-  if (!code) {
-    return `<span title="${team?.name||teamId}" style="font-size:${Math.round(size*0.7)}px;line-height:1;vertical-align:middle">${team?.flag||'🏳️'}</span>`;
-  }
-  return `<span class="fi fi-${code}" style="width:${size}px;height:${Math.round(size*0.75)}px;display:inline-block;flex-shrink:0;border-radius:2px;vertical-align:middle" title="${team?.name||teamId}"></span>`;
-}
-
-// Converts any flag emoji (🇦🇷, 🇫🇷, 🏴󠁧󠁢󠁥󠁮󠁧󠁿 etc.) → flag-icons CSS span
-function flagImgFromEmoji(emoji, size=24) {
-  if (!emoji || emoji === '🌍') {
-    return `<span style="font-size:${size}px;line-height:1;vertical-align:middle">${emoji||'🌍'}</span>`;
-  }
-  const subdivMap = { '🏴󠁧󠁢󠁥󠁮󠁧󠁿': 'gb-eng', '🏴󠁧󠁢󠁳󠁣󠁴󠁿': 'gb-sct', '🏴󠁧󠁢󠁷󠁬󠁳󠁿': 'gb-wls' };
-  let code = subdivMap[emoji];
-  if (!code) {
-    try {
-      const cps = [...emoji].map(c => c.codePointAt(0));
-      const letters = cps.filter(cp => cp >= 0x1F1E6 && cp <= 0x1F1FF)
-        .map(cp => String.fromCharCode(cp - 0x1F1E6 + 65)).join('');
-      if (letters.length === 2) code = letters.toLowerCase();
-    } catch(e) {}
-  }
-  if (!code) return `<span style="font-size:${size}px;line-height:1;vertical-align:middle">${emoji}</span>`;
-  return `<span class="fi fi-${code}" style="width:${size}px;height:${Math.round(size*0.75)}px;display:inline-block;flex-shrink:0;border-radius:2px;vertical-align:middle" title="${emoji}"></span>`;
-}
-
-// ---- Player Photo System (Wikipedia REST API + sessionStorage cache) ----
-const PLAYER_WIKI_TITLES = {
-  // ── Stars (explicit titles to avoid disambiguation) ──
-  "Lionel Messi":         "Lionel_Messi",
-  "Cristiano Ronaldo":    "Cristiano_Ronaldo",
-  "Kylian Mbappé":        "Kylian_Mbappé",
-  "Erling Haaland":       "Erling_Haaland",
-  "Jude Bellingham":      "Jude_Bellingham",
-  "Harry Kane":           "Harry_Kane",
-  "Mohamed Salah":        "Mohamed_Salah",
-  "Vinícius Jr.":         "Vinícius_Júnior",
-  "Lamine Yamal":         "Lamine_Yamal",
-  "Florian Wirtz":        "Florian_Wirtz",
-  "Jamal Musiala":        "Jamal_Musiala",
-  "Bukayo Saka":          "Bukayo_Saka",
-  "Pedri":                "Pedri",
-  "Rodri":                "Rodri_(footballer,_born_2001)",
-  "Gavi":                 "Gavi_(footballer)",
-  "Dani Olmo":            "Dani_Olmo",
-  "Ousmane Dembélé":      "Ousmane_Dembélé",
-  "Bradley Barcola":      "Bradley_Barcola",
-  "Michael Olise":        "Michael_Olise",
-  "Lautaro Martínez":     "Lautaro_Martínez",
-  "Julián Álvarez":       "Julián_Álvarez",
-  "Marcus Thuram":        "Marcus_Thuram",
-  "Thibaut Courtois":     "Thibaut_Courtois",
-  "Virgil van Dijk":      "Virgil_van_Dijk",
-  "Luis Díaz":            "Luis_Díaz_(footballer,_born_1997)",
-  "Christian Pulisic":    "Christian_Pulisic",
-  "Rafael Leão":          "Rafael_Leão",
-  "Declan Rice":          "Declan_Rice",
-  "Bernardo Silva":       "Bernardo_Silva",
-  "Bruno Fernandes":      "Bruno_Fernandes_(footballer,_born_1994)",
-  "Manuel Neuer":         "Manuel_Neuer",
-  "Kai Havertz":          "Kai_Havertz",
-  "Leroy Sané":           "Leroy_Sané",
-  "Raphinha":             "Raphinha",
-  "Neymar":               "Neymar",
-  "Sadio Mané":           "Sadio_Mané",
-  "Martin Ødegaard":      "Martin_Ødegaard",
-  "Alejandro Garnacho":   "Alejandro_Garnacho",
-  "Ollie Watkins":        "Ollie_Watkins",
-  "Granit Xhaka":         "Granit_Xhaka",
-  "Achraf Hakimi":        "Achraf_Hakimi",
-  "Ivan Toney":           "Ivan_Toney",
-  "Marcus Rashford":      "Marcus_Rashford",
-  "Kobbie Mainoo":        "Kobbie_Mainoo",
-  "Anthony Gordon":       "Anthony_Gordon_(footballer,_born_2001)",
-  "Eberechi Eze":         "Eberechi_Eze",
-  "Désiré Doué":          "Désiré_Doué",
-  "Rayan Cherki":         "Rayan_Cherki",
-  "Mike Maignan":         "Mike_Maignan",
-  "Bruno Guimarães":      "Bruno_Guimarães",
-  "Gabriel Martinelli":   "Gabriel_Martinelli",
-  "Matheus Cunha":        "Matheus_Cunha",
-  "David Raya":           "David_Raya",
-  "Nico Williams":        "Nico_Williams_(footballer)",
-  "Endrick":              "Endrick",
-  "Gianluigi Donnarumma": "Gianluigi_Donnarumma",
-  "Riyad Mahrez":         "Riyad_Mahrez",
-  // ── England squad ──
-  "Jordan Pickford":      "Jordan_Pickford",
-  "Dean Henderson":       "Dean_Henderson",
-  "Reece James":          "Reece_James_(footballer,_born_2000)",
-  "John Stones":          "John_Stones",
-  "Marc Guehi":           "Marc_Guéhi",
-  "Jarell Quansah":       "Jarell_Quansah",
-  "Ezri Konsa":           "Ezri_Konsa",
-  "Tino Livramento":      "Tino_Livramento",
-  "Jordan Henderson":     "Jordan_Henderson",
-  // ── Germany squad ──
-  "Antonio Rüdiger":      "Antonio_Rüdiger",
-  "Jonathan Tah":         "Jonathan_Tah",
-  "Nico Schlotterbeck":   "Nico_Schlotterbeck",
-  "Joshua Kimmich":       "Joshua_Kimmich",
-  "Leon Goretzka":        "Leon_Goretzka",
-  "David Raum":           "David_Raum",
-  "Malick Thiaw":         "Malick_Thiaw",
-  "Alexander Nübel":      "Alexander_Nübel",
-  // ── Brazil squad ──
-  "Marquinhos":           "Marquinhos_(footballer)",
-  "Gabriel Magalhães":    "Gabriel_Magalhães",
-  "Alex Sandro":          "Alex_Sandro",
-  "Casemiro":             "Casemiro",
-  "Lucas Paquetá":        "Lucas_Paquetá",
-  "Bremer":               "Gleison_Bremer",
-  "Fabinho":              "Fabinho_(footballer,_born_1993)",
-  "Antony Matheus":       "Antony_(footballer,_born_2000)",
-  "Danilo":               "Danilo_(footballer,_born_1991)",
-  // ── France squad ──
-  "William Saliba":       "William_Saliba",
-  "Dayot Upamecano":      "Dayot_Upamecano",
-  "Ibrahima Konaté":      "Ibrahima_Konaté",
-  "Benjamin Pavard":      "Benjamin_Pavard",
-  "Theo Hernandez":       "Theo_Hernández",
-  "Aurélien Tchouaméni":  "Aurélien_Tchouaméni",
-  "N'Golo Kanté":         "N'Golo_Kanté",
-  // ── Spain squad ──
-  "Dani Carvajal":        "Dani_Carvajal",
-  "Robert Sánchez":       "Robert_Sánchez_(goalkeeper)",
-  "Nacho":                "Nacho_(footballer)",
-  "Aymeric Laporte":      "Aymeric_Laporte",
-  "Robin Le Normand":     "Robin_Le_Normand",
-  "Marc Cucurella":       "Marc_Cucurella",
-  "Alejandro Grimaldo":   "Alejandro_Grimaldo",
-  "Fabián Ruiz":          "Fabián_Ruiz",
-  "Ferran Torres":        "Ferran_Torres",
-  "Mikel Oyarzabal":      "Mikel_Oyarzabal",
-  "Yéremy Pino":          "Yéremy_Pino",
-  "Álvaro Morata":        "Álvaro_Morata",
-  // ── Argentina squad ──
-  "Thiago Almada":        "Thiago_Almada",
-  "Matías Soulé":         "Matías_Soulé",
-  "Claudio Echeverri":    "Claudio_Echeverri_(footballer)",
-  // ── Portugal squad ──
-  "Diogo Costa":          "Diogo_Costa_(footballer,_born_1999)",
-  "Rúben Dias":           "Rúben_Dias",
-  "João Cancelo":         "João_Cancelo",
-  "Nuno Mendes":          "Nuno_Mendes_(footballer,_born_2002)",
-  "Rúben Neves":          "Rúben_Neves",
-  "Vitinha":              "Vitinha_(footballer)",
-  "Pedro Neto":           "Pedro_Neto_(footballer)",
-  "Gonçalo Ramos":        "Gonçalo_Ramos",
-  "Francisco Trincão":    "Francisco_Trincão",
-  "Inácio":               "Gonçalo_Inácio",
-  // ── Switzerland squad ──
-  "Yann Sommer":          "Yann_Sommer",
-  "Gregor Kobel":         "Gregor_Kobel",
-  "Manuel Akanji":        "Manuel_Akanji",
-  "Nico Elvedi":          "Nico_Elvedi",
-  "Breel Embolo":         "Breel_Embolo",
-  "Remo Freuler":         "Remo_Freuler",
-  // ── USA squad ──
-  "Matt Turner":          "Matt_Turner_(soccer)",
-  "Sergiño Dest":         "Sergiño_Dest",
-  "Antonee Robinson":     "Antonee_Robinson",
-  "Tyler Adams":          "Tyler_Adams_(soccer)",
-  "Weston McKennie":      "Weston_McKennie",
-  "Yunus Musah":          "Yunus_Musah",
-  "Ricardo Pepi":         "Ricardo_Pepi",
-  "Folarin Balogun":      "Folarin_Balogun",
-  "Josh Sargent":         "Josh_Sargent_(soccer)",
-};
-
-const _photoPlaceholder = "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60'%3E%3Ccircle cx='30' cy='30' r='30' fill='%23222'/%3E%3Ccircle cx='30' cy='22' r='10' fill='%23444'/%3E%3Cellipse cx='30' cy='52' rx='18' ry='14' fill='%23444'/%3E%3C/svg%3E";
-
-async function getPlayerPhoto(name) {
-  const key = 'wc26p_' + name.replace(/[^a-zA-Z0-9]/g, '_');
-  try { const c = sessionStorage.getItem(key); if (c !== null) return c || null; } catch(e) {}
-
-  const knownTitle = PLAYER_WIKI_TITLES[name];
-
-  // Auto-generate candidate titles from the player's name
-  const parts = name.trim().split(/\s+/);
-  const last  = parts[parts.length - 1];
-  const first = parts[0];
-  const auto  = [
-    parts.join('_'),
-    parts.length > 1 ? `${first}_${last}` : null,
-    `${parts.join('_')}_(footballer)`,
-    `${parts.join('_')}_(soccer_player)`,
-    last,
-    `${last}_(footballer)`,
-  ].filter(Boolean).filter((v, i, a) => a.indexOf(v) === i);
-
-  const candidates = knownTitle ? [knownTitle, ...auto] : auto;
-
-  for (const title of candidates) {
-    try {
-      const r = await fetch(
-        `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`,
-        { headers: { Accept: 'application/json' } }
-      );
-      if (!r.ok) continue;
-      const d = await r.json();
-      if (!d.thumbnail?.source) continue;
-      // For auto-generated titles only: verify page is about a footballer
-      if (!knownTitle || title !== knownTitle) {
-        const blurb = ((d.description || '') + ' ' + (d.extract || '')).toLowerCase();
-        const ok = blurb.includes('football') || blurb.includes('soccer')
-                || blurb.includes('footballer') || blurb.includes(' f.c.')
-                || blurb.includes('premier league') || blurb.includes('bundesliga')
-                || blurb.includes('la liga') || blurb.includes('serie a')
-                || blurb.includes('ligue 1');
-        if (!ok) continue;
-      }
-      const url = d.thumbnail.source;
-      try { sessionStorage.setItem(key, url); } catch(e) {}
-      return url;
-    } catch(e) { /* network error — try next */ }
-  }
-
-  try { sessionStorage.setItem(key, ''); } catch(e) {}
-  return null;
-}
-
-async function loadPhotosIntoImgs(selector) {
-  const imgs = document.querySelectorAll(selector);
-  imgs.forEach(async img => {
-    const name = img.dataset.player;
-    if (!name) return;
-    const url = await getPlayerPhoto(name);
-    if (url) {
-      img.src = url;
-      img.classList.add('photo-loaded');
-      // Hide any fallback sibling (ea-photo-fallback)
-      const fb = img.nextElementSibling;
-      if (fb && fb.classList.contains('ea-photo-fallback')) fb.style.display = 'none';
-    }
-  });
+  const emoji = team?.flag || '🏳️';
+  if (!code) return `<span class="flag-emoji">${emoji}</span>`;
+  return `<img class="flag-img" src="https://flagcdn.com/w${size}/${code}.png" alt="${teamId}" width="${size}" loading="lazy" onerror="this.style.display='none';this.nextSibling.style.display='inline'" /><span class="flag-emoji" style="display:none">${emoji}</span>`;
 }
