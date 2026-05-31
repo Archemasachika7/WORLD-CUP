@@ -70,6 +70,7 @@ const MeetSystem = (() => {
   function init() {
     bindLanding();
     renderThemeChips();
+    renderMeetPlayers();
     checkUrlRoom();
     // Restore nickname from localStorage
     const saved = localStorage.getItem("wc-meet-nick");
@@ -1078,11 +1079,44 @@ const MeetSystem = (() => {
     row.innerHTML = ids.map(id => {
       const th   = TEAM_THEMES[id];
       const team = (typeof TEAMS !== "undefined") ? TEAMS.find(x => x.id === id) : null;
+      const fc   = (typeof FLAG_CODES !== "undefined") ? FLAG_CODES[id] : null;
+      const emoji = team?.flag || "🏳️";
+      const inner = fc
+        ? `<span class="tc-emoji">${emoji}</span><img class="tc-img" src="https://flagcdn.com/w48/${fc}.png" alt="" onerror="this.style.display='none'" />`
+        : `<span class="tc-emoji">${emoji}</span>`;
       return `<button class="theme-chip" style="--chip-color:${th?.accent||"#e50914"}"
         title="${team?.name||id}" onclick="MeetSystem.previewTheme('${id}')">
-        ${team?.flag || "🏳️"}
+        ${inner}
       </button>`;
     }).join("");
+  }
+
+  // ── Player DPs strip ───────────────────────────────────
+  function renderMeetPlayers() {
+    const strip = document.getElementById("meet-players-strip");
+    if (!strip || typeof PLAYERS === "undefined") return;
+    const top = PLAYERS
+      .filter(p => p.teamId && p.rating >= 8.0)
+      .sort((a, b) => b.rating - a.rating)
+      .slice(0, 20);
+    if (!top.length) return;
+    strip.innerHTML =
+      '<div class="mps-label">⭐ Star Players at WC 2026</div>' +
+      '<div class="mps-row">' +
+      top.map(p => {
+        const ph = typeof getPlayerPhoto === "function" ? getPlayerPhoto(p.name) : { src:"", fallback:"" };
+        const team = typeof TEAMS !== "undefined" ? TEAMS.find(t => t.id === p.teamId) : null;
+        const ovr  = Math.round(p.rating * 10);
+        return `<div class="mps-card" title="${p.name} · ${team?.name||""}">
+          <div class="mps-photo-wrap">
+            <img class="mps-photo" src="${ph.src}" onerror="this.src='${ph.fallback}'" alt="${p.name}" />
+            <span class="mps-flag">${team?.flag||""}</span>
+          </div>
+          <div class="mps-name">${p.name.split(" ").pop()}</div>
+          <div class="mps-ovr">${ovr}</div>
+        </div>`;
+      }).join("") +
+      '</div>';
   }
 
   function previewTheme(teamId) {

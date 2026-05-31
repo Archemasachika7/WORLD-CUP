@@ -310,10 +310,14 @@ function initFavsPreview() {
         <span class="fav-player-label">${p.name.split(' ').pop()}</span>
       </div>`;
     }).join('');
+    const fc = FLAG_CODES[t.id];
+    const flagHtml = fc
+      ? `<span class="fav-flag-emoji">${t.flag}</span><img class="fav-flag-img" src="https://flagcdn.com/w64/${fc}.png" alt="" onerror="this.style.display='none'" />`
+      : `<span class="fav-flag-emoji">${t.flag}</span>`;
     return `
     <div class="fav-preview-card card-enter">
       <div class="fav-rank">#${i+1}</div>
-      <div class="fav-flag-wrap">${flagImg(t.id, 64)}</div>
+      <div class="fav-flag-wrap">${flagHtml}</div>
       <div class="fav-name">${t.name}</div>
       <div class="fav-pct">${t.titlePct}%</div>
       <div class="fav-title-lbl">title chance</div>
@@ -373,50 +377,40 @@ function initHeroSlideshow() {
   }, 5000);
 }
 
-// ---- Hero player spotlight ----
+// ---- Hero player scroll strip ----
 function initHeroPlayerSpotlight() {
   var container = document.getElementById("hero-player-spotlight");
   if (!container || typeof PLAYERS === 'undefined') return;
-  var stars = PLAYERS.filter(function(p) { return p.teamId && p.rating >= 8.5; })
+  var stars = PLAYERS
+    .filter(function(p) { return p.teamId; })
     .sort(function(a, b) { return b.rating - a.rating; });
   if (!stars.length) return;
-  var idx = 0;
-  function show(p) {
-    var enc = encodeURIComponent(p.name);
-    var src = (typeof PLAYER_PHOTOS !== 'undefined' && PLAYER_PHOTOS[p.name])
-      ? PLAYER_PHOTOS[p.name]
-      : 'https://ui-avatars.com/api/?name=' + enc + '&background=111&color=fff&size=96&bold=true&format=svg';
-    var fb = 'https://ui-avatars.com/api/?name=' + enc + '&background=111&color=fff&size=96&bold=true&format=svg';
-    var team = typeof TEAMS !== 'undefined' ? TEAMS.find(function(t){return t.id===p.teamId;}) : null;
-    var ovr = Math.round(p.rating * 10);
-    var tierCls = ovr >= 90 ? 'hps-gold' : ovr >= 85 ? 'hps-silver' : 'hps-bronze';
-    container.innerHTML =
-      '<div class="hps-inner ' + tierCls + '">' +
-        '<img class="hps-photo" src="' + src + '" onerror="this.src=\'' + fb + '\'" alt="' + p.name + '" />' +
-        '<div class="hps-info">' +
-          '<div class="hps-ovr">' + ovr + '</div>' +
-          '<div class="hps-name">' + p.name + '</div>' +
-          '<div class="hps-meta">' + (team ? team.flag + ' ' + team.name : p.nation) + ' &middot; ' + p.pos + '</div>' +
-        '</div>' +
-      '</div>';
-    var inner = container.querySelector('.hps-inner');
-    if (inner) {
-      inner.style.opacity = '0';
-      inner.style.transform = 'translateY(12px)';
-      requestAnimationFrame(function() {
-        requestAnimationFrame(function() {
-          inner.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-          inner.style.opacity = '1';
-          inner.style.transform = 'translateY(0)';
-        });
-      });
-    }
+
+  function makeCard(p) {
+    var enc  = encodeURIComponent(p.name);
+    var src  = (typeof PLAYER_PHOTOS !== 'undefined' && PLAYER_PHOTOS[p.name])
+               ? PLAYER_PHOTOS[p.name]
+               : 'https://ui-avatars.com/api/?name=' + enc + '&background=1a1a2e&color=fff&size=96&bold=true&format=svg';
+    var fb   = 'https://ui-avatars.com/api/?name=' + enc + '&background=1a1a2e&color=fff&size=96&bold=true&format=svg';
+    var team = typeof TEAMS !== 'undefined' ? TEAMS.find(function(t){ return t.id === p.teamId; }) : null;
+    var flag = team ? team.flag : (p.nation || '🏳️');
+    var ovr  = Math.round(p.rating * 10);
+    var tier = ovr >= 90 ? 'hps-gold' : ovr >= 85 ? 'hps-silver' : 'hps-bronze';
+    var lastName = p.name.split(' ').pop();
+    return '<div class="hps-card ' + tier + '">' +
+      '<div class="hps-card-flag">' + flag + '</div>' +
+      '<img class="hps-card-photo" src="' + src + '" onerror="this.src=\'' + fb + '\'" alt="' + p.name + '" />' +
+      '<div class="hps-card-bottom">' +
+        '<span class="hps-card-ovr">' + ovr + '</span>' +
+        '<span class="hps-card-name">' + lastName + '</span>' +
+        '<span class="hps-card-flag-sm">' + flag + '</span>' +
+      '</div>' +
+    '</div>';
   }
-  show(stars[0]);
-  setInterval(function() {
-    idx = (idx + 1) % stars.length;
-    show(stars[idx]);
-  }, 3500);
+
+  // Double the array for seamless infinite marquee
+  var html = stars.concat(stars).map(makeCard).join('');
+  container.innerHTML = '<div class="hps-track">' + html + '</div>';
 }
 </script>
 </body>

@@ -2610,23 +2610,114 @@ button { cursor: pointer; }
 
 .meet-theme-hint { font-size: 0.73rem; color: var(--text-dim); margin: 0; }
 
-.meet-themes-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.meet-themes-row { display: flex; gap: 8px; flex-wrap: wrap; }
 
 .theme-chip {
-  width: 34px;
-  height: 34px;
+  width: 46px;
+  height: 46px;
   border-radius: 50%;
   background: var(--chip-color, #e50914);
-  border: 2px solid rgba(255,255,255,0.18);
+  border: 2.5px solid rgba(255,255,255,0.22);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1rem;
-  transition: transform 0.15s, border-color 0.15s;
+  font-size: 1.4rem;
+  transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
   padding: 0;
+  position: relative;
+  overflow: hidden;
 }
-.theme-chip:hover { transform: scale(1.25); border-color: rgba(255,255,255,0.6); }
+.theme-chip:hover { transform: scale(1.22); border-color: rgba(255,255,255,0.7); box-shadow: 0 4px 14px rgba(0,0,0,0.5); }
+.tc-emoji {
+  font-size: 1.5rem;
+  line-height: 1;
+  position: relative;
+  z-index: 1;
+  display: block;
+}
+.tc-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  z-index: 2;
+}
+
+/* Meet — Star Players strip */
+.meet-players-strip {
+  margin-bottom: 28px;
+}
+.mps-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.mps-row {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scrollbar-width: thin;
+}
+.mps-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  cursor: default;
+  transition: transform 0.12s;
+}
+.mps-card:hover { transform: translateY(-3px); }
+.mps-photo-wrap {
+  position: relative;
+  width: 56px;
+  height: 56px;
+}
+.mps-photo {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center top;
+  border: 2px solid rgba(255,255,255,0.15);
+  background: #1e1e30;
+  display: block;
+}
+.mps-flag {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  font-size: 0.9rem;
+  line-height: 1;
+  background: rgba(0,0,0,0.7);
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.mps-name {
+  font-size: 0.62rem;
+  color: var(--text-dim);
+  text-align: center;
+  max-width: 56px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mps-ovr {
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: var(--gold, #d4af37);
+}
 
 /* ── In-Room ─────────────────────────────────────────────── */
 .meet-room { max-width: 1400px; margin: 0 auto; }
@@ -3598,6 +3689,17 @@ body.meet-active .meet-peer-video { cursor: pointer; }
   text-align: left !important;
 }
 
+/* Global flag rendering: emoji shows first, CDN image overlays when loaded */
+.flag-emoji-bg {
+  font-size: inherit;
+  line-height: 1;
+  display: inline-block;
+  vertical-align: middle;
+}
+.flag-img { vertical-align: middle; }
+/* Hide any stale alt-text from lazy images — emoji is the fallback */
+img.flag-img { font-size: 0; }
+
 /* Flag images in team flags */
 .team-flag-lg .flag-img {
   width: 72px;
@@ -3611,14 +3713,22 @@ body.meet-active .meet-peer-video { cursor: pointer; }
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+  height: 44px;
 }
-.fav-flag-wrap .flag-img {
+.fav-flag-emoji {
+  font-size: 2.6rem;
+  line-height: 1;
   display: block;
-  border-radius: 6px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.5);
 }
-.fav-flag-wrap .flag-emoji {
-  font-size: 2.5rem;
+.fav-flag-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 4px;
+  /* shown only if CDN loads — emoji is the reliable fallback */
 }
 .fav-title-lbl {
   font-size: 0.72rem;
@@ -4103,58 +4213,111 @@ body.light-mode .theme-toggle:hover { background: rgba(0,0,0,0.12); }
 .ea-bronze .ea-photo { border-color: #c87941; }
 
 /* ============================================================
-   Hero Player Spotlight
+   Hero Player Spotlight — bottom scrolling strip
    ============================================================ */
 .hero-player-spotlight {
   position: absolute;
-  right: 32px;
-  top: 50%;
-  transform: translateY(-50%);
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  overflow: hidden;
   z-index: 3;
-  width: 200px;
+  padding: 8px 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.72) 0%, transparent 100%);
 }
-.hps-inner {
+.hps-track {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  background: rgba(0,0,0,0.72);
-  border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 16px;
-  padding: 16px 14px;
-  backdrop-filter: blur(12px);
-  text-align: center;
+  gap: 10px;
+  width: max-content;
+  animation: hpsScroll 60s linear infinite;
+  padding: 0 10px;
 }
-.hps-gold   { border-color: rgba(212,175,55,0.55) !important; }
-.hps-silver { border-color: rgba(200,200,200,0.45) !important; }
-.hps-bronze { border-color: rgba(200,121,65,0.45) !important; }
-.hps-photo {
-  width: 72px;
-  height: 72px;
+.hps-track:hover { animation-play-state: paused; }
+@keyframes hpsScroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.hps-card {
+  position: relative;
+  width: 82px;
+  height: 110px;
+  border-radius: 10px;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 2px solid rgba(255,255,255,0.15);
+  background: rgba(0,0,0,0.55);
+  cursor: default;
+}
+.hps-gold   { border-color: rgba(212,175,55,0.7); }
+.hps-silver { border-color: rgba(200,200,200,0.55); }
+.hps-bronze { border-color: rgba(200,121,65,0.55); }
+.hps-card-flag {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 4.2rem;
+  line-height: 1;
+  filter: blur(2px);
+  opacity: 0.32;
+  z-index: 0;
+  user-select: none;
+}
+.hps-card-photo {
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 58px;
+  height: 58px;
   border-radius: 50%;
   object-fit: cover;
   object-position: center top;
-  border: 2px solid rgba(229,9,20,0.6);
+  z-index: 2;
+  border: 2px solid rgba(255,255,255,0.25);
 }
-.hps-gold   .hps-photo { border-color: #d4af37; }
-.hps-silver .hps-photo { border-color: #c8c8c8; }
-.hps-ovr {
-  font-size: 1.6rem;
+.hps-gold   .hps-card-photo { border-color: #d4af37; }
+.hps-silver .hps-card-photo { border-color: #c8c8c8; }
+.hps-card-bottom {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 3;
+  background: linear-gradient(to top, rgba(0,0,0,0.88) 80%, transparent);
+  padding: 18px 4px 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+.hps-card-ovr {
+  font-size: 0.72rem;
   font-weight: 900;
-  color: var(--gold, #d4af37);
+  color: #d4af37;
   line-height: 1;
 }
-.hps-name {
-  font-weight: 800;
-  font-size: 0.8rem;
+.hps-card-name {
+  font-size: 0.62rem;
+  font-weight: 700;
   color: #fff;
-  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 74px;
+  text-align: center;
 }
-.hps-meta {
-  font-size: 0.65rem;
-  color: rgba(255,255,255,0.55);
+.hps-card-flag-sm {
+  font-size: 0.75rem;
+  line-height: 1;
 }
-@media (max-width: 1024px) { .hero-player-spotlight { display: none; } }
+@media (max-width: 768px) {
+  .hps-card { width: 70px; height: 96px; }
+  .hps-card-flag { font-size: 3.2rem; }
+  .hps-card-photo { width: 48px; height: 48px; top: 5px; }
+}
 
 /* ============================================================
    Lineup Builder
