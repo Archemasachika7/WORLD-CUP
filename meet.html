@@ -85,7 +85,7 @@
     <div class="meet-main-layout">
 
       <!-- Left: video grid + stream -->
-      <div class="meet-left-col">
+      <div class="meet-left-col" id="meet-left-col">
         <div id="meet-video-grid" class="meet-video-grid">
           <div id="meet-local-vid-wrap" class="meet-peer-video meet-local hidden">
             <video id="meet-local-video" autoplay muted playsinline></video>
@@ -124,8 +124,12 @@
     <!-- Controls -->
     <div class="meet-controls-bar">
       <div class="meet-media-group">
-        <button id="meet-mic-btn" class="meet-media-btn">🔇 Muted</button>
-        <button id="meet-cam-btn" class="meet-media-btn">📷 Cam Off</button>
+        <button id="meet-mic-btn" class="meet-media-btn" title="Toggle microphone">🔇 Mute</button>
+        <button id="meet-cam-btn" class="meet-media-btn" title="Toggle camera">📷 Video</button>
+        <button id="meet-screen-btn" class="meet-media-btn" title="Share your screen">🖥️ Share</button>
+        <button id="meet-hand-btn" class="meet-media-btn" title="Raise / lower hand">✋ Hand</button>
+        <button id="meet-view-btn" class="meet-media-btn" title="Toggle gallery / speaker view">⊞ Gallery</button>
+        <button id="meet-fullscreen-btn" class="meet-media-btn" title="Fullscreen video area">⛶ Fullscreen</button>
       </div>
       <div class="meet-reactions-group">
         <button class="emoji-reaction-btn" data-emoji="⚽">⚽</button>

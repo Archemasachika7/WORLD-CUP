@@ -2632,23 +2632,12 @@ button { cursor: pointer; }
 }
 
 /* Peer video grid */
-.meet-video-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  background: rgba(0,0,0,0.25);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 10px;
-  padding: 8px;
-  min-height: 56px;
-}
-
 .meet-video-grid:empty::after {
   content: "Mic / camera peers appear here when voice or video is on";
   color: var(--text-dim);
   font-size: 0.76rem;
   padding: 10px;
-  align-self: center;
+  grid-column: 1 / -1;
 }
 
 .meet-peer-video {
@@ -2656,12 +2645,11 @@ button { cursor: pointer; }
   background: #0e0e16;
   border-radius: 8px;
   overflow: hidden;
-  width: 160px;
-  height: 120px;
-  flex-shrink: 0;
+  min-height: 120px;
   border: 2px solid rgba(255,255,255,0.08);
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
-.meet-peer-video video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.meet-peer-video video { width: 100%; height: 100%; object-fit: cover; display: block; min-height: 120px; }
 .meet-local { border-color: var(--meet-accent); }
 
 .meet-vid-label {
@@ -2672,6 +2660,83 @@ button { cursor: pointer; }
   font-weight: 700;
   color: #fff;
   text-shadow: 0 1px 4px rgba(0,0,0,0.9);
+  max-width: calc(100% - 16px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.meet-vid-flag {
+  position: absolute;
+  top: 6px;
+  left: 8px;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.meet-vid-status {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  display: flex;
+  gap: 4px;
+}
+
+/* Hand raised highlight */
+.meet-peer-video.meet-hand-raised {
+  border-color: #f1c40f;
+  box-shadow: 0 0 0 3px rgba(241,196,15,0.35);
+}
+
+/* Screen share tile — wider */
+.meet-screen-tile {
+  width: 320px;
+  height: 180px;
+  flex-shrink: 0;
+}
+
+/* Gallery view: auto-fit grid */
+.meet-video-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 8px;
+  background: rgba(0,0,0,0.25);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px;
+  padding: 8px;
+  min-height: 56px;
+}
+
+/* Speaker view: one big tile + small strip at bottom */
+.meet-video-grid.meet-video-speaker {
+  grid-template-columns: 1fr;
+  grid-template-rows: auto;
+}
+.meet-video-grid.meet-video-speaker .meet-peer-video {
+  width: 100%;
+  height: 280px;
+}
+.meet-video-grid.meet-video-speaker .meet-peer-video:not(:first-child) {
+  height: 100px;
+  grid-column: auto;
+}
+.meet-video-grid.meet-video-speaker {
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+}
+.meet-video-grid.meet-video-speaker .meet-peer-video:first-child {
+  grid-column: 1 / -1;
+  height: 320px;
+}
+
+/* Fullscreen tweaks */
+.meet-left-col:fullscreen,
+.meet-left-col:-webkit-full-screen {
+  background: #000;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  overflow-y: auto;
 }
 
 /* Stream bar inside room */
@@ -2882,6 +2947,11 @@ button { cursor: pointer; }
   background: rgba(46,204,113,0.14);
   border-color: rgba(46,204,113,0.38);
   color: #2ecc71;
+}
+.meet-media-btn.media-danger {
+  background: rgba(229,9,20,0.18);
+  border-color: rgba(229,9,20,0.45);
+  color: #ff4d4d;
 }
 
 .meet-reactions-group {

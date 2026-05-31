@@ -42,10 +42,14 @@ const MeetSystem = (() => {
   let st = {
     roomId: null, nickname: "", teamId: "", teamFlag: "⚽",
     peerId: null, joined: false, micOn: false, camOn: false,
+    screenOn: false, handRaised: false, viewMode: "gallery", // gallery | speaker
   };
   let sbCh = null;
   let localStream = null;
+  let screenStream = null;
   let peers = {};
+  // map peerId → { nickname, flag, handRaised }
+  let peerMeta = {};
 
   // ── Init ───────────────────────────────────────────────
   function init() {
@@ -124,15 +128,17 @@ const MeetSystem = (() => {
       .on("broadcast", { event: "chat"        }, ({ payload }) => appendMsg(payload))
       .on("broadcast", { event: "emoji_pop"   }, ({ payload }) => rain(payload.e))
       .on("broadcast", { event: "stream_sync" }, ({ payload }) => loadStream(payload.url, false))
-      .on("broadcast", { event: "rtc_hello"   }, ({ payload }) => { if (payload.p !== st.peerId) sendOffer(payload.p); })
+      .on("broadcast", { event: "rtc_hello"   }, ({ payload }) => { if (payload.p !== st.peerId) { peerMeta[payload.p] = { nickname: payload.n, flag: payload.f || "⚽", handRaised: false }; sendOffer(payload.p); } })
       .on("broadcast", { event: "rtc_offer"   }, ({ payload }) => { if (payload.to === st.peerId) handleOffer(payload); })
       .on("broadcast", { event: "rtc_answer"  }, ({ payload }) => { if (payload.to === st.peerId) handleAnswer(payload); })
-      .on("broadcast", { event: "rtc_ice"     }, ({ payload }) => { if (payload.to === st.peerId) handleIce(payload); });
+      .on("broadcast", { event: "rtc_ice"     }, ({ payload }) => { if (payload.to === st.peerId) handleIce(payload); })
+      .on("broadcast", { event: "hand_raise"  }, ({ payload }) => handleHandRaise(payload))
+      .on("broadcast", { event: "peer_meta"   }, ({ payload }) => { if (payload.p !== st.peerId) { peerMeta[payload.p] = { nickname: payload.n, flag: payload.f || "⚽", handRaised: payload.handRaised || false }; updatePeerLabel(payload.p); } });
 
     await sbCh.subscribe(async status => {
       if (status !== "SUBSCRIBED") return;
       await sbCh.track({ n: st.nickname, f: st.teamFlag, id: st.teamId, p: st.peerId, t: Date.now() });
-      sbCh.send({ type:"broadcast", event:"rtc_hello", payload:{ p: st.peerId, n: st.nickname } });
+      sbCh.send({ type:"broadcast", event:"rtc_hello", payload:{ p: st.peerId, n: st.nickname, f: st.teamFlag } });
     });
   }
 
@@ -249,6 +255,105 @@ const MeetSystem = (() => {
   }
 
   // ── WebRTC ─────────────────────────────────────────────
+  // ── Screen Share ───────────────────────────────────────
+  async function toggleScreenShare() {
+    if (st.screenOn) {
+      screenStream?.getTracks().forEach(t => t.stop());
+      screenStream = null;
+      st.screenOn = false;
+      // Replace screen track with camera track (or nothing) in all peers
+      const camTrack = localStream?.getVideoTracks()[0] || null;
+      Object.values(peers).forEach(p => {
+        const sender = p.pc.getSenders().find(s => s.track?.kind === "video");
+        if (sender) sender.replaceTrack(camTrack || null).catch(() => {});
+      });
+      document.getElementById("meet-screen-share-vid-wrap")?.remove();
+      updateBtns();
+      return;
+    }
+    try {
+      screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
+      st.screenOn = true;
+      const screenTrack = screenStream.getVideoTracks()[0];
+      // Replace video sender in all peers
+      Object.values(peers).forEach(p => {
+        const sender = p.pc.getSenders().find(s => s.track?.kind === "video");
+        if (sender) sender.replaceTrack(screenTrack).catch(() => {});
+        else p.pc.addTrack(screenTrack, screenStream);
+      });
+      // Show local preview
+      const grid = document.getElementById("meet-video-grid");
+      if (grid) {
+        let wrap = document.getElementById("meet-screen-share-vid-wrap");
+        if (!wrap) {
+          wrap = document.createElement("div");
+          wrap.id = "meet-screen-share-vid-wrap";
+          wrap.className = "meet-peer-video meet-local meet-screen-tile";
+          const vid = document.createElement("video");
+          vid.autoplay = true; vid.muted = true; vid.playsInline = true;
+          const lbl = document.createElement("div");
+          lbl.className = "meet-vid-label"; lbl.textContent = "🖥️ Your Screen";
+          wrap.appendChild(vid); wrap.appendChild(lbl);
+          grid.appendChild(wrap);
+        }
+        wrap.querySelector("video").srcObject = screenStream;
+      }
+      screenTrack.onended = () => { if (st.screenOn) toggleScreenShare(); };
+      sysMsg("📺 You started sharing your screen");
+      updateBtns();
+    } catch { alert2("Screen sharing cancelled or not supported."); }
+  }
+
+  // ── Raise Hand ─────────────────────────────────────────
+  function toggleHand() {
+    st.handRaised = !st.handRaised;
+    updateBtns();
+    sbCh?.send({ type:"broadcast", event:"hand_raise", payload:{ p: st.peerId, n: st.nickname, f: st.teamFlag, raised: st.handRaised } });
+    sysMsg(st.handRaised ? `✋ You raised your hand` : `You lowered your hand`);
+    // Update own label
+    const localLabel = document.querySelector("#meet-local-vid-wrap .meet-vid-label");
+    if (localLabel) localLabel.textContent = (st.handRaised ? "✋ " : "") + "You";
+  }
+
+  function handleHandRaise({ p, n, f, raised }) {
+    if (!peerMeta[p]) peerMeta[p] = { nickname: n, flag: f || "⚽", handRaised: false };
+    peerMeta[p].handRaised = raised;
+    sysMsg(raised ? `✋ ${f || "⚽"} ${n} raised their hand` : `${f || "⚽"} ${n} lowered their hand`);
+    updatePeerLabel(p);
+  }
+
+  function updatePeerLabel(peerId) {
+    const wrap = document.getElementById(`peer-${peerId}`);
+    if (!wrap) return;
+    const meta = peerMeta[peerId] || {};
+    const lbl = wrap.querySelector(".meet-vid-label");
+    if (lbl) lbl.textContent = (meta.handRaised ? "✋ " : "") + (meta.nickname || "Peer");
+    const flagEl = wrap.querySelector(".meet-vid-flag");
+    if (flagEl) flagEl.textContent = meta.flag || "";
+    wrap.classList.toggle("meet-hand-raised", !!meta.handRaised);
+  }
+
+  // ── View Toggle (Gallery / Speaker) ───────────────────
+  function toggleView() {
+    st.viewMode = st.viewMode === "gallery" ? "speaker" : "gallery";
+    const grid = document.getElementById("meet-video-grid");
+    const btn = document.getElementById("meet-view-btn");
+    if (grid) grid.classList.toggle("meet-video-speaker", st.viewMode === "speaker");
+    if (btn) btn.textContent = st.viewMode === "gallery" ? "⊞ Gallery" : "👤 Speaker";
+    if (btn) btn.classList.toggle("media-active", st.viewMode === "speaker");
+  }
+
+  // ── Fullscreen ─────────────────────────────────────────
+  function toggleFullscreen() {
+    const el = document.getElementById("meet-left-col") || document.getElementById("meet-video-grid");
+    if (!el) return;
+    if (!document.fullscreenElement) {
+      el.requestFullscreen().catch(() => {});
+    } else {
+      document.exitFullscreen().catch(() => {});
+    }
+  }
+
   async function toggleMic() {
     if (!localStream) await startMedia(false);
     if (!localStream) return;
@@ -306,10 +411,14 @@ const MeetSystem = (() => {
   }
 
   function updateBtns() {
-    const m = document.getElementById("meet-mic-btn");
-    const c = document.getElementById("meet-cam-btn");
-    if (m) { m.textContent = st.micOn ? "🎙️ Mic On" : "🔇 Muted"; m.classList.toggle("media-active", st.micOn); }
-    if (c) { c.textContent = st.camOn ? "📹 Cam On" : "📷 Cam Off"; c.classList.toggle("media-active", st.camOn); }
+    const m  = document.getElementById("meet-mic-btn");
+    const c  = document.getElementById("meet-cam-btn");
+    const sc = document.getElementById("meet-screen-btn");
+    const h  = document.getElementById("meet-hand-btn");
+    if (m)  { m.textContent  = st.micOn    ? "🎙️ Unmute"   : "🔇 Mute";    m.classList.toggle("media-active", st.micOn); }
+    if (c)  { c.textContent  = st.camOn    ? "📹 Video On"  : "📷 Video";   c.classList.toggle("media-active", st.camOn); }
+    if (sc) { sc.textContent = st.screenOn ? "🖥️ Stop Share": "🖥️ Share";  sc.classList.toggle("media-active", st.screenOn); sc.classList.toggle("media-danger", st.screenOn); }
+    if (h)  { h.textContent  = st.handRaised ? "✋ Lower Hand" : "✋ Hand";  h.classList.toggle("media-active", st.handRaised); }
   }
 
   function mkPeer(peerId) {
@@ -406,12 +515,21 @@ const MeetSystem = (() => {
       wrap.className = "meet-peer-video";
       const vid = document.createElement("video");
       vid.autoplay = true; vid.playsInline = true;
+      const meta = peerMeta[peerId] || {};
+      const flag = document.createElement("span");
+      flag.className = "meet-vid-flag"; flag.textContent = meta.flag || "";
       const lbl = document.createElement("div");
-      lbl.className = "meet-vid-label"; lbl.textContent = "Peer";
-      wrap.appendChild(vid); wrap.appendChild(lbl);
+      lbl.className = "meet-vid-label"; lbl.textContent = (meta.handRaised ? "✋ " : "") + (meta.nickname || "Peer");
+      const statusRow = document.createElement("div");
+      statusRow.className = "meet-vid-status";
+      statusRow.appendChild(flag);
+      wrap.appendChild(vid); wrap.appendChild(statusRow); wrap.appendChild(lbl);
       grid.appendChild(wrap);
+      // Request meta broadcast so we get their name/flag
+      sbCh?.send({ type:"broadcast", event:"peer_meta", payload:{ p: st.peerId, n: st.nickname, f: st.teamFlag, handRaised: st.handRaised } });
     }
     wrap.querySelector("video").srcObject = stream;
+    updatePeerLabel(peerId);
   }
 
   // ── Leave ──────────────────────────────────────────────
@@ -421,6 +539,10 @@ const MeetSystem = (() => {
     sbCh = null;
     localStream?.getTracks().forEach(t => t.stop());
     localStream = null;
+    screenStream?.getTracks().forEach(t => t.stop());
+    screenStream = null;
+    peerMeta = {};
+    st.screenOn = false; st.handRaised = false; st.viewMode = "gallery";
     Object.values(peers).forEach(p => p.pc.close());
     peers = {};
     st = { ...st, roomId:null, joined:false, micOn:false, camOn:false, peerId:null };
@@ -463,6 +585,14 @@ const MeetSystem = (() => {
     document.getElementById("meet-copy-link-btn")?.addEventListener("click", copyLink);
     document.getElementById("meet-mic-btn")?.addEventListener("click", toggleMic);
     document.getElementById("meet-cam-btn")?.addEventListener("click", toggleCam);
+    document.getElementById("meet-screen-btn")?.addEventListener("click", toggleScreenShare);
+    document.getElementById("meet-hand-btn")?.addEventListener("click", toggleHand);
+    document.getElementById("meet-view-btn")?.addEventListener("click", toggleView);
+    document.getElementById("meet-fullscreen-btn")?.addEventListener("click", toggleFullscreen);
+    document.addEventListener("fullscreenchange", () => {
+      const btn = document.getElementById("meet-fullscreen-btn");
+      if (btn) btn.textContent = document.fullscreenElement ? "⛶ Exit Full" : "⛶ Fullscreen";
+    });
     document.getElementById("meet-stream-go")?.addEventListener("click", () => {
       const url = (document.getElementById("meet-stream-input")?.value || "").trim();
       if (url) loadStream(url, true);
