@@ -806,6 +806,16 @@ const PLAYER_PHOTOS = {
   "Kobbie Mainoo":        "https://commons.wikimedia.org/wiki/Special:FilePath/Kobbie_Mainoo_2024.jpg",
   "Anthony Gordon":       "https://commons.wikimedia.org/wiki/Special:FilePath/Anthony_Gordon_2023.jpg",
   "Jean-Philippe Mateta": "https://commons.wikimedia.org/wiki/Special:FilePath/Jean-Philippe_Mateta_2023.jpg",
+  "Ivan Toney":           "https://commons.wikimedia.org/wiki/Special:FilePath/Ivan_Toney_2018.jpg",
+  "Matheus Cunha":        "https://commons.wikimedia.org/wiki/Special:FilePath/Matheus_Cunha_2021.jpg",
+  "Antony Matheus":       "https://commons.wikimedia.org/wiki/Special:FilePath/Antony_2021.jpg",
+  "Giuliano Simeone":     "https://commons.wikimedia.org/wiki/Special:FilePath/Giuliano_Simeone_2024.jpg",
+  "Franco Mastantuono":   "https://commons.wikimedia.org/wiki/Special:FilePath/Franco_Mastantuono_2024.jpg",
+  "Riyad Mahrez":         "https://commons.wikimedia.org/wiki/Special:FilePath/Riyad_Mahrez_2018.jpg",
+  "Gio Reyna":            "https://commons.wikimedia.org/wiki/Special:FilePath/Giovanni_Reyna_2021.jpg",
+  "Sadio Mané":           "https://commons.wikimedia.org/wiki/Special:FilePath/Sadio_Mané_2018.jpg",
+  "Karim Benzema":        "https://commons.wikimedia.org/wiki/Special:FilePath/Karim_Benzema_2018.jpg",
+  "Xherdan Shaqiri":      "https://commons.wikimedia.org/wiki/Special:FilePath/Xherdan_Shaqiri_2018.jpg",
 };
 
 function getPlayerPhoto(name) {
