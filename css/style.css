@@ -39,6 +39,27 @@ body {
   font-family: var(--font-body);
   line-height: 1.6;
   overflow-x: hidden;
+  position: relative;
+}
+
+/* Cinematic blurred player background */
+body::before {
+  content: '';
+  position: fixed;
+  inset: -10%;
+  z-index: -1;
+  background-image: var(--hero-bg, none);
+  background-size: cover;
+  background-position: center;
+  filter: blur(18px) brightness(0.22) saturate(1.4);
+  transform: scale(1.12);
+  animation: heroBgZoom 24s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes heroBgZoom {
+  0%   { transform: scale(1.12); }
+  100% { transform: scale(1.22); }
 }
 
 /* Apply display font globally to all headings */

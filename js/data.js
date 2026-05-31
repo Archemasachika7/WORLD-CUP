@@ -444,7 +444,7 @@ const SQUADS = {
       { name:"Cristiano Ronaldo", pos:"FW", club:"Al-Nassr",          league:"SaudiPro"     },
       { name:"Rafael Leão",       pos:"FW", club:"AC Milan",          league:"SerieA"       },
       { name:"Gonçalo Ramos",     pos:"FW", club:"PSG",               league:"Ligue1"       },
-      { name:"Diogo Jota",        pos:"FW", club:"Liverpool",         league:"EPL"          },
+      { name:"João Félix",        pos:"FW", club:"Chelsea",           league:"EPL"          },
     ]
   },
 
