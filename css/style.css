@@ -3606,10 +3606,87 @@ body.meet-active .meet-peer-video { cursor: pointer; }
 }
 
 /* Favourites preview */
-.fav-preview-card .flag-img {
+.fav-flag-wrap {
+  margin: 8px auto 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.fav-flag-wrap .flag-img {
   display: block;
-  margin: 0 auto 10px;
-  border-radius: 3px;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+}
+.fav-flag-wrap .flag-emoji {
+  font-size: 2.5rem;
+}
+.fav-title-lbl {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+}
+.fav-players-row {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255,255,255,0.07);
+}
+.fav-player-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.fav-player-img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid rgba(255,255,255,0.2);
+  background: #1e1e30;
+}
+.fav-player-label {
+  font-size: 0.62rem;
+  color: var(--text-dim);
+  text-align: center;
+  max-width: 44px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Team card player strip */
+.tc-players {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255,255,255,0.07);
+}
+.tc-player {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+.tc-player-img {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid rgba(255,255,255,0.15);
+  background: #1e1e30;
+}
+.tc-player-name {
+  font-size: 0.58rem;
+  color: var(--text-dim);
+  text-align: center;
+  max-width: 40px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Ranking row flag */

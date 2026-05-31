@@ -287,6 +287,25 @@ function renderTeamCard(t) {
     ? '<span class="sq-badge sq-preliminary">~ Preliminary</span>'
     : '<span class="sq-badge sq-pending">? Unannounced</span>';
   var starStr = "★".repeat(stars) + "☆".repeat(5 - stars);
+
+  var teamPlayers = PLAYERS.filter(function(p) { return p.teamId === t.id; })
+    .sort(function(a, b) { return b.rating - a.rating; })
+    .slice(0, 3);
+  var playerStrip = '';
+  if (teamPlayers.length > 0) {
+    playerStrip = '<div class="tc-players">' +
+      teamPlayers.map(function(p) {
+        var enc = encodeURIComponent(p.name);
+        var src = PLAYER_PHOTOS[p.name] || ('https://ui-avatars.com/api/?name=' + enc + '&background=1e1e30&color=e5e5e5&size=80&bold=true&format=svg');
+        var fb  = 'https://ui-avatars.com/api/?name=' + enc + '&background=1e1e30&color=e5e5e5&size=80&bold=true&format=svg';
+        return '<div class="tc-player" title="' + p.name + '">' +
+          '<img class="tc-player-img" src="' + src + '" onerror="this.src=\'' + fb + '\'" alt="' + p.name + '" />' +
+          '<div class="tc-player-name">' + p.name.split(' ').pop() + '</div>' +
+        '</div>';
+      }).join('') +
+    '</div>';
+  }
+
   return '<div class="team-card" data-id="' + t.id + '">' +
     (t.isHost ? '<span class="host-badge">HOST</span>' : "") +
     (t.isDebut ? '<span class="host-badge" style="background:var(--accent2)">DEBUT</span>' : "") +
@@ -295,7 +314,8 @@ function renderTeamCard(t) {
     '<div class="team-group">Group ' + t.group + " &bull; FIFA #" + t.ranking + "</div>" +
     '<div class="team-top5">' + top5 + " top-5 league player" + (top5 !== 1 ? "s" : "") + "</div>" +
     '<div class="team-stars">' + starStr + "</div>" +
-    badge + "</div>";
+    badge +
+    playerStrip + "</div>";
 }
 
 // ── Team Viewer ─────────────────────────────────────────────────

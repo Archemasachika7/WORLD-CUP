@@ -293,16 +293,29 @@ function initFavsPreview() {
   const container = document.getElementById("favs-preview-container");
   if (!container) return;
   const favs = Predictions.getTournamentFavourites().slice(0, 5);
-  container.innerHTML = favs.map((t, i) => `
+  container.innerHTML = favs.map((t, i) => {
+    const teamPlayers = PLAYERS.filter(p => p.teamId === t.id)
+      .sort((a, b) => b.rating - a.rating)
+      .slice(0, 2);
+    const playerAvatars = teamPlayers.map(p => {
+      const enc = encodeURIComponent(p.name);
+      const src = PLAYER_PHOTOS[p.name] || `https://ui-avatars.com/api/?name=${enc}&background=1e1e30&color=e5e5e5&size=80&bold=true&format=svg`;
+      const fb  = `https://ui-avatars.com/api/?name=${enc}&background=1e1e30&color=e5e5e5&size=80&bold=true&format=svg`;
+      return `<div class="fav-player-chip" title="${p.name}">
+        <img class="fav-player-img" src="${src}" onerror="this.src='${fb}'" alt="${p.name}" />
+        <span class="fav-player-label">${p.name.split(' ').pop()}</span>
+      </div>`;
+    }).join('');
+    return `
     <div class="fav-preview-card card-enter">
       <div class="fav-rank">#${i+1}</div>
-      <div style="margin:0 auto 10px;width:48px;height:32px;display:flex;align-items:center;justify-content:center;">
-        ${flagImg(t.id, 48)}
-      </div>
+      <div class="fav-flag-wrap">${flagImg(t.id, 64)}</div>
       <div class="fav-name">${t.name}</div>
       <div class="fav-pct">${t.titlePct}%</div>
-      <div style="font-size:0.72rem;color:var(--text-dim)">title chance</div>
-    </div>`).join('');
+      <div class="fav-title-lbl">title chance</div>
+      ${playerAvatars ? `<div class="fav-players-row">${playerAvatars}</div>` : ''}
+    </div>`;
+  }).join('');
 }
 
 // ---- News ----
