@@ -42,10 +42,16 @@ const MeetSystem = (() => {
   let st = {
     roomId: null, nickname: "", teamId: "", teamFlag: "⚽",
     peerId: null, joined: false, micOn: false, camOn: false,
+    screenOn: false, handRaised: false, viewMode: "gallery",
+    participantsOpen: false, unreadCount: 0,
   };
   let sbCh = null;
   let localStream = null;
+  let screenStream = null;
   let peers = {};
+  let peerMeta = {}; // peerId → { nickname, flag, handRaised, micOn, camOn }
+  let audioCtx = null;
+  let speakerAnalysers = {}; // peerId → { analyser, data, interval }
 
   // ── Init ───────────────────────────────────────────────
   function init() {
@@ -124,15 +130,27 @@ const MeetSystem = (() => {
       .on("broadcast", { event: "chat"        }, ({ payload }) => appendMsg(payload))
       .on("broadcast", { event: "emoji_pop"   }, ({ payload }) => rain(payload.e))
       .on("broadcast", { event: "stream_sync" }, ({ payload }) => loadStream(payload.url, false))
-      .on("broadcast", { event: "rtc_hello"   }, ({ payload }) => { if (payload.p !== st.peerId) sendOffer(payload.p); })
+      .on("broadcast", { event: "rtc_hello"   }, ({ payload }) => { if (payload.p !== st.peerId) { peerMeta[payload.p] = { nickname: payload.n, flag: payload.f || "⚽", handRaised: false }; sendOffer(payload.p); } })
       .on("broadcast", { event: "rtc_offer"   }, ({ payload }) => { if (payload.to === st.peerId) handleOffer(payload); })
       .on("broadcast", { event: "rtc_answer"  }, ({ payload }) => { if (payload.to === st.peerId) handleAnswer(payload); })
-      .on("broadcast", { event: "rtc_ice"     }, ({ payload }) => { if (payload.to === st.peerId) handleIce(payload); });
+      .on("broadcast", { event: "rtc_ice"     }, ({ payload }) => { if (payload.to === st.peerId) handleIce(payload); })
+      .on("broadcast", { event: "hand_raise"  }, ({ payload }) => handleHandRaise(payload))
+      .on("broadcast", { event: "peer_meta"   }, ({ payload }) => {
+        if (payload.p !== st.peerId) {
+          peerMeta[payload.p] = { nickname: payload.n, flag: payload.f || "⚽", handRaised: payload.handRaised || false, micOn: payload.micOn !== false, camOn: payload.camOn !== false };
+          updatePeerLabel(payload.p);
+          updateTileStatus(`peer-${payload.p}`, payload.micOn !== false, payload.camOn !== false);
+          const hasVid = payload.camOn !== false;
+          setAvatar(`peer-${payload.p}`, payload.n || "Peer");
+          showAvatar(`peer-${payload.p}`, !hasVid);
+          if (st.participantsOpen) renderParticipantsList();
+        }
+      });
 
     await sbCh.subscribe(async status => {
       if (status !== "SUBSCRIBED") return;
       await sbCh.track({ n: st.nickname, f: st.teamFlag, id: st.teamId, p: st.peerId, t: Date.now() });
-      sbCh.send({ type:"broadcast", event:"rtc_hello", payload:{ p: st.peerId, n: st.nickname } });
+      sbCh.send({ type:"broadcast", event:"rtc_hello", payload:{ p: st.peerId, n: st.nickname, f: st.teamFlag } });
     });
   }
 
@@ -181,7 +199,13 @@ const MeetSystem = (() => {
       </div>
       <time class="meet-msg-time">${t}</time>`;
     box.appendChild(d);
-    box.scrollTop = box.scrollHeight;
+    if (!self) {
+      const atBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 60;
+      if (atBottom) box.scrollTop = box.scrollHeight;
+      else markUnread();
+    } else {
+      box.scrollTop = box.scrollHeight;
+    }
   }
 
   function sysMsg(txt) {
@@ -249,6 +273,105 @@ const MeetSystem = (() => {
   }
 
   // ── WebRTC ─────────────────────────────────────────────
+  // ── Screen Share ───────────────────────────────────────
+  async function toggleScreenShare() {
+    if (st.screenOn) {
+      screenStream?.getTracks().forEach(t => t.stop());
+      screenStream = null;
+      st.screenOn = false;
+      // Replace screen track with camera track (or nothing) in all peers
+      const camTrack = localStream?.getVideoTracks()[0] || null;
+      Object.values(peers).forEach(p => {
+        const sender = p.pc.getSenders().find(s => s.track?.kind === "video");
+        if (sender) sender.replaceTrack(camTrack || null).catch(() => {});
+      });
+      document.getElementById("meet-screen-share-vid-wrap")?.remove();
+      updateBtns();
+      return;
+    }
+    try {
+      screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
+      st.screenOn = true;
+      const screenTrack = screenStream.getVideoTracks()[0];
+      // Replace video sender in all peers
+      Object.values(peers).forEach(p => {
+        const sender = p.pc.getSenders().find(s => s.track?.kind === "video");
+        if (sender) sender.replaceTrack(screenTrack).catch(() => {});
+        else p.pc.addTrack(screenTrack, screenStream);
+      });
+      // Show local preview
+      const grid = document.getElementById("meet-video-grid");
+      if (grid) {
+        let wrap = document.getElementById("meet-screen-share-vid-wrap");
+        if (!wrap) {
+          wrap = document.createElement("div");
+          wrap.id = "meet-screen-share-vid-wrap";
+          wrap.className = "meet-peer-video meet-local meet-screen-tile";
+          const vid = document.createElement("video");
+          vid.autoplay = true; vid.muted = true; vid.playsInline = true;
+          const lbl = document.createElement("div");
+          lbl.className = "meet-vid-label"; lbl.textContent = "🖥️ Your Screen";
+          wrap.appendChild(vid); wrap.appendChild(lbl);
+          grid.appendChild(wrap);
+        }
+        wrap.querySelector("video").srcObject = screenStream;
+      }
+      screenTrack.onended = () => { if (st.screenOn) toggleScreenShare(); };
+      sysMsg("📺 You started sharing your screen");
+      updateBtns();
+    } catch { alert2("Screen sharing cancelled or not supported."); }
+  }
+
+  // ── Raise Hand ─────────────────────────────────────────
+  function toggleHand() {
+    st.handRaised = !st.handRaised;
+    updateBtns();
+    sbCh?.send({ type:"broadcast", event:"hand_raise", payload:{ p: st.peerId, n: st.nickname, f: st.teamFlag, raised: st.handRaised } });
+    sysMsg(st.handRaised ? `✋ You raised your hand` : `You lowered your hand`);
+    // Update own label
+    const localLabel = document.querySelector("#meet-local-vid-wrap .meet-vid-label");
+    if (localLabel) localLabel.textContent = (st.handRaised ? "✋ " : "") + "You";
+  }
+
+  function handleHandRaise({ p, n, f, raised }) {
+    if (!peerMeta[p]) peerMeta[p] = { nickname: n, flag: f || "⚽", handRaised: false };
+    peerMeta[p].handRaised = raised;
+    sysMsg(raised ? `✋ ${f || "⚽"} ${n} raised their hand` : `${f || "⚽"} ${n} lowered their hand`);
+    updatePeerLabel(p);
+  }
+
+  function updatePeerLabel(peerId) {
+    const wrap = document.getElementById(`peer-${peerId}`);
+    if (!wrap) return;
+    const meta = peerMeta[peerId] || {};
+    const lbl = wrap.querySelector(".meet-vid-label");
+    if (lbl) lbl.textContent = (meta.handRaised ? "✋ " : "") + (meta.nickname || "Peer");
+    const flagEl = wrap.querySelector(".meet-vid-flag");
+    if (flagEl) flagEl.textContent = meta.flag || "";
+    wrap.classList.toggle("meet-hand-raised", !!meta.handRaised);
+  }
+
+  // ── View Toggle (Gallery / Speaker) ───────────────────
+  function toggleView() {
+    st.viewMode = st.viewMode === "gallery" ? "speaker" : "gallery";
+    const grid = document.getElementById("meet-video-grid");
+    const btn = document.getElementById("meet-view-btn");
+    if (grid) grid.classList.toggle("meet-video-speaker", st.viewMode === "speaker");
+    if (btn) btn.textContent = st.viewMode === "gallery" ? "⊞ Gallery" : "👤 Speaker";
+    if (btn) btn.classList.toggle("media-active", st.viewMode === "speaker");
+  }
+
+  // ── Fullscreen ─────────────────────────────────────────
+  function toggleFullscreen() {
+    const el = document.getElementById("meet-left-col") || document.getElementById("meet-video-grid");
+    if (!el) return;
+    if (!document.fullscreenElement) {
+      el.requestFullscreen().catch(() => {});
+    } else {
+      document.exitFullscreen().catch(() => {});
+    }
+  }
+
   async function toggleMic() {
     if (!localStream) await startMedia(false);
     if (!localStream) return;
@@ -291,6 +414,7 @@ const MeetSystem = (() => {
     }
     updateLocalVid();
     updateBtns();
+    startSpeakerDetection(localStream, "local");
     Object.values(peers).forEach(p => {
       localStream.getTracks().forEach(track => {
         if (!p.pc.getSenders().find(s => s.track === track)) p.pc.addTrack(track, localStream);
@@ -302,14 +426,26 @@ const MeetSystem = (() => {
     const wrap = document.getElementById("meet-local-vid-wrap");
     const vid  = document.getElementById("meet-local-video");
     if (vid && localStream) { vid.srcObject = localStream; vid.muted = true; vid.play().catch(()=>{}); }
-    wrap?.classList.toggle("hidden", !st.camOn);
+    // Show tile as soon as mic OR cam is active
+    wrap?.classList.toggle("hidden", !st.micOn && !st.camOn);
+    setAvatar("meet-local-vid-wrap", st.nickname || "You");
+    showAvatar("meet-local-vid-wrap", !st.camOn && st.micOn);
+    updateTileStatus("meet-local-vid-wrap", st.micOn, st.camOn);
+    // Broadcast updated status to peers
+    sbCh?.send({ type:"broadcast", event:"peer_meta",
+      payload:{ p: st.peerId, n: st.nickname, f: st.teamFlag, handRaised: st.handRaised, micOn: st.micOn, camOn: st.camOn } });
+    if (st.participantsOpen) renderParticipantsList();
   }
 
   function updateBtns() {
-    const m = document.getElementById("meet-mic-btn");
-    const c = document.getElementById("meet-cam-btn");
-    if (m) { m.textContent = st.micOn ? "🎙️ Mic On" : "🔇 Muted"; m.classList.toggle("media-active", st.micOn); }
-    if (c) { c.textContent = st.camOn ? "📹 Cam On" : "📷 Cam Off"; c.classList.toggle("media-active", st.camOn); }
+    const m  = document.getElementById("meet-mic-btn");
+    const c  = document.getElementById("meet-cam-btn");
+    const sc = document.getElementById("meet-screen-btn");
+    const h  = document.getElementById("meet-hand-btn");
+    if (m)  { m.textContent  = st.micOn    ? "🎙️ Unmute"   : "🔇 Mute";    m.classList.toggle("media-active", st.micOn); }
+    if (c)  { c.textContent  = st.camOn    ? "📹 Video On"  : "📷 Video";   c.classList.toggle("media-active", st.camOn); }
+    if (sc) { sc.textContent = st.screenOn ? "🖥️ Stop Share": "🖥️ Share";  sc.classList.toggle("media-active", st.screenOn); sc.classList.toggle("media-danger", st.screenOn); }
+    if (h)  { h.textContent  = st.handRaised ? "✋ Lower Hand" : "✋ Hand";  h.classList.toggle("media-active", st.handRaised); }
   }
 
   function mkPeer(peerId) {
@@ -406,12 +542,209 @@ const MeetSystem = (() => {
       wrap.className = "meet-peer-video";
       const vid = document.createElement("video");
       vid.autoplay = true; vid.playsInline = true;
+      const meta = peerMeta[peerId] || {};
+      // Avatar fallback
+      const av = document.createElement("div");
+      av.className = "meet-avatar";
+      const avSpan = document.createElement("span");
+      avSpan.textContent = getInitials(meta.nickname || "?");
+      av.appendChild(avSpan);
+      av.style.background = avatarColor(meta.nickname || "");
+      // Flag
+      const flag = document.createElement("span");
+      flag.className = "meet-vid-flag"; flag.textContent = meta.flag || "";
+      // Label
       const lbl = document.createElement("div");
-      lbl.className = "meet-vid-label"; lbl.textContent = "Peer";
-      wrap.appendChild(vid); wrap.appendChild(lbl);
+      lbl.className = "meet-vid-label"; lbl.textContent = (meta.handRaised ? "✋ " : "") + (meta.nickname || "Peer");
+      // Status icons
+      const statusRow = document.createElement("div");
+      statusRow.className = "meet-vid-status";
+      statusRow.appendChild(flag);
+      const tileStatus = document.createElement("div");
+      tileStatus.className = "meet-tile-status";
+      wrap.appendChild(vid); wrap.appendChild(av); wrap.appendChild(statusRow); wrap.appendChild(tileStatus); wrap.appendChild(lbl);
       grid.appendChild(wrap);
+      // Ask for their meta
+      sbCh?.send({ type:"broadcast", event:"peer_meta",
+        payload:{ p: st.peerId, n: st.nickname, f: st.teamFlag, handRaised: st.handRaised, micOn: st.micOn, camOn: st.camOn } });
     }
-    wrap.querySelector("video").srcObject = stream;
+    const vid = wrap.querySelector("video");
+    vid.srcObject = stream;
+    // Start speaker detection on audio tracks
+    const audioStream = new MediaStream(stream.getAudioTracks());
+    if (audioStream.getAudioTracks().length > 0) startSpeakerDetection(audioStream, peerId);
+    // Show avatar if no video
+    const hasVideo = stream.getVideoTracks().some(t => t.enabled && t.readyState === "live");
+    const meta = peerMeta[peerId] || {};
+    setAvatar(`peer-${peerId}`, meta.nickname || "Peer");
+    showAvatar(`peer-${peerId}`, !hasVideo);
+    updatePeerLabel(peerId);
+  }
+
+  // ── Active Speaker Detection ───────────────────────────
+  function startSpeakerDetection(stream, peerId) {
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const src = audioCtx.createMediaStreamSource(stream);
+      const analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 256;
+      src.connect(analyser);
+      const data = new Uint8Array(analyser.frequencyBinCount);
+      const interval = setInterval(() => {
+        analyser.getByteFrequencyData(data);
+        const vol = data.reduce((a, b) => a + b, 0) / data.length;
+        const elId = peerId === "local" ? "meet-local-vid-wrap" : `peer-${peerId}`;
+        const el = document.getElementById(elId);
+        if (el) el.classList.toggle("meet-speaking", vol > 8);
+      }, 120);
+      if (speakerAnalysers[peerId]) clearInterval(speakerAnalysers[peerId].interval);
+      speakerAnalysers[peerId] = { analyser, data, interval };
+    } catch(e) { console.warn("speaker detection:", e); }
+  }
+
+  function stopSpeakerDetection(peerId) {
+    const a = speakerAnalysers[peerId];
+    if (a) { clearInterval(a.interval); delete speakerAnalysers[peerId]; }
+    const elId = peerId === "local" ? "meet-local-vid-wrap" : `peer-${peerId}`;
+    document.getElementById(elId)?.classList.remove("meet-speaking");
+  }
+
+  // ── Avatar / Initials ──────────────────────────────────
+  function getInitials(name) {
+    return (name || "?").split(" ").slice(0, 2).map(w => w[0]).join("").toUpperCase();
+  }
+
+  function avatarColor(name) {
+    let h = 0;
+    for (let i = 0; i < (name || "").length; i++) h = (h * 31 + name.charCodeAt(i)) & 0xffffffff;
+    return `hsl(${Math.abs(h) % 360},55%,42%)`;
+  }
+
+  function setAvatar(wrapId, name) {
+    const wrap = document.getElementById(wrapId);
+    if (!wrap) return;
+    let av = wrap.querySelector(".meet-avatar");
+    if (!av) { av = document.createElement("div"); av.className = "meet-avatar"; wrap.appendChild(av); }
+    const span = av.querySelector("span") || document.createElement("span");
+    span.textContent = getInitials(name);
+    if (!av.contains(span)) av.appendChild(span);
+    av.style.background = avatarColor(name);
+  }
+
+  function showAvatar(wrapId, show) {
+    const wrap = document.getElementById(wrapId);
+    wrap?.querySelector(".meet-avatar")?.classList.toggle("visible", show);
+    const vid = wrap?.querySelector("video");
+    if (vid) vid.style.opacity = show ? "0" : "1";
+  }
+
+  // ── Tile Status Icons ──────────────────────────────────
+  function updateTileStatus(wrapId, micOn, camOn) {
+    const wrap = document.getElementById(wrapId);
+    if (!wrap) return;
+    let status = wrap.querySelector(".meet-tile-status");
+    if (!status) { status = document.createElement("div"); status.className = "meet-tile-status"; wrap.appendChild(status); }
+    status.innerHTML = (!micOn ? `<span class="tile-icon tile-muted">🔇</span>` : "") +
+                       (!camOn ? `<span class="tile-icon tile-nocam">📷</span>` : "");
+  }
+
+  // ── Participants Panel ─────────────────────────────────
+  function toggleParticipants() {
+    st.participantsOpen = !st.participantsOpen;
+    const panel = document.getElementById("meet-participants-panel");
+    const btn   = document.getElementById("meet-participants-btn");
+    panel?.classList.toggle("hidden", !st.participantsOpen);
+    btn?.classList.toggle("media-active", st.participantsOpen);
+    if (st.participantsOpen) renderParticipantsList();
+  }
+
+  function renderParticipantsList() {
+    const list = document.getElementById("meet-participants-list");
+    if (!list) return;
+    // Build from presence + own entry
+    const users = [];
+    // self
+    users.push({ id: st.peerId, nickname: st.nickname, flag: st.teamFlag, self: true,
+      micOn: st.micOn, camOn: st.camOn, handRaised: st.handRaised });
+    // peers
+    Object.entries(peerMeta).forEach(([id, m]) => {
+      users.push({ id, nickname: m.nickname, flag: m.flag, self: false,
+        micOn: m.micOn !== false, camOn: m.camOn !== false, handRaised: m.handRaised });
+    });
+    list.innerHTML = users.map(u => `
+      <div class="meet-participant-row${u.self ? " self" : ""}">
+        <span class="meet-participant-avatar" style="background:${avatarColor(u.nickname)}">${getInitials(u.nickname)}</span>
+        <span class="meet-participant-flag">${u.flag || "⚽"}</span>
+        <span class="meet-participant-name">${esc(u.nickname)}${u.self ? " (you)" : ""}</span>
+        <span class="meet-participant-icons">
+          ${u.handRaised ? "✋" : ""}
+          ${!u.micOn ? "🔇" : ""}
+          ${!u.camOn ? "📷" : ""}
+        </span>
+      </div>`).join("");
+  }
+
+  // ── Device Settings ────────────────────────────────────
+  async function openSettings() {
+    const modal = document.getElementById("meet-settings-modal");
+    modal?.classList.remove("hidden");
+    const micSel = document.getElementById("meet-mic-select");
+    const camSel = document.getElementById("meet-cam-select");
+    if (!micSel || !camSel) return;
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      micSel.innerHTML = devices.filter(d => d.kind === "audioinput")
+        .map(d => `<option value="${d.deviceId}">${d.label || "Mic " + d.deviceId.slice(0,6)}</option>`).join("");
+      camSel.innerHTML = devices.filter(d => d.kind === "videoinput")
+        .map(d => `<option value="${d.deviceId}">${d.label || "Camera " + d.deviceId.slice(0,6)}</option>`).join("");
+    } catch(e) { alert2("Cannot list devices — grant permissions first."); }
+  }
+
+  async function applyDevices() {
+    const micId = document.getElementById("meet-mic-select")?.value;
+    const camId = document.getElementById("meet-cam-select")?.value;
+    document.getElementById("meet-settings-modal")?.classList.add("hidden");
+    if (!micId && !camId) return;
+    const constraints = { audio: micId ? { deviceId: { exact: micId } } : true,
+                          video: camId ? { deviceId: { exact: camId } } : st.camOn };
+    try {
+      const newStream = await navigator.mediaDevices.getUserMedia(constraints);
+      // Stop old tracks
+      localStream?.getTracks().forEach(t => t.stop());
+      localStream = newStream;
+      st.micOn = newStream.getAudioTracks().length > 0;
+      st.camOn = newStream.getVideoTracks().length > 0;
+      updateLocalVid();
+      updateBtns();
+      // Replace tracks in all peer connections
+      Object.values(peers).forEach(p => {
+        newStream.getTracks().forEach(track => {
+          const sender = p.pc.getSenders().find(s => s.track?.kind === track.kind);
+          if (sender) sender.replaceTrack(track).catch(() => {});
+          else p.pc.addTrack(track, newStream);
+        });
+      });
+      stopSpeakerDetection("local");
+      startSpeakerDetection(newStream, "local");
+      sysMsg("🎙️ Switched to new devices");
+    } catch(e) { alert2("Could not switch device: " + e.message); }
+  }
+
+  // ── Chat Unread Badge ──────────────────────────────────
+  function markUnread() {
+    const box = document.getElementById("meet-messages");
+    // Only count as unread if chat is scrolled up
+    const atBottom = !box || (box.scrollHeight - box.scrollTop - box.clientHeight < 60);
+    if (atBottom) return;
+    st.unreadCount++;
+    const badge = document.getElementById("meet-chat-badge");
+    if (badge) { badge.textContent = st.unreadCount; badge.classList.remove("hidden"); }
+  }
+
+  function clearUnread() {
+    st.unreadCount = 0;
+    const badge = document.getElementById("meet-chat-badge");
+    if (badge) badge.classList.add("hidden");
   }
 
   // ── Leave ──────────────────────────────────────────────
@@ -421,6 +754,12 @@ const MeetSystem = (() => {
     sbCh = null;
     localStream?.getTracks().forEach(t => t.stop());
     localStream = null;
+    screenStream?.getTracks().forEach(t => t.stop());
+    screenStream = null;
+    Object.keys(speakerAnalysers).forEach(id => stopSpeakerDetection(id));
+    peerMeta = {};
+    st.screenOn = false; st.handRaised = false; st.viewMode = "gallery";
+    st.participantsOpen = false; st.unreadCount = 0;
     Object.values(peers).forEach(p => p.pc.close());
     peers = {};
     st = { ...st, roomId:null, joined:false, micOn:false, camOn:false, peerId:null };
@@ -463,6 +802,24 @@ const MeetSystem = (() => {
     document.getElementById("meet-copy-link-btn")?.addEventListener("click", copyLink);
     document.getElementById("meet-mic-btn")?.addEventListener("click", toggleMic);
     document.getElementById("meet-cam-btn")?.addEventListener("click", toggleCam);
+    document.getElementById("meet-screen-btn")?.addEventListener("click", toggleScreenShare);
+    document.getElementById("meet-hand-btn")?.addEventListener("click", toggleHand);
+    document.getElementById("meet-participants-btn")?.addEventListener("click", toggleParticipants);
+    document.getElementById("meet-settings-btn")?.addEventListener("click", openSettings);
+    document.getElementById("meet-close-participants")?.addEventListener("click", toggleParticipants);
+    document.getElementById("meet-close-settings")?.addEventListener("click", () => document.getElementById("meet-settings-modal")?.classList.add("hidden"));
+    document.getElementById("meet-apply-devices")?.addEventListener("click", applyDevices);
+    document.getElementById("meet-settings-overlay")?.addEventListener("click", e => { if (e.target.id === "meet-settings-overlay") document.getElementById("meet-settings-modal")?.classList.add("hidden"); });
+    document.getElementById("meet-messages")?.addEventListener("scroll", () => {
+      const box = document.getElementById("meet-messages");
+      if (box && box.scrollHeight - box.scrollTop - box.clientHeight < 60) clearUnread();
+    });
+    document.getElementById("meet-view-btn")?.addEventListener("click", toggleView);
+    document.getElementById("meet-fullscreen-btn")?.addEventListener("click", toggleFullscreen);
+    document.addEventListener("fullscreenchange", () => {
+      const btn = document.getElementById("meet-fullscreen-btn");
+      if (btn) btn.textContent = document.fullscreenElement ? "⛶ Exit Full" : "⛶ Fullscreen";
+    });
     document.getElementById("meet-stream-go")?.addEventListener("click", () => {
       const url = (document.getElementById("meet-stream-input")?.value || "").trim();
       if (url) loadStream(url, true);
