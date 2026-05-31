@@ -3731,6 +3731,35 @@ body.meet-active .meet-peer-video { cursor: pointer; }
 }
 
 /* Global flag rendering: emoji shows first, CDN image overlays when loaded */
+/* Flag wrapper: image overlays the emoji fallback so OS letter-codes
+   (e.g. "MX", "ZA", "KR") never show beside the flag */
+.flag-wrap {
+  position: relative;
+  display: inline-block;
+  vertical-align: middle;
+  line-height: 0;
+  overflow: hidden;
+  border-radius: 3px;
+}
+.flag-wrap .flag-emoji-bg {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  z-index: 0;
+  overflow: hidden;
+  font-size: 0.7em;
+}
+.flag-wrap .flag-img {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 .flag-emoji-bg {
   font-size: inherit;
   line-height: 1;

@@ -677,7 +677,11 @@ function flagImg(teamId, size=32) {
   const team = TEAMS.find(t => t.id === teamId);
   const emoji = team?.flag || '🏳️';
   if (!code) return `<span class="flag-emoji">${emoji}</span>`;
-  return `<span class="flag-emoji flag-emoji-bg">${emoji}</span><img class="flag-img" src="https://flagcdn.com/w${size}/${code}.png" alt="" width="${size}" loading="eager" onerror="this.style.display='none'" style="position:relative;z-index:1" />`;
+  const h = Math.round(size * 0.75);
+  return `<span class="flag-wrap" style="width:${size}px;height:${h}px">` +
+    `<span class="flag-emoji-bg">${emoji}</span>` +
+    `<img class="flag-img" src="https://flagcdn.com/w${size}/${code}.png" alt="" loading="eager" onerror="this.style.display='none'" />` +
+  `</span>`;
 }
 
 // ---- Player photo URLs (Wikipedia Commons) ----
