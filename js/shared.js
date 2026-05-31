@@ -44,8 +44,8 @@ function buildNav(activePage) {
 
   container.innerHTML = `
     <div class="nav-logo">
-      <span class="trophy">🏆</span>
-      <span>WC <span class="logo-26">26</span></span>
+      <span class="logo-wc">WC</span><span class="logo-26">26</span>
+      <span style="font-family:var(--font-display);font-size:.65rem;letter-spacing:2px;color:#555;align-self:flex-end;margin-bottom:3px;padding-left:4px">FIFA</span>
     </div>
     <button class="nav-hamburger" id="nav-hamburger" aria-label="Menu">☰</button>
     <ul class="nav-links" id="nav-links-list">
