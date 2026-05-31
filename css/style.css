@@ -2360,11 +2360,52 @@ button { cursor: pointer; }
 
 .ea-nation {
   font-size: 0.9rem;
+  line-height: 1;
 }
 
 .ea-wcteam {
   font-size: 0.85rem;
   margin-top: 2px;
+  line-height: 1;
+}
+
+/* Layered flag inside EA cards */
+.ea-flag-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 20px;
+}
+.ea-flag-emoji {
+  font-size: 1rem;
+  line-height: 1;
+  position: relative;
+  z-index: 1;
+}
+.ea-nation .ea-flag-img,
+.ea-wcteam .ea-flag-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 2px;
+  z-index: 2;
+  font-size: 0;
+}
+.ea-club .ea-flag-wrap { width: 22px; height: 15px; }
+.ea-club .ea-flag-emoji { font-size: 0.8rem; }
+.ea-club .ea-flag-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 2px;
+  z-index: 2;
+  font-size: 0;
 }
 
 .ea-silhouette {
@@ -4212,112 +4253,6 @@ body.light-mode .theme-toggle:hover { background: rgba(0,0,0,0.12); }
 .ea-silver .ea-photo { border-color: #c8c8c8; }
 .ea-bronze .ea-photo { border-color: #c87941; }
 
-/* ============================================================
-   Hero Player Spotlight — bottom scrolling strip
-   ============================================================ */
-.hero-player-spotlight {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  width: 100%;
-  overflow: hidden;
-  z-index: 3;
-  padding: 8px 0;
-  background: linear-gradient(to top, rgba(0,0,0,0.72) 0%, transparent 100%);
-}
-.hps-track {
-  display: flex;
-  gap: 10px;
-  width: max-content;
-  animation: hpsScroll 60s linear infinite;
-  padding: 0 10px;
-}
-.hps-track:hover { animation-play-state: paused; }
-@keyframes hpsScroll {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-.hps-card {
-  position: relative;
-  width: 82px;
-  height: 110px;
-  border-radius: 10px;
-  overflow: hidden;
-  flex-shrink: 0;
-  border: 2px solid rgba(255,255,255,0.15);
-  background: rgba(0,0,0,0.55);
-  cursor: default;
-}
-.hps-gold   { border-color: rgba(212,175,55,0.7); }
-.hps-silver { border-color: rgba(200,200,200,0.55); }
-.hps-bronze { border-color: rgba(200,121,65,0.55); }
-.hps-card-flag {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 4.2rem;
-  line-height: 1;
-  filter: blur(2px);
-  opacity: 0.32;
-  z-index: 0;
-  user-select: none;
-}
-.hps-card-photo {
-  position: absolute;
-  top: 6px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 58px;
-  height: 58px;
-  border-radius: 50%;
-  object-fit: cover;
-  object-position: center top;
-  z-index: 2;
-  border: 2px solid rgba(255,255,255,0.25);
-}
-.hps-gold   .hps-card-photo { border-color: #d4af37; }
-.hps-silver .hps-card-photo { border-color: #c8c8c8; }
-.hps-card-bottom {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 3;
-  background: linear-gradient(to top, rgba(0,0,0,0.88) 80%, transparent);
-  padding: 18px 4px 4px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1px;
-}
-.hps-card-ovr {
-  font-size: 0.72rem;
-  font-weight: 900;
-  color: #d4af37;
-  line-height: 1;
-}
-.hps-card-name {
-  font-size: 0.62rem;
-  font-weight: 700;
-  color: #fff;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 74px;
-  text-align: center;
-}
-.hps-card-flag-sm {
-  font-size: 0.75rem;
-  line-height: 1;
-}
-@media (max-width: 768px) {
-  .hps-card { width: 70px; height: 96px; }
-  .hps-card-flag { font-size: 3.2rem; }
-  .hps-card-photo { width: 48px; height: 48px; top: 5px; }
-}
 
 /* ============================================================
    Lineup Builder

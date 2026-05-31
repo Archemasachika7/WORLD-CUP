@@ -382,31 +382,57 @@ function renderStats() {
   container.innerHTML = html;
 }
 
+// League → 2-letter flag code for flagcdn.com
+const LEAGUE_FLAG_CODES = {
+  "EPL": "gb-eng", "LaLiga": "es", "Bundesliga": "de", "SerieA": "it",
+  "Ligue1": "fr", "LigaPortugal": "pt", "Eredivisie": "nl",
+  "SaudiPro": "sa", "LigaMX": "mx", "MLS": "us", "JupilerPro": "be"
+};
+
+function eaFlagHtml(emoji, code, size) {
+  if (!code) return `<span class="ea-flag-emoji">${emoji}</span>`;
+  return `<span class="ea-flag-wrap"><span class="ea-flag-emoji">${emoji}</span><img class="ea-flag-img" src="https://flagcdn.com/w${size}/${code}.png" alt="" onerror="this.style.display='none'" /></span>`;
+}
+
 function renderEaCard(p) {
   const lm      = LEAGUE_META[p.league] || LEAGUE_META["Other"];
   const ovr     = Math.round(p.rating * 10);
   const eff     = (p.rating * lm.weight).toFixed(1);
   const wct     = p.teamId ? TEAMS.find(t => t.id === p.teamId) : null;
   const tier    = ovr >= 90 ? "gold" : ovr >= 85 ? "silver" : "bronze";
-  const posIcon = p.pos === "GK" ? "🧤" : p.pos === "DF" ? "🛡️" : p.pos === "MF" ? "⚙️" : "⚽";
 
   const stat1lbl = p.pos === "GK" ? "CS"  : p.pos === "DF" ? "GA"  : "GOL";
   const stat1val = p.pos === "GK" ? p.cs  : p.pos === "DF" ? p.ga  : p.goals;
   const stat2lbl = p.pos === "GK" ? "RTG" : "AST";
   const stat2val = p.pos === "GK" ? p.rating : p.assists;
 
+  // Nation flag: use WC team flag code if available, else fallback to p.nation emoji
+  const natCode   = wct && FLAG_CODES ? FLAG_CODES[wct.id] : null;
+  const natEmoji  = wct ? wct.flag : p.nation;
+  const natHtml   = eaFlagHtml(natEmoji, natCode, 32);
+
+  // WC team flag (smaller badge beside nation)
+  const wcHtml = wct ? eaFlagHtml(wct.flag, natCode, 32) : '';
+
+  // League flag
+  const lgCode    = LEAGUE_FLAG_CODES[p.league] || null;
+  const lgEmoji   = lm.nation;
+  const lgFlagHtml = eaFlagHtml(lgEmoji, lgCode, 24);
+
+  const ph = getPlayerPhoto(p.name);
+
   return `
     <div class="ea-card ea-${tier}" title="${p.name} — ${p.club}">
       <div class="ea-top">
         <div class="ea-ovr">${ovr}</div>
         <div class="ea-pos">${p.pos}</div>
-        <div class="ea-nation">${p.nation}</div>
-        ${wct ? `<div class="ea-wcteam">${wct.flag}</div>` : ''}
+        <div class="ea-nation">${natHtml}</div>
+        ${wct ? `<div class="ea-wcteam">${wcHtml}</div>` : ''}
       </div>
-      <div class="ea-silhouette"><img class="ea-photo" src="${(()=>{ const ph=getPlayerPhoto(p.name); return ph.src; })()}" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(p.name)}&background=1e1e30&color=e5e5e5&size=80&bold=true&format=svg'" alt="${p.name}" /></div>
+      <div class="ea-silhouette"><img class="ea-photo" src="${ph.src}" onerror="this.src='${ph.fallback}'" alt="${p.name}" /></div>
       <div class="ea-name">${p.name.toUpperCase().split(" ").pop()}</div>
       <div class="ea-fullname">${p.name}</div>
-      <div class="ea-club">${lm.nation} ${p.club}</div>
+      <div class="ea-club">${lgFlagHtml} ${p.club}</div>
       <div class="ea-stats">
         <div class="ea-stat"><span class="ea-sv">${stat1val||"—"}</span><span class="ea-sl">${stat1lbl}</span></div>
         <div class="ea-stat"><span class="ea-sv">${stat2val||"—"}</span><span class="ea-sl">${stat2lbl}</span></div>

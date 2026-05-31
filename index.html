@@ -11,7 +11,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <style>
 /* Hero slideshow */
-.hero-slide{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity 2s ease;z-index:0;filter:brightness(0.28) saturate(1.3)}
+.hero-slide{position:absolute;inset:0;background-size:cover;background-position:center top;opacity:0;transition:opacity 2.5s ease;z-index:0;filter:blur(7px) brightness(0.3) saturate(1.3);transform:scale(1.06)}
 .hero-slide.active{opacity:1}
 .hero-content,.hero-countdown{position:relative;z-index:2}
 </style>
@@ -67,8 +67,6 @@
     <div id="hero-countdown" class="countdown-flip-wrap">…</div>
   </div>
 
-  <!-- Player spotlight -->
-  <div id="hero-player-spotlight" class="hero-player-spotlight" aria-hidden="true"></div>
 </section>
 
 <!-- ======================================================
@@ -235,7 +233,6 @@ document.addEventListener("DOMContentLoaded", () => {
   initHeroCountdown();
   initHeroParticles();
   initFavsPreview();
-  initHeroPlayerSpotlight();
   API.startNewsAutoRefresh(renderNews);
   initScrollAnimations();
 });
@@ -355,19 +352,33 @@ function initScrollAnimations() {
 }
 
 function initHeroSlideshow() {
-  var slides_container = document.getElementById("hero-slides");
-  if (!slides_container) return;
-  var images = [
-    "https://images.unsplash.com/photo-1508098682722-e99c643e8041?w=1920&q=80",
-    "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=1920&q=80",
-    "https://images.unsplash.com/photo-1459865264687-595d652de67e?w=1920&q=80",
-    "https://images.unsplash.com/photo-1551958219-acbc595d9e44?w=1920&q=80",
-    "https://images.unsplash.com/photo-1518604274543-a5da4a84ce6d?w=1920&q=80",
+  var slidesContainer = document.getElementById("hero-slides");
+  if (!slidesContainer) return;
+
+  // Portugal-first, then other world stars — blurred player photos
+  var orderedNames = [
+    "Cristiano Ronaldo", "Bruno Fernandes", "Rafael Leão", "Bernardo Silva",
+    "Rúben Dias", "João Félix", "Gonçalo Ramos", "Diogo Jota",
+    "Kylian Mbappé", "Erling Haaland", "Jude Bellingham", "Vinicius Junior",
+    "Lamine Yamal", "Lionel Messi", "Harry Kane", "Mohamed Salah",
+    "Jamal Musiala", "Pedri", "Raphinha", "Julián Álvarez"
   ];
-  slides_container.innerHTML = images.map(function(url) {
+  var photos = typeof PLAYER_PHOTOS !== 'undefined' ? PLAYER_PHOTOS : {};
+  var images = orderedNames.map(function(n){ return photos[n]; }).filter(Boolean);
+
+  // Fallback if PLAYER_PHOTOS not ready
+  if (!images.length) {
+    images = [
+      "https://images.unsplash.com/photo-1508098682722-e99c643e8041?w=1920&q=80",
+      "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=1920&q=80",
+      "https://images.unsplash.com/photo-1459865264687-595d652de67e?w=1920&q=80"
+    ];
+  }
+
+  slidesContainer.innerHTML = images.map(function(url) {
     return '<div class="hero-slide" style="background-image:url(\'' + url + '\')"></div>';
   }).join("");
-  var slides = slides_container.querySelectorAll(".hero-slide");
+  var slides = slidesContainer.querySelectorAll(".hero-slide");
   var current = 0;
   slides[0].classList.add("active");
   setInterval(function() {
@@ -377,41 +388,6 @@ function initHeroSlideshow() {
   }, 5000);
 }
 
-// ---- Hero player scroll strip ----
-function initHeroPlayerSpotlight() {
-  var container = document.getElementById("hero-player-spotlight");
-  if (!container || typeof PLAYERS === 'undefined') return;
-  var stars = PLAYERS
-    .filter(function(p) { return p.teamId; })
-    .sort(function(a, b) { return b.rating - a.rating; });
-  if (!stars.length) return;
-
-  function makeCard(p) {
-    var enc  = encodeURIComponent(p.name);
-    var src  = (typeof PLAYER_PHOTOS !== 'undefined' && PLAYER_PHOTOS[p.name])
-               ? PLAYER_PHOTOS[p.name]
-               : 'https://ui-avatars.com/api/?name=' + enc + '&background=1a1a2e&color=fff&size=96&bold=true&format=svg';
-    var fb   = 'https://ui-avatars.com/api/?name=' + enc + '&background=1a1a2e&color=fff&size=96&bold=true&format=svg';
-    var team = typeof TEAMS !== 'undefined' ? TEAMS.find(function(t){ return t.id === p.teamId; }) : null;
-    var flag = team ? team.flag : (p.nation || '🏳️');
-    var ovr  = Math.round(p.rating * 10);
-    var tier = ovr >= 90 ? 'hps-gold' : ovr >= 85 ? 'hps-silver' : 'hps-bronze';
-    var lastName = p.name.split(' ').pop();
-    return '<div class="hps-card ' + tier + '">' +
-      '<div class="hps-card-flag">' + flag + '</div>' +
-      '<img class="hps-card-photo" src="' + src + '" onerror="this.src=\'' + fb + '\'" alt="' + p.name + '" />' +
-      '<div class="hps-card-bottom">' +
-        '<span class="hps-card-ovr">' + ovr + '</span>' +
-        '<span class="hps-card-name">' + lastName + '</span>' +
-        '<span class="hps-card-flag-sm">' + flag + '</span>' +
-      '</div>' +
-    '</div>';
-  }
-
-  // Double the array for seamless infinite marquee
-  var html = stars.concat(stars).map(makeCard).join('');
-  container.innerHTML = '<div class="hps-track">' + html + '</div>';
-}
 </script>
 </body>
 </html>
