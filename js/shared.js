@@ -44,7 +44,7 @@ function buildNav(activePage) {
 
   container.innerHTML = `
     <a class="nav-logo" href="index.html" aria-label="World Cup 2026 home">
-      <img class="nav-logo-img" src="/img/wc2026-logo.svg" alt="" onerror="this.style.display='none'" />
+      <img class="nav-logo-img" src="https://ioqgduqyfdcjvafyytxz.supabase.co/storage/v1/object/public/avatars/tournaments_fifa-world-cup-2026--white_3000x3000.football-logos.cc.png" alt="" onerror="this.src='/img/wc2026-logo.svg'" />
       <span class="logo-wc">WC</span><span class="logo-26">26</span>
       <span class="logo-fifa">FIFA</span>
     </a>
@@ -106,7 +106,7 @@ function buildFooter(containerId) {
   const el = document.getElementById(containerId || "footer");
   if (!el) return;
   el.innerHTML = `
-    <img class="footer-logo" src="/img/wc2026-logo.svg" alt="World Cup 2026" onerror="this.style.display='none'" />
+    <img class="footer-logo" src="https://ioqgduqyfdcjvafyytxz.supabase.co/storage/v1/object/public/avatars/tournaments_fifa-world-cup-2026--white_3000x3000.football-logos.cc.png" alt="World Cup 2026" onerror="this.src='/img/wc2026-logo.svg'" />
     <div class="footer-links">
       ${NAV_PAGES.map(p => `<a href="${p.href}">${p.icon} ${p.label}</a>`).join("")}
       <a href="https://www.fifa.com" target="_blank" rel="noopener">FIFA Official</a>

@@ -5,9 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Matches — World Cup 2026</title>
   <meta name="description" content="Full FIFA World Cup 2026 match schedule with win probability and H2H predictor." />
-  <link rel="icon" type="image/png" href="/img/wc2026-logo.svg" />
+  <link rel="icon" type="image/png" href="https://ioqgduqyfdcjvafyytxz.supabase.co/storage/v1/object/public/avatars/tournaments_fifa-world-cup-2026--white_3000x3000.football-logos.cc.png" />
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css"/>
 </head>
 <body>
 
@@ -265,7 +266,7 @@ function displayMatches(stageFilter, schedule) {
               <span class="match-stage-pill">${esc(m.stage)}</span>
               <span class="match-time-badge">${esc(typeof localMatchTime === 'function' ? localMatchTime(m.date, m.time) : m.time)}</span>
             </div>
-            <div class="match-card-venue">📍 ${esc(m.venue)}</div>
+            <div class="match-card-venue">${esc(m.venue)}</div>
             <div class="match-card-teams" style="justify-content:center;padding:12px 0;">
               <span style="font-size:1.1rem;font-weight:800;color:var(--text-dim);letter-spacing:1px;">TBD vs TBD</span>
             </div>
@@ -291,7 +292,7 @@ function displayMatches(stageFilter, schedule) {
             <span class="match-stage-pill">${stagePill}</span>
             <span class="match-time-badge">${esc(timeLabel)}</span>
           </div>
-          <div class="match-card-venue">📍 ${esc(m.venue)}</div>
+          <div class="match-card-venue">${esc(m.venue)}</div>
           <div class="match-card-teams">
             <div class="mct-team home-side">
               <div class="mct-flag">${flagImg(home.id, 48)}</div>
@@ -355,7 +356,7 @@ function openMatchModal(match) {
   const dt   = new Date(match.date + "T" + match.time).toLocaleDateString("en-US",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
   body.innerHTML = `
     <div class="match-modal-header">
-      <h2>${esc(match.stage)}</h2><p>${dt} &bull; ${esc(typeof localMatchTime === 'function' ? localMatchTime(match.date, match.time) : match.time)}</p><p>📍 ${esc(match.venue)}</p>
+      <h2>${esc(match.stage)}</h2><p>${dt} &bull; ${esc(typeof localMatchTime === 'function' ? localMatchTime(match.date, match.time) : match.time)}</p><p>${esc(match.venue)}</p>
     </div>
     <div class="big-matchup">
       <div class="bm-team">${flagImg(home.id, 80)}<br><strong>${esc(home.name)}</strong><br><small>FIFA #${home.ranking} &bull; Elo ${home.elo}</small></div>
