@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>World Cup 2026 — Live Hub</title>
   <meta name="description" content="FIFA World Cup 2026 — live stream + watch party, all 48 teams, real 2025-26 stats, in-play predictor." />
-  <link rel="icon" type="image/png" href="https://ioqgduqyfdcjvafyytxz.supabase.co/storage/v1/object/public/avatars/tournaments_fifa-world-cup-2026--white_3000x3000.football-logos.cc.png" />
+  <link rel="icon" type="image/png" href="/img/wc2026-logo.svg" />
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/animations.css" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -31,7 +31,7 @@
   <div class="hero-particles" id="hero-particles"></div>
 
   <div class="hero-content">
-    <img class="hero-logo" src="https://ioqgduqyfdcjvafyytxz.supabase.co/storage/v1/object/public/avatars/tournaments_fifa-world-cup-2026--white_3000x3000.football-logos.cc.png" alt="FIFA World Cup 2026" onerror="this.style.display='none'" />
+    <img class="hero-logo" src="/img/wc2026-logo.svg" alt="FIFA World Cup 2026" onerror="this.style.display='none'" />
     <div class="hero-eyebrow">
       <span class="hero-live-dot"></span>
       FIFA World Cup 2026 — Fan Hub
@@ -39,16 +39,21 @@
     <h1 class="hero-title">
       <span class="we-are">We Are</span>
       <span class="wc-26">26</span>
-      <span class="wc-year"><img src="https://flagcdn.com/w32/us.png" style="height:20px;vertical-align:middle;border-radius:2px"> <img src="https://flagcdn.com/w32/ca.png" style="height:20px;vertical-align:middle;border-radius:2px"> <img src="https://flagcdn.com/w32/mx.png" style="height:20px;vertical-align:middle;border-radius:2px"> &nbsp;·&nbsp; FIFA World Cup 2026</span>
+      <span class="wc-year">
+        <span class="flag-wrap" style="width:28px;height:21px"><span class="flag-emoji-bg">🇺🇸</span><img class="flag-img" src="https://flagcdn.com/w40/us.png" alt="USA" loading="eager" onerror="this.style.display='none'"></span>
+        <span class="flag-wrap" style="width:28px;height:21px"><span class="flag-emoji-bg">🇨🇦</span><img class="flag-img" src="https://flagcdn.com/w40/ca.png" alt="Canada" loading="eager" onerror="this.style.display='none'"></span>
+        <span class="flag-wrap" style="width:28px;height:21px"><span class="flag-emoji-bg">🇲🇽</span><img class="flag-img" src="https://flagcdn.com/w40/mx.png" alt="Mexico" loading="eager" onerror="this.style.display='none'"></span>
+        &nbsp;·&nbsp; FIFA World Cup 2026
+      </span>
     </h1>
     <p class="hero-subtitle">
       48 nations. 104 matches. Live stats, in-play probability,
       watch party rooms, bracket predictor and streaming all in one hub.
     </p>
     <div class="hero-hosts">
-      <span class="host-pill"><img src="https://flagcdn.com/w32/us.png" style="height:16px;vertical-align:middle;border-radius:2px;margin-right:4px"> United States</span>
-      <span class="host-pill"><img src="https://flagcdn.com/w32/ca.png" style="height:16px;vertical-align:middle;border-radius:2px;margin-right:4px"> Canada</span>
-      <span class="host-pill"><img src="https://flagcdn.com/w32/mx.png" style="height:16px;vertical-align:middle;border-radius:2px;margin-right:4px"> Mexico</span>
+      <span class="host-pill"><span class="flag-wrap" style="width:22px;height:16px;margin-right:6px"><span class="flag-emoji-bg">🇺🇸</span><img class="flag-img" src="https://flagcdn.com/w40/us.png" alt="" loading="eager" onerror="this.style.display='none'"></span>United States</span>
+      <span class="host-pill"><span class="flag-wrap" style="width:22px;height:16px;margin-right:6px"><span class="flag-emoji-bg">🇨🇦</span><img class="flag-img" src="https://flagcdn.com/w40/ca.png" alt="" loading="eager" onerror="this.style.display='none'"></span>Canada</span>
+      <span class="host-pill"><span class="flag-wrap" style="width:22px;height:16px;margin-right:6px"><span class="flag-emoji-bg">🇲🇽</span><img class="flag-img" src="https://flagcdn.com/w40/mx.png" alt="" loading="eager" onerror="this.style.display='none'"></span>Mexico</span>
       <span class="host-pill">📅 June 11 – July 19, 2026</span>
     </div>
     <div class="hero-actions">
@@ -81,7 +86,7 @@
   </div>
   <div class="host-cities-grid">
     <div class="host-city-card card-enter">
-      <div class="host-city-flag"><img src="https://flagcdn.com/w80/us.png" style="width:72px;border-radius:6px" alt="USA"></div>
+      <div class="host-city-flag"><span class="flag-wrap" style="width:80px;height:60px"><span class="flag-emoji-bg">🇺🇸</span><img class="flag-img" src="https://flagcdn.com/w80/us.png" alt="USA" loading="eager" onerror="this.style.display='none'"></span></div>
       <div class="host-city-name">United States</div>
       <div style="color:var(--text-dim);font-size:0.85rem;margin-bottom:12px">11 Venues</div>
       <div class="host-city-venues">11</div>
@@ -89,7 +94,7 @@
       <p style="font-size:0.8rem;color:var(--text-dim);margin-top:12px">MetLife • AT&T • SoFi • Levi's • Hard Rock and more</p>
     </div>
     <div class="host-city-card card-enter">
-      <div class="host-city-flag"><img src="https://flagcdn.com/w80/ca.png" style="width:72px;border-radius:6px" alt="Canada"></div>
+      <div class="host-city-flag"><span class="flag-wrap" style="width:80px;height:60px"><span class="flag-emoji-bg">🇨🇦</span><img class="flag-img" src="https://flagcdn.com/w80/ca.png" alt="Canada" loading="eager" onerror="this.style.display='none'"></span></div>
       <div class="host-city-name">Canada</div>
       <div style="color:var(--text-dim);font-size:0.85rem;margin-bottom:12px">3 Venues</div>
       <div class="host-city-venues">3</div>
@@ -97,7 +102,7 @@
       <p style="font-size:0.8rem;color:var(--text-dim);margin-top:12px">BMO Field (Toronto) • BC Place (Vancouver) • Stade de Montréal</p>
     </div>
     <div class="host-city-card card-enter">
-      <div class="host-city-flag"><img src="https://flagcdn.com/w80/mx.png" style="width:72px;border-radius:6px" alt="Mexico"></div>
+      <div class="host-city-flag"><span class="flag-wrap" style="width:80px;height:60px"><span class="flag-emoji-bg">🇲🇽</span><img class="flag-img" src="https://flagcdn.com/w80/mx.png" alt="Mexico" loading="eager" onerror="this.style.display='none'"></span></div>
       <div class="host-city-name">Mexico</div>
       <div style="color:var(--text-dim);font-size:0.85rem;margin-bottom:12px">3 Venues</div>
       <div class="host-city-venues">3</div>
