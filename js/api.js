@@ -69,12 +69,7 @@ const API = (() => {
     const cached = loadCache(NEWS_KEY);
     if (cached) return cached;
     try {
-      const anonKey = (typeof SUPABASE_ANON_KEY !== "undefined") ? SUPABASE_ANON_KEY : null;
-      if (!anonKey) throw new Error("SUPABASE_ANON_KEY not available");
-      const res = await fetch(
-        "https://yqwmiffmwbdouxfkgbqa.supabase.co/functions/v1/news-proxy",
-        { headers: { "Authorization": `Bearer ${anonKey}`, "Content-Type": "application/json" } }
-      );
+      const res = await fetch("/api/news");
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = await res.json();
       const articles = (json.articles || []).map(a => ({ ...a, tag: "Live News" }));
