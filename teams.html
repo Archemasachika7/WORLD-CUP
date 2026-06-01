@@ -164,6 +164,8 @@ var activeConf = "ALL";
 var searchQuery = "";
 
 var CONF_FLAGS = { ALL:"🌍", UEFA:"🇪🇺", CONMEBOL:"🌎", CONCACAF:"🌎", AFC:"🌏", CAF:"🌍", OFC:"🌊" };
+var CONF_NAMES = { ALL:"All Confederations", UEFA:"Europe", CONMEBOL:"South America", CONCACAF:"North America", AFC:"Asia", CAF:"Africa", OFC:"Oceania" };
+function confLabel(conf) { return CONF_NAMES[conf] || conf; }
 
 document.addEventListener("DOMContentLoaded", function() {
   buildNav("teams");
@@ -179,7 +181,7 @@ function buildConfFilters() {
   var confs = ["ALL","UEFA","CONMEBOL","CONCACAF","AFC","CAF","OFC"];
   var container = document.getElementById("conf-filters");
   container.innerHTML = confs.map(function(c) {
-    return '<button class="tab-btn conf-filter-btn' + (c==="ALL"?" active":"") + '" data-conf="' + c + '">' + CONF_FLAGS[c] + " " + c + "</button>";
+    return '<button class="tab-btn conf-filter-btn' + (c==="ALL"?" active":"") + '" data-conf="' + c + '">' + CONF_FLAGS[c] + " " + confLabel(c) + "</button>";
   }).join("");
   container.querySelectorAll(".conf-filter-btn").forEach(function(btn) {
     btn.addEventListener("click", function() {
@@ -269,7 +271,7 @@ function renderGroupRow(t) {
   return '<div class="team-card group-row-card" data-id="' + t.id + '" style="display:flex;align-items:center;gap:16px;padding:16px 20px;border-radius:10px;cursor:pointer;">' +
     flagImg(t.id, 40) +
     '<div style="flex:1"><div style="font-weight:700;font-size:1rem">' + t.name + "</div>" +
-    '<div style="font-size:0.8rem;color:var(--text-dim)">' + t.conf + " &bull; FIFA #" + t.ranking + " &bull; Elo " + t.elo + "</div></div>" +
+    '<div style="font-size:0.8rem;color:var(--text-dim)">' + confLabel(t.conf) + " &bull; FIFA #" + t.ranking + " &bull; Elo " + t.elo + "</div></div>" +
     '<span class="sq-badge ' + sqCls + '">' + badge + " " + squad.status + "</span>" +
     (t.isHost ? '<span class="host-badge">HOST</span>' : "") +
     "</div>";
@@ -351,10 +353,10 @@ function openTeamViewer(teamId) {
   document.getElementById("tv-flag-wrap").innerHTML = flagImg(team.id, 64);
   document.getElementById("tv-title").textContent = team.name;
   document.getElementById("tv-sub").textContent =
-    "Group " + team.group + " · FIFA #" + team.ranking + " · " + team.conf + " · Elo " + team.elo;
+    "Group " + team.group + " · FIFA #" + team.ranking + " · " + confLabel(team.conf) + " · Elo " + team.elo;
 
   var badgeHtml = '<span class="tv-badge" style="background:rgba(255,255,255,.06)">' +
-    (team.isHost ? "🏟️ Host" : team.conf) + "</span>";
+    (team.isHost ? "🏟️ Host" : confLabel(team.conf)) + "</span>";
   if (squad.status === "ANNOUNCED")
     badgeHtml += '<span class="tv-badge" style="border-color:#66bb6a;color:#66bb6a">✅ Squad Confirmed</span>';
   else if (squad.status === "PRELIMINARY")

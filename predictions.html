@@ -74,7 +74,7 @@ function renderPredictions() {
           <div class="rank-bar stat-bar-fill" style="width:${Math.round(t.composite*100)}%;background:var(--accent);height:100%;border-radius:inherit;"></div>
         </div>
         <span class="rank-pct">${Math.round(t.composite*100)}%</span>
-        <span class="rank-top5">${t.top5Players} T5</span>
+        <span class="rank-top5">${t.top5Players} top-5</span>
         <span class="rank-label ${t.titleLabel.includes('Strong')?'label-green':t.titleLabel.includes('Dark')?'label-yellow':'label-grey'}">${t.titleLabel}</span>
       </div>`).join("")}
     </div>
@@ -147,7 +147,7 @@ function openTeamModal(teamId) {
       ${flagImg(team.id, 80)}
       <div>
         <h2>${team.name}</h2>
-        <p class="modal-sub">Group ${team.group} &bull; FIFA #${team.ranking} &bull; ${team.conf} &bull; Elo ${team.elo}</p>
+        <p class="modal-sub">Group ${team.group} &bull; FIFA #${team.ranking} &bull; ${{UEFA:"Europe",CONMEBOL:"South America",CONCACAF:"North America",AFC:"Asia",CAF:"Africa",OFC:"Oceania"}[team.conf]||team.conf} &bull; Elo ${team.elo}</p>
       </div>
     </div>
     <div class="modal-scores">
