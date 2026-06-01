@@ -121,19 +121,20 @@ function buildFooter(containerId) {
 }
 
 // Shared stream presets data
+// Labels use plain text only — flag-icons spans are injected by buildStreamPresets in meet.html
 const STREAM_PRESETS = [
-  { label: "🏆 EpicSports",  url: "https://me.epicsports.online/" },
-  { label: "📺 FIFA+",       url: "https://www.fifa.com/fifaplus" },
-  { label: "🇮🇳 SonyLIV",    url: "https://www.sonyliv.com" },
-  { label: "🎬 Hotstar",     url: "https://www.hotstar.com" },
-  { label: "📱 Zee5",        url: "https://www.zee5.com" },
-  { label: "🏏 FanCode",     url: "https://fancode.com" },
-  { label: "🇺🇸 Fox Sports", url: "https://www.foxsports.com" },
-  { label: "🇬🇧 BBC",        url: "https://www.bbc.co.uk/iplayer" },
-  { label: "🇨🇦 TSN",        url: "https://www.tsn.ca/live" },
-  { label: "🌍 DAZN",        url: "https://www.dazn.com" },
-  { label: "🦚 Peacock",     url: "https://www.peacocktv.com" },
-  { label: "⚡ beIN Sports", url: "https://www.beinsports.com" },
+  { label: "EpicSports",  icon: "🏆", url: "https://me.epicsports.online/" },
+  { label: "FIFA+",       icon: "📺", url: "https://www.fifa.com/fifaplus" },
+  { label: "SonyLIV",    icon: null,  url: "https://www.sonyliv.com" },
+  { label: "Hotstar",    icon: "🎬", url: "https://www.hotstar.com" },
+  { label: "Zee5",       icon: "📱", url: "https://www.zee5.com" },
+  { label: "FanCode",    icon: "🏏", url: "https://fancode.com" },
+  { label: "Fox Sports", icon: null,  url: "https://www.foxsports.com" },
+  { label: "BBC",        icon: null,  url: "https://www.bbc.co.uk/iplayer" },
+  { label: "TSN",        icon: null,  url: "https://www.tsn.ca/live" },
+  { label: "DAZN",       icon: "🌍", url: "https://www.dazn.com" },
+  { label: "Peacock",    icon: "🦚", url: "https://www.peacocktv.com" },
+  { label: "beIN Sports",icon: null,  url: "https://www.beinsports.com" },
 ];
 
 // Page fade-in on load

@@ -84,7 +84,6 @@
       </div>
       <div class="meet-room-right">
         <span id="meet-user-count" class="meet-user-count">0 watching</span>
-        <button id="meet-leave-btn" class="meet-leave-btn">🚪 Leave</button>
       </div>
     </div>
 
@@ -128,6 +127,13 @@
           <!-- Iframe fills area when stream is loaded -->
           <div id="meet-stream-frame-wrap" class="meet-stream-frame-wrap" style="border-radius:12px;">
             <iframe id="meet-stream-iframe" src="about:blank" allowfullscreen allow="autoplay; fullscreen; picture-in-picture" frameborder="0" title="Room stream"></iframe>
+            <!-- Fallback card shown when site blocks iframe embedding -->
+            <div id="meet-stream-fallback" class="meet-stream-fallback hidden">
+              <div class="stream-fallback-icon">🔗</div>
+              <div class="stream-fallback-name" id="stream-fallback-name"></div>
+              <div class="stream-fallback-msg">This site doesn't allow embedding</div>
+              <a id="stream-fallback-link" href="#" target="_blank" rel="noopener" class="stream-fallback-open">Open in New Tab →</a>
+            </div>
           </div>
 
           <!-- Picture-in-Picture local cam -->
@@ -184,31 +190,49 @@
 
     <!-- Controls -->
     <div class="meet-controls-bar">
-      <div class="meet-media-group">
+
+      <!-- React popup (above bar, shows on React button click) -->
+      <div class="meet-react-popup" id="meet-react-popup" role="menu" aria-label="Emoji reactions">
+        <div class="react-grid">
+          <button class="emoji-reaction-btn" data-emoji="⚽">⚽</button>
+          <button class="emoji-reaction-btn" data-emoji="🔥">🔥</button>
+          <button class="emoji-reaction-btn" data-emoji="❤️">❤️</button>
+          <button class="emoji-reaction-btn" data-emoji="😱">😱</button>
+          <button class="emoji-reaction-btn" data-emoji="🎉">🎉</button>
+          <button class="emoji-reaction-btn" data-emoji="👏">👏</button>
+          <button class="emoji-reaction-btn" data-emoji="🚀">🚀</button>
+          <button class="emoji-reaction-btn" data-emoji="💪">💪</button>
+          <button class="emoji-reaction-btn" data-emoji="🏆">🏆</button>
+          <button class="emoji-reaction-btn" data-emoji="😭">😭</button>
+          <button class="emoji-reaction-btn" data-emoji="🤩">🤩</button>
+          <button class="emoji-reaction-btn" data-emoji="💥">💥</button>
+        </div>
+      </div>
+
+      <!-- More popup (above bar, shows on ⋯ button click) -->
+      <div class="meet-more-popup" id="meet-more-popup" role="menu" aria-label="More options">
+        <button id="meet-blur-btn" class="meet-media-btn meet-more-item" title="Toggle background blur (B)">✨ Blur</button>
+        <button id="meet-participants-btn" class="meet-media-btn meet-more-item" title="Show participants (P)">👥 People</button>
+        <button id="meet-settings-btn" class="meet-media-btn meet-more-item" title="Device settings">⚙️ Settings</button>
+        <button id="meet-view-btn" class="meet-media-btn meet-more-item" title="Toggle gallery / speaker view">⊞ Gallery</button>
+        <button id="meet-fullscreen-btn" class="meet-media-btn meet-more-item" title="Fullscreen video area">⛶ Fullscreen</button>
+      </div>
+
+      <!-- Primary button row -->
+      <div class="meet-primary-group">
         <button id="meet-mic-btn" class="meet-media-btn" title="Toggle microphone (M)">🔇 Mute</button>
         <button id="meet-cam-btn" class="meet-media-btn" title="Toggle camera (V)">📷 Video</button>
-        <button id="meet-blur-btn" class="meet-media-btn" title="Toggle background blur (B)">✨ Blur</button>
         <button id="meet-screen-btn" class="meet-media-btn" title="Share your screen (S)">🖥️ Share</button>
         <button id="meet-hand-btn" class="meet-media-btn" title="Raise / lower hand (H)">✋ Hand</button>
-        <button id="meet-participants-btn" class="meet-media-btn" title="Show participants (P)">👥 People</button>
-        <button id="meet-settings-btn" class="meet-media-btn" title="Device settings">⚙️ Settings</button>
-        <button id="meet-view-btn" class="meet-media-btn" title="Toggle gallery / speaker view">⊞ Gallery</button>
-        <button id="meet-fullscreen-btn" class="meet-media-btn" title="Fullscreen video area">⛶ Fullscreen</button>
+        <button id="meet-react-btn" class="meet-media-btn" title="Emoji reactions">😀 React</button>
+        <button id="meet-more-btn" class="meet-media-btn" title="More options">⋯ More</button>
       </div>
-      <div class="meet-reactions-group">
-        <button class="emoji-reaction-btn" data-emoji="⚽">⚽</button>
-        <button class="emoji-reaction-btn" data-emoji="🔥">🔥</button>
-        <button class="emoji-reaction-btn" data-emoji="❤️">❤️</button>
-        <button class="emoji-reaction-btn" data-emoji="😱">😱</button>
-        <button class="emoji-reaction-btn" data-emoji="🎉">🎉</button>
-        <button class="emoji-reaction-btn" data-emoji="👏">👏</button>
-        <button class="emoji-reaction-btn" data-emoji="🚀">🚀</button>
-        <button class="emoji-reaction-btn" data-emoji="💪">💪</button>
-        <button class="emoji-reaction-btn" data-emoji="🏆">🏆</button>
-        <button class="emoji-reaction-btn" data-emoji="😭">😭</button>
-        <button class="emoji-reaction-btn" data-emoji="🤩">🤩</button>
-        <button class="emoji-reaction-btn" data-emoji="💥">💥</button>
+
+      <!-- Leave button, right-aligned -->
+      <div class="meet-leave-group">
+        <button id="meet-leave-btn" class="meet-leave-btn">🔴 Leave</button>
       </div>
+
     </div>
 
   </div><!-- /meet-room -->
@@ -262,12 +286,30 @@ function populateMeetTeamSelector() {
     TEAMS.map(t => `<option value="${t.flag}" data-id="${t.id}">${t.name}</option>`).join("");
 }
 
-function buildStreamPresets(containerId, compact) {
+// Flag-icon map: broadcaster name -> ISO 3166-1 alpha-2 country code
+const _flagMap = {
+  'Fox Sports': 'us',
+  'BBC':        'gb',
+  'TSN':        'ca',
+  'SonyLIV':   'in',
+  'beIN Sports':'qa',
+};
+
+function _presetButtonHTML(p) {
+  const flagCode = _flagMap[p.label];
+  let prefix = '';
+  if (flagCode) {
+    prefix = `<span class="fi fi-${flagCode}" style="margin-right:5px;font-size:1em;vertical-align:-1px;"></span>`;
+  } else if (p.icon) {
+    prefix = p.icon + ' ';
+  }
+  return `<button class="preset-stream" onclick="loadPresetStream('${p.url}')">${prefix}${p.label}</button>`;
+}
+
+function buildStreamPresets(containerId) {
   const container = document.getElementById(containerId);
   if (!container) return;
-  container.innerHTML = STREAM_PRESETS.map(p =>
-    `<button class="preset-stream" onclick="loadPresetStream('${p.url}')">${compact ? p.label.split(' ')[0] + ' ' + p.label.split(' ').slice(1).join(' ') : p.label}</button>`
-  ).join('');
+  container.innerHTML = STREAM_PRESETS.map(p => _presetButtonHTML(p)).join('');
 }
 
 function loadPresetStream(url) {
@@ -276,6 +318,99 @@ function loadPresetStream(url) {
     input.value = url;
     document.getElementById("meet-stream-go")?.click();
   }
+}
+
+// ── Controls bar popup logic ────────────────────────────────
+document.addEventListener("DOMContentLoaded", () => {
+  // More popup
+  const moreBtn  = document.getElementById("meet-more-btn");
+  const morePopup = document.getElementById("meet-more-popup");
+  if (moreBtn && morePopup) {
+    moreBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      morePopup.classList.toggle("open");
+      reactPopup && reactPopup.classList.remove("open");
+    });
+  }
+
+  // React popup
+  const reactBtn  = document.getElementById("meet-react-btn");
+  const reactPopup = document.getElementById("meet-react-popup");
+  if (reactBtn && reactPopup) {
+    reactBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      reactPopup.classList.toggle("open");
+      morePopup && morePopup.classList.remove("open");
+    });
+  }
+
+  // Close popups on outside click
+  document.addEventListener("click", () => {
+    morePopup && morePopup.classList.remove("open");
+    reactPopup && reactPopup.classList.remove("open");
+  });
+
+  // Prevent popup-internal clicks from closing them
+  morePopup && morePopup.addEventListener("click", (e) => e.stopPropagation());
+  reactPopup && reactPopup.addEventListener("click", (e) => e.stopPropagation());
+});
+
+// ── Iframe embed fallback ───────────────────────────────────
+// Known streaming sites that block X-Frame-Options / CSP embedding.
+// YouTube & Twitch use embeds so they are fine.
+const _embedBlockedDomains = [
+  'foxsports.com', 'bbc.co.uk', 'zee5.com', 'sonyliv.com', 'hotstar.com',
+  'tsn.ca', 'beinsports.com', 'peacocktv.com', 'dazn.com', 'fancode.com',
+  'fifa.com',
+];
+
+function _isDomainBlocked(url) {
+  try {
+    const host = new URL(url).hostname.replace(/^www\./, '');
+    return _embedBlockedDomains.some(d => host === d || host.endsWith('.' + d));
+  } catch { return false; }
+}
+
+function _getLabelForUrl(url) {
+  const match = STREAM_PRESETS.find(p => url.startsWith(p.url) || p.url.startsWith(url.split('?')[0]));
+  if (match) return match.label;
+  try { return new URL(url).hostname.replace(/^www\./, ''); } catch { return url; }
+}
+
+function setupStreamIframeFallback(url) {
+  const iframe   = document.getElementById("meet-stream-iframe");
+  const fallback = document.getElementById("meet-stream-fallback");
+  const fbName   = document.getElementById("stream-fallback-name");
+  const fbLink   = document.getElementById("stream-fallback-link");
+  if (!iframe || !fallback) return;
+
+  // Always hide fallback initially
+  fallback.classList.add("hidden");
+
+  if (!url || url === 'about:blank') return;
+
+  if (_isDomainBlocked(url)) {
+    // Show fallback immediately — no point trying to load
+    const label = _getLabelForUrl(url);
+    if (fbName) fbName.textContent = label + " — can't be embedded";
+    if (fbLink) fbLink.href = url;
+    fallback.classList.remove("hidden");
+    return;
+  }
+
+  // For other URLs, try loading; detect cross-origin block on load event
+  iframe.addEventListener("load", function onLoad() {
+    iframe.removeEventListener("load", onLoad);
+    try {
+      // This throws if cross-origin blocked
+      void iframe.contentWindow.location.href;
+    } catch (e) {
+      const label = _getLabelForUrl(url);
+      if (fbName) fbName.textContent = label + " — can't be embedded";
+      if (fbLink) fbLink.href = url;
+      fallback.classList.remove("hidden");
+    }
+  }, { once: true });
 }
 </script>
 </body>
