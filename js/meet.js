@@ -325,18 +325,70 @@ const MeetSystem = (() => {
 
   // ── Stream Sync ────────────────────────────────────────
   function loadStream(url, broadcast = true) {
-    const iframe = document.getElementById("meet-stream-iframe");
-    const wrap   = document.getElementById("meet-stream-frame-wrap");
-    const inp    = document.getElementById("meet-stream-input");
+    const iframe      = document.getElementById("meet-stream-iframe");
+    const wrap        = document.getElementById("meet-stream-frame-wrap");
+    const placeholder = document.getElementById("meet-stream-placeholder");
+    const leftCol     = document.getElementById("meet-left-col");
+    const inp         = document.getElementById("meet-stream-input");
     if (inp)   inp.value = url;
     if (iframe) iframe.src = url;
-    wrap?.classList.remove("hidden");
+    // Show stream iframe, hide placeholder
+    wrap?.classList.add("active");
+    if (placeholder) placeholder.style.display = "none";
+    leftCol?.classList.add("has-stream");
+    // Show PiP if camera is on
+    updatePip();
     if (broadcast) {
       sbCh?.send({ type:"broadcast", event:"stream_sync", payload:{ url } });
       sysMsg(`${st.teamFlag} ${st.nickname} synced a stream for everyone`);
     } else {
       sysMsg("Host synced a stream — loading for you…");
     }
+  }
+
+  function updatePip() {
+    const pipTile  = document.getElementById("meet-pip-tile");
+    const pipVideo = document.getElementById("meet-pip-video");
+    const hasStream = document.getElementById("meet-stream-frame-wrap")?.classList.contains("active");
+    if (!pipTile) return;
+    if (hasStream && localStream && st.camOn) {
+      pipVideo.srcObject = localStream;
+      pipTile.classList.add("visible");
+    } else {
+      pipTile.classList.remove("visible");
+    }
+  }
+
+  function initPip() {
+    const pipTile = document.getElementById("meet-pip-tile");
+    const pipClose = document.getElementById("meet-pip-close");
+    if (!pipTile) return;
+
+    // Close button
+    pipClose?.addEventListener("click", e => {
+      e.stopPropagation();
+      pipTile.classList.remove("visible");
+    });
+
+    // Drag to reposition
+    let dragging = false, ox = 0, oy = 0;
+    pipTile.addEventListener("mousedown", e => {
+      if (e.target === pipClose) return;
+      dragging = true;
+      const r = pipTile.getBoundingClientRect();
+      ox = e.clientX - r.left; oy = e.clientY - r.top;
+      pipTile.style.cursor = "grabbing";
+    });
+    document.addEventListener("mousemove", e => {
+      if (!dragging) return;
+      const area = document.getElementById("meet-stream-area");
+      const ar = area?.getBoundingClientRect() || { left:0, top:0, width:window.innerWidth, height:window.innerHeight };
+      const x = Math.max(0, Math.min(ar.width - pipTile.offsetWidth, e.clientX - ar.left - ox));
+      const y = Math.max(0, Math.min(ar.height - pipTile.offsetHeight, e.clientY - ar.top - oy));
+      pipTile.style.right = "auto"; pipTile.style.bottom = "auto";
+      pipTile.style.left = x + "px"; pipTile.style.top = y + "px";
+    });
+    document.addEventListener("mouseup", () => { dragging = false; pipTile.style.cursor = "move"; });
   }
 
   // ── WebRTC ─────────────────────────────────────────────
@@ -607,6 +659,7 @@ const MeetSystem = (() => {
     setAvatar("meet-local-vid-wrap", st.nickname || "You");
     showAvatar("meet-local-vid-wrap", !st.camOn && st.micOn);
     updateTileStatus("meet-local-vid-wrap", st.micOn, st.camOn);
+    updatePip();
     sbCh?.send({ type:"broadcast", event:"peer_meta",
       payload:{ p: st.peerId, n: st.nickname, f: st.teamFlag, handRaised: st.handRaised, micOn: st.micOn, camOn: st.camOn } });
     if (st.participantsOpen) renderParticipantsList();
@@ -981,7 +1034,11 @@ const MeetSystem = (() => {
 
     const iframe = document.getElementById("meet-stream-iframe");
     if (iframe) iframe.src = "about:blank";
-    document.getElementById("meet-stream-frame-wrap")?.classList.add("hidden");
+    const fw = document.getElementById("meet-stream-frame-wrap");
+    fw?.classList.remove("active");
+    document.getElementById("meet-stream-placeholder").style.display = "";
+    document.getElementById("meet-left-col")?.classList.remove("has-stream");
+    document.getElementById("meet-pip-tile")?.classList.remove("visible");
     document.getElementById("meet-messages").innerHTML = "";
     document.getElementById("meet-presence-bar").innerHTML = "";
 
@@ -1014,6 +1071,7 @@ const MeetSystem = (() => {
     const shareInp = document.getElementById("meet-share-url");
     if (shareInp) shareInp.value = location.href.split("?")[0].split("#")[0] + `?room=${roomId}`;
     startTimer();
+    initPip();
   }
 
   function bindRoom() {

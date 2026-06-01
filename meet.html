@@ -116,8 +116,26 @@
         <!-- Stream presets inside room -->
         <div class="stream-presets" id="room-stream-presets" style="padding:8px 0;"></div>
 
-        <div id="meet-stream-frame-wrap" class="meet-stream-frame-wrap hidden">
-          <iframe id="meet-stream-iframe" src="about:blank" allowfullscreen allow="autoplay; fullscreen; picture-in-picture" frameborder="0" title="Room stream"></iframe>
+        <!-- Stream area with PiP -->
+        <div class="meet-stream-area" id="meet-stream-area">
+          <!-- Placeholder shown before stream loads -->
+          <div class="meet-stream-placeholder" id="meet-stream-placeholder">
+            <div class="placeholder-icon">📺</div>
+            <h3>No stream active</h3>
+            <p>Paste a stream URL above or pick a broadcaster to sync video for everyone in the room.</p>
+          </div>
+
+          <!-- Iframe fills area when stream is loaded -->
+          <div id="meet-stream-frame-wrap" class="meet-stream-frame-wrap" style="border-radius:12px;">
+            <iframe id="meet-stream-iframe" src="about:blank" allowfullscreen allow="autoplay; fullscreen; picture-in-picture" frameborder="0" title="Room stream"></iframe>
+          </div>
+
+          <!-- Picture-in-Picture local cam -->
+          <div class="meet-pip-tile" id="meet-pip-tile">
+            <video id="meet-pip-video" autoplay muted playsinline></video>
+            <div class="meet-pip-label">You</div>
+            <button class="meet-pip-close" id="meet-pip-close" title="Hide PiP">✕</button>
+          </div>
         </div>
 
         <div id="meet-emoji-rain" class="meet-emoji-rain" aria-hidden="true"></div>
