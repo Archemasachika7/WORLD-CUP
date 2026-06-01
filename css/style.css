@@ -3192,6 +3192,7 @@ button { cursor: pointer; }
 .meet-stream-go:hover { filter: brightness(1.15); }
 
 .meet-stream-frame-wrap {
+  position: relative;
   border-radius: 10px;
   overflow: hidden;
   border: 1px solid rgba(255,255,255,0.08);
@@ -3334,13 +3335,29 @@ button { cursor: pointer; }
 .meet-controls-bar {
   display: flex;
   align-items: center;
-  gap: 12px;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.08);
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: rgba(10,10,20,0.95);
+  border-top: 1px solid rgba(255,255,255,0.08);
   border-radius: 12px;
-  padding: 12px 16px;
   margin-top: 10px;
-  flex-wrap: wrap;
+  position: relative;
+}
+
+/* Primary button group — centered */
+.meet-primary-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  justify-content: center;
+}
+
+/* Leave button — right-aligned */
+.meet-leave-group {
+  position: absolute;
+  right: 16px;
 }
 
 .meet-media-group { display: flex; gap: 8px; flex-shrink: 0; }
@@ -3349,7 +3366,7 @@ button { cursor: pointer; }
   background: rgba(255,255,255,0.06);
   border: 1px solid rgba(255,255,255,0.14);
   color: var(--text-dim);
-  padding: 10px 16px;
+  padding: 9px 14px;
   border-radius: 8px;
   font-size: 0.85rem;
   font-weight: 600;
@@ -3368,6 +3385,103 @@ button { cursor: pointer; }
   border-color: rgba(229,9,20,0.45);
   color: #ff4d4d;
 }
+
+/* ── More popup & React popup (appear above bar) ────────── */
+.meet-more-popup,
+.meet-react-popup {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  background: #1a1a2e;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 12px;
+  padding: 10px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+  z-index: 200;
+  display: none;
+}
+.meet-more-popup.open,
+.meet-react-popup.open { display: flex; }
+
+.meet-more-popup {
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 200px;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.meet-react-popup {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Items inside the More popup */
+.meet-more-item {
+  width: 100%;
+  text-align: left;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.88rem;
+}
+
+/* React grid inside popup */
+.react-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 4px;
+}
+
+/* ── Stream iframe fallback card ────────────────────────── */
+.meet-stream-fallback {
+  position: absolute;
+  inset: 0;
+  background: rgba(10,10,20,0.96);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 32px 24px;
+  text-align: center;
+  z-index: 5;
+}
+.meet-stream-fallback.hidden { display: none !important; }
+
+.stream-fallback-icon {
+  font-size: 3rem;
+  opacity: 0.8;
+}
+
+.stream-fallback-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.4;
+}
+
+.stream-fallback-msg {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+
+.stream-fallback-open {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  transition: filter 0.2s;
+  margin-top: 6px;
+}
+.stream-fallback-open:hover { filter: brightness(1.15); }
 
 /* ── Active Speaker ─────────────────────────────────────── */
 @keyframes speakPulse {

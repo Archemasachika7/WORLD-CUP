@@ -332,6 +332,8 @@ const MeetSystem = (() => {
     const inp         = document.getElementById("meet-stream-input");
     if (inp)   inp.value = url;
     if (iframe) iframe.src = url;
+    // Trigger embed-fallback check (defined in meet.html inline script)
+    if (typeof setupStreamIframeFallback === "function") setupStreamIframeFallback(url);
     // Show stream iframe, hide placeholder
     wrap?.classList.add("active");
     if (placeholder) placeholder.style.display = "none";
@@ -1034,6 +1036,7 @@ const MeetSystem = (() => {
 
     const iframe = document.getElementById("meet-stream-iframe");
     if (iframe) iframe.src = "about:blank";
+    document.getElementById("meet-stream-fallback")?.classList.add("hidden");
     const fw = document.getElementById("meet-stream-frame-wrap");
     fw?.classList.remove("active");
     document.getElementById("meet-stream-placeholder").style.display = "";
