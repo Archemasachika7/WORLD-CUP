@@ -1713,14 +1713,11 @@ const LEAGUE_FLAG_CODES = {
   "SaudiPro": "sa", "LigaMX": "mx", "MLS": "us", "JupilerPro": "be"
 };
 
-// Core flag markup: image overlays emoji fallback so OS letter-codes never show
+// Core flag markup: uses flag-icons CSS library (jsDelivr) — always renders real flag graphics
 function _flagMarkup(code, emoji, size) {
-  if (!code) return `<span class="flag-emoji">${emoji || '🏳️'}</span>`;
-  const h = Math.round(size * 0.75);
-  return `<span class="flag-wrap" style="width:${size}px;height:${h}px">` +
-    `<span class="flag-emoji-bg">${emoji || ''}</span>` +
-    `<img class="flag-img" src="https://flagcdn.com/w${size}/${code}.png" alt="" loading="eager" onerror="this.style.display='none'" />` +
-  `</span>`;
+  if (!code) return `<span style="font-size:${size}px;vertical-align:middle">${emoji || '🏳️'}</span>`;
+  const w = Math.round(size * 1.34);
+  return `<span class="fi fi-${code}" style="width:${w}px;height:${size}px;font-size:${size}px;display:inline-block;vertical-align:middle;border-radius:3px;overflow:hidden;flex-shrink:0" title="${emoji || ''}"></span>`;
 }
 
 function flagImg(teamId, size=32) {
