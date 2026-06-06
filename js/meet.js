@@ -1264,9 +1264,18 @@ const MeetSystem = (() => {
   function copyLink() {
     const url = document.getElementById("meet-share-url")?.value;
     if (!url) return;
-    navigator.clipboard.writeText(url)
-      .then(() => { alert2("Link copied — share it with friends! 🎉"); showToast("Link copied to clipboard!", "success"); })
-      .catch(() => { document.getElementById("meet-share-url")?.select(); document.execCommand("copy"); alert2("Link copied!"); });
+    const btn = document.getElementById("meet-copy-link-btn");
+    const origText = btn?.textContent;
+    const doSuccess = () => {
+      showToast("Link copied to clipboard!", "success");
+      if (btn) {
+        btn.textContent = "✓ Copied!";
+        btn.classList.add("copied");
+        setTimeout(() => { btn.textContent = origText; btn.classList.remove("copied"); }, 2000);
+      }
+    };
+    navigator.clipboard.writeText(url).then(doSuccess)
+      .catch(() => { document.getElementById("meet-share-url")?.select(); document.execCommand("copy"); doSuccess(); });
   }
 
   // ── Theme ──────────────────────────────────────────────
@@ -1323,6 +1332,12 @@ const MeetSystem = (() => {
     if (sel) for (const opt of sel.options) {
       if (opt.dataset.id === teamId) { sel.value = opt.value; break; }
     }
+    // Visual selected ring on the chip
+    document.querySelectorAll(".theme-chip").forEach(c => c.classList.remove("selected"));
+    const chips = document.querySelectorAll(".theme-chip");
+    const ids = ["esp","fra","bel","arg","eng","bra","por","ned","ger","col","mex","usa","jpn","kor","nor","swe"];
+    const idx = ids.indexOf(teamId);
+    if (idx >= 0 && chips[idx]) chips[idx].classList.add("selected");
   }
 
   function applyTheme(teamId) {

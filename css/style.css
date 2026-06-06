@@ -5030,3 +5030,250 @@ body.light-mode .theme-toggle:hover { background: rgba(0,0,0,0.12); }
   padding: 1px 4px;
   border-radius: 3px;
 }
+
+/* ============================================================
+   SITE-WIDE UI POLISH — smooth interactions & micro-animations
+   ============================================================ */
+
+/* ── Global: button active/pressed feedback ─────────────────── */
+button:active,
+.btn-primary:active,
+.btn-secondary:active,
+.nav-cta:active {
+  transform: scale(0.96);
+  transition: transform 0.08s;
+}
+
+/* ── Global: smoother transitions on all buttons ────────────── */
+.btn-primary,
+.btn-secondary {
+  transition: background 0.18s ease, color 0.18s ease,
+              border-color 0.18s ease, transform 0.1s ease;
+}
+.btn-primary:hover  { transform: translateY(-1px); }
+.btn-secondary:hover { transform: translateY(-1px); }
+
+/* ── Nav link active underline polish ───────────────────────── */
+.nav-link {
+  position: relative;
+  transition: color 0.2s ease;
+}
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 0; right: 0;
+  height: 2px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.22s cubic-bezier(0.4,0,0.2,1);
+}
+.nav-link:hover::after,
+.nav-link.active::after { transform: scaleX(1); }
+
+/* ── Nav CTA hover lift ─────────────────────────────────────── */
+.nav-cta {
+  transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+.nav-cta:hover  { transform: translateY(-1px); }
+.nav-cta:active { transform: scale(0.96); }
+
+/* ── Meet: media control buttons — smoother + pressed state ─── */
+.meet-media-btn {
+  transition: background 0.18s ease, color 0.18s ease,
+              border-color 0.18s ease, transform 0.1s ease, box-shadow 0.18s ease;
+}
+.meet-media-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(0,0,0,0.3); }
+.meet-media-btn:active { transform: scale(0.94); box-shadow: none; }
+
+/* ── Meet: input focus glow ─────────────────────────────────── */
+.meet-field:focus {
+  outline: none;
+  border-color: var(--meet-accent, #e50914);
+  box-shadow: 0 0 0 3px rgba(229,9,20,0.18);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.meet-msg-input:focus {
+  box-shadow: 0 0 0 3px rgba(229,9,20,0.15);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* ── Meet: chat messages — hover highlight ──────────────────── */
+.meet-msg {
+  transition: background 0.18s ease, transform 0.15s ease;
+}
+.meet-msg:hover { transform: translateX(2px); }
+.meet-msg-other:hover { background: rgba(255,255,255,0.08); }
+.meet-msg-self:hover  { background: rgba(229,9,20,0.20); }
+
+/* ── Meet: chat timestamps appear on hover ──────────────────── */
+.meet-msg-time {
+  opacity: 0.45;
+  transition: opacity 0.2s ease;
+}
+.meet-msg:hover .meet-msg-time { opacity: 1; }
+
+/* ── Meet: unread badge pulse ───────────────────────────────── */
+@keyframes badgePulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(229,9,20,0.6); }
+  50%       { box-shadow: 0 0 0 5px rgba(229,9,20,0); }
+}
+.meet-chat-badge:not(.hidden) {
+  animation: badgePulse 1.4s ease infinite;
+}
+
+/* ── Meet: leave dialog — entrance animation + red top bar ─── */
+@keyframes dialogPop {
+  from { opacity: 0; transform: scale(0.88) translateY(12px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+.meet-leave-dialog {
+  animation: dialogPop 0.28s cubic-bezier(0.34,1.56,0.64,1) forwards;
+}
+.meet-leave-overlay:not(.hidden) .meet-leave-dialog::before {
+  content: '';
+  display: block;
+  height: 4px;
+  background: linear-gradient(90deg, var(--accent), #ff6b35);
+  border-radius: 16px 16px 0 0;
+  margin: -32px -32px 24px;
+}
+.meet-leave-confirm-btn {
+  transition: background 0.18s ease, transform 0.1s ease, box-shadow 0.18s ease;
+}
+.meet-leave-confirm-btn:hover {
+  background: #e50914;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 18px rgba(229,9,20,0.4);
+}
+.meet-leave-confirm-btn:active { transform: scale(0.96); }
+.meet-leave-cancel-btn {
+  transition: background 0.18s ease, transform 0.1s ease;
+}
+.meet-leave-cancel-btn:hover  { transform: translateY(-1px); }
+.meet-leave-cancel-btn:active { transform: scale(0.96); }
+
+/* ── Meet: screen-share label polish ───────────────────────── */
+.meet-screen-label {
+  animation: fadeSlideDown 0.3s ease forwards;
+}
+@keyframes fadeSlideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Meet: stream iframe smooth fade-in ─────────────────────── */
+.meet-stream-frame-wrap iframe {
+  opacity: 0;
+  transition: opacity 0.45s ease;
+}
+.meet-stream-frame-wrap.active iframe {
+  opacity: 1;
+}
+
+/* ── Meet: theme chip selected ring ─────────────────────────── */
+.theme-chip.selected {
+  border-color: #fff;
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.35), 0 4px 14px rgba(0,0,0,0.5);
+  transform: scale(1.15);
+}
+.theme-chip {
+  transition: transform 0.18s cubic-bezier(0.34,1.56,0.64,1),
+              border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.theme-chip:active { transform: scale(0.9); }
+
+/* ── Meet: copy link button success state ───────────────────── */
+.meet-copy-btn {
+  transition: background 0.18s ease, color 0.18s ease, transform 0.1s ease;
+}
+.meet-copy-btn:hover  { transform: translateY(-1px); }
+.meet-copy-btn:active { transform: scale(0.95); }
+.meet-copy-btn.copied {
+  background: rgba(46,204,113,0.16);
+  border-color: rgba(46,204,113,0.4);
+  color: #2ecc71;
+}
+
+/* ── Meet: participant rows ─────────────────────────────────── */
+.meet-participant-row {
+  transition: background 0.18s ease, padding-left 0.18s ease;
+}
+.meet-participant-row:hover {
+  background: rgba(229,9,20,0.07);
+  padding-left: 14px;
+}
+
+/* ── Meet: send button hover ────────────────────────────────── */
+.meet-send-btn {
+  transition: background 0.18s ease, transform 0.1s ease;
+}
+.meet-send-btn:hover  { transform: translateY(-1px); }
+.meet-send-btn:active { transform: scale(0.94); }
+
+/* ── Meet: preset stream buttons ────────────────────────────── */
+.preset-stream {
+  transition: background 0.2s ease, border-color 0.2s ease,
+              transform 0.15s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s ease;
+}
+.preset-stream:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+}
+.preset-stream:active { transform: scale(0.97); }
+
+/* ── Meet: speaking ring glow polish ────────────────────────── */
+@keyframes speakPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(46,204,113,0.5); }
+  50%       { box-shadow: 0 0 0 4px rgba(46,204,113,0); }
+}
+.meet-peer-video.meet-speaking,
+#meet-local-vid-wrap.meet-speaking {
+  animation: speakPulse 0.8s ease infinite;
+}
+
+/* ── Meet: pinned tile shimmer border ───────────────────────── */
+@keyframes pinnedBorder {
+  0%, 100% { border-color: rgba(255,215,0,0.6); }
+  50%       { border-color: rgba(255,215,0,1); }
+}
+.meet-peer-video.meet-pinned,
+#meet-local-vid-wrap.meet-pinned {
+  animation: pinnedBorder 1.4s ease infinite;
+}
+
+/* ── Meet: quality bars smooth update ───────────────────────── */
+.qb { transition: height 0.4s cubic-bezier(0.4,0,0.2,1); }
+
+/* ── Meet: toast — slightly springier entrance ──────────────── */
+.meet-toast {
+  transition: opacity 0.3s cubic-bezier(0.4,0,0.2,1),
+              transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+}
+.meet-toast.toast-visible { transform: translateX(0) scale(1); }
+.meet-toast.toast-exit    { transform: translateX(28px) scale(0.95); }
+
+/* ── Scrollbar polish (all panels) ──────────────────────────── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 6px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
+
+/* ── Focus rings for keyboard accessibility ─────────────────── */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ── Reduced motion: respect system preference ──────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
