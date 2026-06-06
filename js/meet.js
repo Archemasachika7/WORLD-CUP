@@ -437,7 +437,7 @@ const MeetSystem = (() => {
     if (!sw || !sv) return;
     // Use the buffered screen stream if ontrack already routed it
     if (!sv.srcObject && peerScreenStreams[peerId]) {
-      sv.srcObject = peerScreenStreams[peerId];
+      sv.srcObject = peerScreenStreams[peerId]; sv.muted = false;
     }
     sw.classList.add("active");
     const lbl = sw.querySelector(".meet-screen-label");
@@ -451,7 +451,7 @@ const MeetSystem = (() => {
     const sw = document.getElementById("meet-screen-wrap");
     if (sw) sw.classList.remove("active");
     const sv = document.getElementById("meet-screen-video");
-    if (sv) sv.srcObject = null;
+    if (sv) { sv.srcObject = null; sv.muted = true; }
     const lbl = sw?.querySelector(".meet-screen-label");
     if (lbl) lbl.textContent = "🖥️ You are sharing your screen";
     const hasUrlStream = document.getElementById("meet-stream-frame-wrap")?.classList.contains("active");
@@ -506,7 +506,7 @@ const MeetSystem = (() => {
       // Show screen locally in the main area
       const sw = document.getElementById("meet-screen-wrap");
       const sv = document.getElementById("meet-screen-video");
-      if (sw && sv) { sv.srcObject = screenStream; sw.classList.add("active"); }
+      if (sw && sv) { sv.srcObject = screenStream; sv.muted = true; sw.classList.add("active"); }
       document.getElementById("meet-left-col")?.classList.add("has-stream");
       const ph = document.getElementById("meet-stream-placeholder");
       if (ph) ph.style.display = "none";
@@ -875,7 +875,7 @@ const MeetSystem = (() => {
         peerScreenStreams[peerId] = stream;
         // Never let the screen stream sit in the camera tile.
         if (tileVid && tileVid.srcObject === stream) tileVid.srcObject = null;
-        if (screenSharingPeer === peerId && sv && sv.srcObject !== stream) sv.srcObject = stream;
+        if (screenSharingPeer === peerId && sv && sv.srcObject !== stream) { sv.srcObject = stream; sv.muted = false; }
       } else {
         // Camera/mic stream → grid tile.
         renderRemote(peerId, stream);
