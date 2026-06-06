@@ -48,6 +48,9 @@ const MeetSystem = (() => {
   let localStream = null;
   let screenStream = null;
   let screenSharingPeer = null; // peerId of whoever is currently sharing their screen
+  let screenSenders = {};       // peerId → RTCRtpSender for the screen-video track (so we can removeTrack)
+  let peerScreenStreamIds = {}; // peerId → stream.id expected for that peer's screen share
+  let peerScreenStreams = {};   // peerId → received screen MediaStream (ready to show)
   let peers = {};
   let peerMeta = {}; // peerId → { nickname, flag, handRaised, micOn, camOn }
   let audioCtx = null;
@@ -156,6 +159,11 @@ const MeetSystem = (() => {
         if (payload.p !== st.peerId) {
           peerMeta[payload.p] = { nickname: payload.n, flag: payload.f || "⚽", handRaised: false };
           sendOffer(payload.p);
+          // Re-announce active screen share so the new peer can identify the screen stream
+          if (st.screenOn && screenStream) {
+            sbCh?.send({ type:"broadcast", event:"screen_share",
+              payload:{ p: st.peerId, n: st.nickname, sharing: true, streamId: screenStream.id } });
+          }
         }
       })
       .on("broadcast", { event: "rtc_offer"   }, ({ payload }) => { if (payload.to === st.peerId) handleOffer(payload); })
@@ -166,15 +174,23 @@ const MeetSystem = (() => {
         if (payload.p === st.peerId) return;
         if (payload.sharing) {
           screenSharingPeer = payload.p;
+          if (payload.streamId) peerScreenStreamIds[payload.p] = payload.streamId;
           const name = peerMeta[payload.p]?.nickname || "Someone";
           sysMsg(`🖥️ ${name} started sharing their screen`);
           showToast(`🖥️ ${name} is sharing their screen`, "info");
+          // If ontrack already buffered the screen stream, push it to sv now
+          if (peerScreenStreams[payload.p]) {
+            const sv = document.getElementById("meet-screen-video");
+            if (sv) sv.srcObject = peerScreenStreams[payload.p];
+          }
           showRemoteScreen(payload.p);
         } else {
           if (screenSharingPeer === payload.p) {
-            screenSharingPeer = null;
             const name = peerMeta[payload.p]?.nickname || "Someone";
             sysMsg(`🖥️ ${name} stopped sharing their screen`);
+            delete peerScreenStreams[payload.p];
+            delete peerScreenStreamIds[payload.p];
+            screenSharingPeer = null;
             hideRemoteScreen();
           }
         }
@@ -413,27 +429,12 @@ const MeetSystem = (() => {
 
   // ── Remote screen share helpers ────────────────────────
   function showRemoteScreen(peerId) {
-    const wrap = document.getElementById(`peer-${peerId}`);
-    const vid  = wrap?.querySelector("video");
-    const sw   = document.getElementById("meet-screen-wrap");
-    const sv   = document.getElementById("meet-screen-video");
+    const sw = document.getElementById("meet-screen-wrap");
+    const sv = document.getElementById("meet-screen-video");
     if (!sw || !sv) return;
-    // Build a dedicated stream from the peer connection's receivers so we always
-    // get the live screen track even right after replaceTrack() was called.
-    const pc = peers[peerId]?.pc;
-    if (pc) {
-      const receivers = pc.getReceivers();
-      const videoTrack = receivers.find(r => r.track?.kind === "video" && r.track.readyState === "live")?.track;
-      if (videoTrack) {
-        const tracks = [videoTrack];
-        const audioTrack = receivers.find(r => r.track?.kind === "audio" && r.track.readyState === "live")?.track;
-        if (audioTrack) tracks.push(audioTrack);
-        sv.srcObject = new MediaStream(tracks);
-      } else if (vid?.srcObject) {
-        sv.srcObject = vid.srcObject;
-      }
-    } else if (vid?.srcObject) {
-      sv.srcObject = vid.srcObject;
+    // Use the buffered screen stream if ontrack already routed it
+    if (!sv.srcObject && peerScreenStreams[peerId]) {
+      sv.srcObject = peerScreenStreams[peerId];
     }
     sw.classList.add("active");
     const lbl = sw.querySelector(".meet-screen-label");
@@ -462,14 +463,13 @@ const MeetSystem = (() => {
   async function toggleScreenShare() {
     if (st.screenOn) {
       screenStream?.getTracks().forEach(t => t.stop());
+      // Remove the dedicated screen senders (camera sender is untouched)
+      Object.entries(peers).forEach(([pid, p]) => {
+        if (screenSenders[pid]) { try { p.pc.removeTrack(screenSenders[pid]); } catch {} delete screenSenders[pid]; }
+      });
       screenStream = null;
       st.screenOn = false;
-      const camTrack = localStream?.getVideoTracks()[0] || null;
-      Object.values(peers).forEach(p => {
-        const sender = p.pc.getSenders().find(s => s.track?.kind === "video");
-        if (sender) sender.replaceTrack(camTrack || null).catch(() => {});
-      });
-      // Broadcast stop to other peers
+      // Broadcast stop so remotes clear their screen area
       sbCh?.send({ type:"broadcast", event:"screen_share", payload:{ p: st.peerId, sharing: false } });
       // Hide screen from local main area
       const sw = document.getElementById("meet-screen-wrap");
@@ -490,34 +490,27 @@ const MeetSystem = (() => {
       // Request screen + system audio
       screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
       st.screenOn = true;
-      const screenTrack     = screenStream.getVideoTracks()[0];
+      const screenTrack      = screenStream.getVideoTracks()[0];
       const screenAudioTrack = screenStream.getAudioTracks()[0];
 
-      Object.values(peers).forEach(p => {
-        // Replace the outgoing video track with the screen track
-        const videoSender = p.pc.getSenders().find(s => s.track?.kind === "video");
-        if (videoSender) videoSender.replaceTrack(screenTrack).catch(() => {});
-        else p.pc.addTrack(screenTrack, screenStream);
-        // Forward screen audio as an additional track (system audio)
-        if (screenAudioTrack) {
-          try { p.pc.addTrack(screenAudioTrack, screenStream); } catch {}
-        }
+      // Add screen as a SECOND track alongside the camera (never replaceTrack)
+      // so both camera (peer tile) and screen (main area) are visible simultaneously.
+      Object.entries(peers).forEach(([pid, p]) => {
+        try { const s = p.pc.addTrack(screenTrack, screenStream); screenSenders[pid] = s; } catch {}
+        if (screenAudioTrack) { try { p.pc.addTrack(screenAudioTrack, screenStream); } catch {} }
       });
 
-      // Show screen in the local main area
+      // Show screen locally in the main area
       const sw = document.getElementById("meet-screen-wrap");
       const sv = document.getElementById("meet-screen-video");
-      if (sw && sv) {
-        sv.srcObject = screenStream;
-        sw.classList.add("active");
-      }
-      // Cameras collapse to bottom strip
+      if (sw && sv) { sv.srcObject = screenStream; sw.classList.add("active"); }
       document.getElementById("meet-left-col")?.classList.add("has-stream");
       const ph = document.getElementById("meet-stream-placeholder");
       if (ph) ph.style.display = "none";
 
-      // Broadcast to all peers so they see it in their main area too
-      sbCh?.send({ type:"broadcast", event:"screen_share", payload:{ p: st.peerId, n: st.nickname, sharing: true } });
+      // Include the stream ID so remotes can identify the screen stream in ontrack
+      sbCh?.send({ type:"broadcast", event:"screen_share",
+        payload:{ p: st.peerId, n: st.nickname, sharing: true, streamId: screenStream.id } });
 
       screenTrack.onended = () => { if (st.screenOn) toggleScreenShare(); };
       sysMsg("📺 You started sharing your screen");
@@ -790,7 +783,34 @@ const MeetSystem = (() => {
     };
 
     pc.ontrack = e => {
-      if (e.streams?.[0]) renderRemote(peerId, e.streams[0]);
+      const stream = e.streams?.[0];
+      if (!stream) return;
+
+      // Route screen share stream to the screen video element, not the peer tile.
+      // We identify it by the stream ID that was broadcast in the screen_share event.
+      const knownScreenId = peerScreenStreamIds[peerId];
+      if (knownScreenId && stream.id === knownScreenId) {
+        peerScreenStreams[peerId] = stream;
+        if (screenSharingPeer === peerId) {
+          const sv = document.getElementById("meet-screen-video");
+          if (sv) sv.srcObject = stream;
+        }
+        return;
+      }
+
+      // If the broadcast hasn't arrived yet but the peer tile already has a camera video,
+      // this second video stream must be the screen — buffer it and show if sharing is active.
+      const existingVid = document.getElementById(`peer-${peerId}`)?.querySelector("video");
+      if (stream.getVideoTracks().length > 0 && existingVid?.srcObject?.getVideoTracks().length > 0) {
+        peerScreenStreams[peerId] = stream;
+        if (screenSharingPeer === peerId) {
+          const sv = document.getElementById("meet-screen-video");
+          if (sv) sv.srcObject = stream;
+        }
+        return;
+      }
+
+      renderRemote(peerId, stream);
     };
 
     pc.onconnectionstatechange = () => {
@@ -798,16 +818,17 @@ const MeetSystem = (() => {
         document.getElementById(`peer-${peerId}`)?.remove();
         peers[peerId]?.pc?.close();
         delete peers[peerId];
+        delete screenSenders[peerId];
       }
     };
 
+    // Always send camera + mic first, then screen tracks on top if sharing is active
+    if (localStream) localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
     if (st.screenOn && screenStream) {
-      // Screen share is active — send mic audio from localStream + screen video/audio
-      if (localStream) localStream.getAudioTracks().forEach(t => pc.addTrack(t, localStream));
-      screenStream.getVideoTracks().forEach(t => { try { pc.addTrack(t, screenStream); } catch {} });
+      screenStream.getVideoTracks().forEach(t => {
+        try { const s = pc.addTrack(t, screenStream); screenSenders[peerId] = s; } catch {}
+      });
       screenStream.getAudioTracks().forEach(t => { try { pc.addTrack(t, screenStream); } catch {} });
-    } else if (localStream) {
-      localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
     }
     return pc;
   }
