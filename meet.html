@@ -203,51 +203,69 @@
       </div>
     </div>
 
-    <!-- Controls -->
+    <!-- Controls bar (popups live OUTSIDE this div to avoid overflow clipping) -->
     <div class="meet-controls-bar">
 
-      <!-- React popup (above bar, shows on React button click) -->
-      <div class="meet-react-popup" id="meet-react-popup" role="menu" aria-label="Emoji reactions">
-        <div class="react-grid">
-          <button class="emoji-reaction-btn" data-emoji="⚽">⚽</button>
-          <button class="emoji-reaction-btn" data-emoji="🔥">🔥</button>
-          <button class="emoji-reaction-btn" data-emoji="❤️">❤️</button>
-          <button class="emoji-reaction-btn" data-emoji="😱">😱</button>
-          <button class="emoji-reaction-btn" data-emoji="🎉">🎉</button>
-          <button class="emoji-reaction-btn" data-emoji="👏">👏</button>
-          <button class="emoji-reaction-btn" data-emoji="🚀">🚀</button>
-          <button class="emoji-reaction-btn" data-emoji="💪">💪</button>
-          <button class="emoji-reaction-btn" data-emoji="🏆">🏆</button>
-          <button class="emoji-reaction-btn" data-emoji="😭">😭</button>
-          <button class="emoji-reaction-btn" data-emoji="🤩">🤩</button>
-          <button class="emoji-reaction-btn" data-emoji="💥">💥</button>
+      <!-- Scrollable button strip (inner, so bar overflow stays visible) -->
+      <div class="meet-controls-scroll">
+        <div class="meet-primary-group">
+          <button id="meet-mic-btn" class="meet-media-btn" title="Microphone (M)">
+            <span class="btn-icon">🔇</span><span class="btn-label"> Mute</span>
+          </button>
+          <button id="meet-cam-btn" class="meet-media-btn" title="Camera (V)">
+            <span class="btn-icon">📷</span><span class="btn-label"> Video</span>
+          </button>
+          <button id="meet-screen-btn" class="meet-media-btn" title="Share screen (S)">
+            <span class="btn-icon">🖥️</span><span class="btn-label"> Share</span>
+          </button>
+          <button id="meet-hand-btn" class="meet-media-btn" title="Raise hand (H)">
+            <span class="btn-icon">✋</span><span class="btn-label"> Hand</span>
+          </button>
+          <button id="meet-react-btn" class="meet-media-btn" title="Reactions">
+            <span class="btn-icon">😀</span><span class="btn-label"> React</span>
+          </button>
+          <button id="meet-more-btn" class="meet-media-btn" title="More options">
+            <span class="btn-icon">⋯</span><span class="btn-label"> More</span>
+          </button>
         </div>
       </div>
 
-      <!-- More popup (above bar, shows on ⋯ button click) -->
-      <div class="meet-more-popup" id="meet-more-popup" role="menu" aria-label="More options">
-        <button id="meet-blur-btn" class="meet-media-btn meet-more-item" title="Toggle background blur (B)">✨ Blur</button>
-        <button id="meet-participants-btn" class="meet-media-btn meet-more-item" title="Show participants (P)">👥 People</button>
-        <button id="meet-settings-btn" class="meet-media-btn meet-more-item" title="Device settings">⚙️ Settings</button>
-        <button id="meet-view-btn" class="meet-media-btn meet-more-item" title="Toggle gallery / speaker view">⊞ Gallery</button>
-        <button id="meet-fullscreen-btn" class="meet-media-btn meet-more-item" title="Fullscreen video area">⛶ Fullscreen</button>
-      </div>
-
-      <!-- Primary button row -->
-      <div class="meet-primary-group">
-        <button id="meet-mic-btn" class="meet-media-btn" title="Toggle microphone (M)">🔇 Mute</button>
-        <button id="meet-cam-btn" class="meet-media-btn" title="Toggle camera (V)">📷 Video</button>
-        <button id="meet-screen-btn" class="meet-media-btn" title="Share your screen (S)">🖥️ Share</button>
-        <button id="meet-hand-btn" class="meet-media-btn" title="Raise / lower hand (H)">✋ Hand</button>
-        <button id="meet-react-btn" class="meet-media-btn" title="Emoji reactions">😀 React</button>
-        <button id="meet-more-btn" class="meet-media-btn" title="More options">⋯ More</button>
-      </div>
-
-      <!-- Leave button, right-aligned -->
+      <!-- Leave — pinned right -->
       <div class="meet-leave-group">
-        <button id="meet-leave-btn" class="meet-leave-btn">🔴 Leave</button>
+        <button id="meet-leave-btn" class="meet-leave-btn">
+          <span class="btn-icon">🔴</span><span class="btn-label"> Leave</span>
+        </button>
       </div>
 
+    </div>
+
+    <!-- ── Popups: OUTSIDE controls bar so overflow:visible works ── -->
+
+    <!-- React popup -->
+    <div class="meet-react-popup" id="meet-react-popup" role="menu" aria-label="Emoji reactions">
+      <div class="react-grid">
+        <button class="emoji-reaction-btn" data-emoji="⚽">⚽</button>
+        <button class="emoji-reaction-btn" data-emoji="🔥">🔥</button>
+        <button class="emoji-reaction-btn" data-emoji="❤️">❤️</button>
+        <button class="emoji-reaction-btn" data-emoji="😱">😱</button>
+        <button class="emoji-reaction-btn" data-emoji="🎉">🎉</button>
+        <button class="emoji-reaction-btn" data-emoji="👏">👏</button>
+        <button class="emoji-reaction-btn" data-emoji="🚀">🚀</button>
+        <button class="emoji-reaction-btn" data-emoji="💪">💪</button>
+        <button class="emoji-reaction-btn" data-emoji="🏆">🏆</button>
+        <button class="emoji-reaction-btn" data-emoji="😭">😭</button>
+        <button class="emoji-reaction-btn" data-emoji="🤩">🤩</button>
+        <button class="emoji-reaction-btn" data-emoji="💥">💥</button>
+      </div>
+    </div>
+
+    <!-- More popup -->
+    <div class="meet-more-popup" id="meet-more-popup" role="menu" aria-label="More options">
+      <button id="meet-blur-btn" class="meet-media-btn meet-more-item" title="Background blur (B)">✨ Blur</button>
+      <button id="meet-participants-btn" class="meet-media-btn meet-more-item" title="Participants (P)">👥 People</button>
+      <button id="meet-settings-btn" class="meet-media-btn meet-more-item" title="Device settings">⚙️ Settings</button>
+      <button id="meet-view-btn" class="meet-media-btn meet-more-item" title="Gallery / Speaker">⊞ Gallery</button>
+      <button id="meet-fullscreen-btn" class="meet-media-btn meet-more-item" title="Fullscreen">⛶ Fullscreen</button>
     </div>
 
   </div><!-- /meet-room -->
@@ -337,48 +355,66 @@ function loadPresetStream(url) {
 
 // ── Controls bar popup logic ────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
-  // More popup
-  const moreBtn  = document.getElementById("meet-more-btn");
+  const moreBtn   = document.getElementById("meet-more-btn");
   const morePopup = document.getElementById("meet-more-popup");
+  const reactBtn  = document.getElementById("meet-react-btn");
+  const reactPopup= document.getElementById("meet-react-popup");
+
+  // Position popup above its trigger button (viewport-aware)
+  function anchorPopup(popup, triggerBtn) {
+    const r = triggerBtn.getBoundingClientRect();
+    // Place bottom edge 8px above the button top
+    popup.style.bottom = (window.innerHeight - r.top + 8) + "px";
+    popup.style.top    = "auto";
+    popup.style.right  = "auto";
+    // Center horizontally over the button, clamped to viewport edges
+    const pw   = popup.offsetWidth  || 220;
+    const left = Math.max(8, Math.min(window.innerWidth - pw - 8, r.left + r.width / 2 - pw / 2));
+    popup.style.left = left + "px";
+  }
+
+  function openPopup(popup, trigger, other) {
+    other && other.classList.remove("open");
+    popup.classList.add("open");
+    anchorPopup(popup, trigger);
+  }
+
+  function closeAll() {
+    morePopup  && morePopup.classList.remove("open");
+    reactPopup && reactPopup.classList.remove("open");
+  }
+
   if (moreBtn && morePopup) {
     moreBtn.addEventListener("click", (e) => {
       e.stopPropagation();
-      morePopup.classList.toggle("open");
-      reactPopup && reactPopup.classList.remove("open");
+      if (morePopup.classList.contains("open")) { closeAll(); }
+      else { openPopup(morePopup, moreBtn, reactPopup); }
     });
+    morePopup.addEventListener("click", (e) => e.stopPropagation());
   }
 
-  // React popup
-  const reactBtn  = document.getElementById("meet-react-btn");
-  const reactPopup = document.getElementById("meet-react-popup");
   if (reactBtn && reactPopup) {
     reactBtn.addEventListener("click", (e) => {
       e.stopPropagation();
-      reactPopup.classList.toggle("open");
-      morePopup && morePopup.classList.remove("open");
+      if (reactPopup.classList.contains("open")) { closeAll(); }
+      else { openPopup(reactPopup, reactBtn, morePopup); }
     });
+    reactPopup.addEventListener("click", (e) => e.stopPropagation());
   }
 
-  // Close popups on outside click
-  document.addEventListener("click", () => {
-    morePopup && morePopup.classList.remove("open");
-    reactPopup && reactPopup.classList.remove("open");
-  });
-
-  // Prevent popup-internal clicks from closing them
-  morePopup && morePopup.addEventListener("click", (e) => e.stopPropagation());
-  reactPopup && reactPopup.addEventListener("click", (e) => e.stopPropagation());
+  // Close popups on outside click or scroll
+  document.addEventListener("click", closeAll);
+  window.addEventListener("resize", closeAll);
 
   // Presets panel toggle
   const presetsToggleBtn = document.getElementById("meet-presets-toggle-btn");
-  const presetsPanel = document.getElementById("meet-presets-panel");
+  const presetsPanel     = document.getElementById("meet-presets-panel");
   if (presetsToggleBtn && presetsPanel) {
     presetsToggleBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       const isOpen = presetsPanel.classList.toggle("open");
       presetsToggleBtn.classList.toggle("active", isOpen);
-      morePopup && morePopup.classList.remove("open");
-      reactPopup && reactPopup.classList.remove("open");
+      closeAll();
     });
     presetsPanel.addEventListener("click", (e) => e.stopPropagation());
     document.addEventListener("click", () => {
