@@ -418,7 +418,21 @@ const MeetSystem = (() => {
     const sw   = document.getElementById("meet-screen-wrap");
     const sv   = document.getElementById("meet-screen-video");
     if (!sw || !sv) return;
-    if (vid?.srcObject) {
+    // Build a dedicated stream from the peer connection's receivers so we always
+    // get the live screen track even right after replaceTrack() was called.
+    const pc = peers[peerId]?.pc;
+    if (pc) {
+      const receivers = pc.getReceivers();
+      const videoTrack = receivers.find(r => r.track?.kind === "video" && r.track.readyState === "live")?.track;
+      if (videoTrack) {
+        const tracks = [videoTrack];
+        const audioTrack = receivers.find(r => r.track?.kind === "audio" && r.track.readyState === "live")?.track;
+        if (audioTrack) tracks.push(audioTrack);
+        sv.srcObject = new MediaStream(tracks);
+      } else if (vid?.srcObject) {
+        sv.srcObject = vid.srcObject;
+      }
+    } else if (vid?.srcObject) {
       sv.srcObject = vid.srcObject;
     }
     sw.classList.add("active");
@@ -787,7 +801,14 @@ const MeetSystem = (() => {
       }
     };
 
-    if (localStream) localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
+    if (st.screenOn && screenStream) {
+      // Screen share is active — send mic audio from localStream + screen video/audio
+      if (localStream) localStream.getAudioTracks().forEach(t => pc.addTrack(t, localStream));
+      screenStream.getVideoTracks().forEach(t => { try { pc.addTrack(t, screenStream); } catch {} });
+      screenStream.getAudioTracks().forEach(t => { try { pc.addTrack(t, screenStream); } catch {} });
+    } else if (localStream) {
+      localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
+    }
     return pc;
   }
 
@@ -886,7 +907,10 @@ const MeetSystem = (() => {
       askPeerMeta();
     }
     const vid = wrap.querySelector("video");
-    vid.srcObject = stream;
+    // Only replace srcObject when the new stream has video, or there is no current stream.
+    // This prevents an audio-only stream (e.g. screen system-audio track) from blanking
+    // out the peer tile while the video track is still arriving via replaceTrack().
+    if (stream.getVideoTracks().length > 0 || !vid.srcObject) vid.srcObject = stream;
     // Speaker detection on audio tracks
     const audioStream = new MediaStream(stream.getAudioTracks());
     if (audioStream.getAudioTracks().length > 0) startSpeakerDetection(audioStream, peerId);
