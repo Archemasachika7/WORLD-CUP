@@ -2931,44 +2931,41 @@ button { cursor: pointer; }
 /* Main layout */
 .meet-main-layout {
   display: grid;
-  grid-template-columns: 1fr 350px;
+  grid-template-columns: 1fr 340px;
   gap: 14px;
-  min-height: 500px;
+  min-height: 540px;
+  align-items: stretch;
 }
 
 /* Left column */
 .meet-left-col {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 0;
   position: relative;
+  overflow: hidden;
+  border-radius: 14px;
 }
 
-/* Peer video grid */
-.meet-video-grid:empty::after {
-  content: "Mic / camera peers appear here when voice or video is on";
-  color: var(--text-dim);
-  font-size: 0.76rem;
-  padding: 10px;
-  grid-column: 1 / -1;
-}
-
-/* Stream area: covers the left col, with PiP cam floating on top */
+/* ── Unified stream + cameras container ──────────────────── */
 .meet-stream-area {
   position: relative;
-  border-radius: 12px;
+  border-radius: 14px;
   overflow: hidden;
-  background: #000;
+  background: #0a0a14;
   border: 1px solid rgba(255,255,255,0.08);
   flex: 1;
   display: flex;
   flex-direction: column;
-  min-height: 340px;
+  min-height: 480px;
+  transition: border-color 0.4s ease;
 }
 
-/* Placeholder shown when no stream loaded */
+/* Placeholder: absolutely fills area (minus stream bar) */
 .meet-stream-placeholder {
-  flex: 1;
+  position: absolute;
+  inset: 0;
+  bottom: 56px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -2977,12 +2974,14 @@ button { cursor: pointer; }
   color: var(--text-dim);
   padding: 40px 20px;
   text-align: center;
+  z-index: 1;
+  pointer-events: none;
 }
-.meet-stream-placeholder .placeholder-icon { font-size: 3rem; opacity: 0.5; }
+.meet-stream-placeholder .placeholder-icon { font-size: 3rem; opacity: 0.4; }
 .meet-stream-placeholder h3 { font-size: 1rem; font-weight: 700; color: var(--text); margin: 0; }
 .meet-stream-placeholder p { font-size: 0.82rem; margin: 0; max-width: 260px; line-height: 1.5; }
 
-/* Stream iframe fills the area when active */
+/* Stream iframe: fills entire area when active */
 .meet-stream-frame-wrap {
   position: absolute;
   inset: 0;
@@ -2990,8 +2989,16 @@ button { cursor: pointer; }
   overflow: hidden;
   background: #000;
   display: none;
+  z-index: 3;
 }
-.meet-stream-frame-wrap.active { display: block; }
+.meet-stream-frame-wrap.active {
+  display: block;
+  animation: streamFadeIn 0.45s ease forwards;
+}
+@keyframes streamFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
 .meet-stream-frame-wrap iframe {
   width: 100%;
   height: 100%;
@@ -2999,10 +3006,86 @@ button { cursor: pointer; }
   display: block;
 }
 
-/* Picture-in-Picture local cam tile */
+/* ── Camera tiles grid (default: fills stream area) ──────── */
+.meet-video-grid {
+  position: absolute;
+  inset: 0;
+  bottom: 56px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 8px;
+  padding: 10px;
+  background: transparent;
+  z-index: 2;
+  overflow-y: auto;
+  overflow-x: hidden;
+  align-content: start;
+  border-radius: 0;
+  transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+              bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.meet-video-grid:empty::after {
+  content: "Mic / camera peers appear here when voice or video is on";
+  color: var(--text-dim);
+  font-size: 0.76rem;
+  padding: 10px;
+  grid-column: 1 / -1;
+}
+
+/* ── Camera strip when stream is active ──────────────────── */
+.meet-left-col.has-stream .meet-video-grid {
+  position: absolute;
+  top: auto;
+  bottom: 56px;
+  left: 0;
+  right: 0;
+  height: 130px;
+  grid-auto-flow: column;
+  grid-template-rows: 1fr;
+  grid-template-columns: unset;
+  grid-auto-columns: 200px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  background: linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.52) 100%);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 8px 12px;
+  gap: 8px;
+  z-index: 5;
+  border-radius: 0;
+  align-content: unset;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.2) transparent;
+}
+.meet-left-col.has-stream .meet-video-grid::-webkit-scrollbar { height: 3px; }
+.meet-left-col.has-stream .meet-video-grid::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 2px; }
+
+.meet-left-col.has-stream .meet-video-grid .meet-peer-video {
+  width: 200px;
+  height: 100%;
+  aspect-ratio: unset;
+  flex-shrink: 0;
+  min-height: unset;
+}
+
+/* ── Camera tile base ────────────────────────────────────── */
+.meet-peer-video {
+  position: relative;
+  background: #0e0e16;
+  border-radius: 8px;
+  overflow: hidden;
+  min-height: 120px;
+  border: 2px solid rgba(255,255,255,0.08);
+  transition: border-color 0.25s, box-shadow 0.25s, opacity 0.3s;
+}
+.meet-peer-video video { width: 100%; height: 100%; object-fit: cover; display: block; min-height: 120px; }
+.meet-local { border-color: var(--meet-accent); }
+
+/* ── PiP local cam (top-right corner, draggable) ─────────── */
 .meet-pip-tile {
   position: absolute;
-  bottom: 14px;
+  top: 14px;
   right: 14px;
   width: 160px;
   height: 110px;
@@ -3011,11 +3094,17 @@ button { cursor: pointer; }
   border: 2px solid rgba(255,255,255,0.3);
   box-shadow: 0 4px 20px rgba(0,0,0,0.7);
   cursor: move;
-  z-index: 10;
+  z-index: 11;
   background: #0e0e16;
   display: none;
+  transition: box-shadow 0.2s;
 }
-.meet-pip-tile.visible { display: block; }
+.meet-pip-tile:hover { box-shadow: 0 6px 28px rgba(0,0,0,0.85); }
+.meet-pip-tile.visible { display: block; animation: pipEnter 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+@keyframes pipEnter {
+  from { opacity: 0; transform: scale(0.82); }
+  to   { opacity: 1; transform: scale(1); }
+}
 .meet-pip-tile video { width: 100%; height: 100%; object-fit: cover; display: block; }
 .meet-pip-label {
   position: absolute;
@@ -3042,27 +3131,9 @@ button { cursor: pointer; }
   align-items: center;
   justify-content: center;
   line-height: 1;
+  transition: background 0.2s;
 }
-
-/* Shrink video grid when stream is active */
-.meet-left-col.has-stream .meet-video-grid {
-  min-height: 56px;
-  max-height: 100px;
-  overflow: hidden;
-}
-
-
-.meet-peer-video {
-  position: relative;
-  background: #0e0e16;
-  border-radius: 8px;
-  overflow: hidden;
-  min-height: 120px;
-  border: 2px solid rgba(255,255,255,0.08);
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-.meet-peer-video video { width: 100%; height: 100%; object-fit: cover; display: block; min-height: 120px; }
-.meet-local { border-color: var(--meet-accent); }
+.meet-pip-close:hover { background: rgba(229,9,20,0.7); }
 
 .meet-vid-label {
   position: absolute;
@@ -3100,28 +3171,24 @@ button { cursor: pointer; }
   box-shadow: 0 0 0 3px rgba(241,196,15,0.35);
 }
 
-/* Screen share tile — wider */
+/* Screen share tile — wider in gallery, normal size in strip */
 .meet-screen-tile {
   width: 320px;
   height: 180px;
   flex-shrink: 0;
 }
-
-/* Gallery view: auto-fit grid */
-.meet-video-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 8px;
-  background: rgba(0,0,0,0.25);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 10px;
-  padding: 8px;
-  min-height: 56px;
+.meet-left-col.has-stream .meet-screen-tile {
+  width: 240px;
+  height: 100%;
+  aspect-ratio: unset;
 }
 
-/* Speaker view: one big tile + small strip at bottom */
+/* ── Gallery view (default inside stream area) ───────────── */
+/* handled by .meet-video-grid absolute rules above */
+
+/* ── Speaker view: one big tile + small row ──────────────── */
 .meet-video-grid.meet-video-speaker {
-  grid-template-columns: 1fr;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
   grid-template-rows: auto;
 }
 .meet-video-grid.meet-video-speaker .meet-peer-video {
@@ -3132,81 +3199,164 @@ button { cursor: pointer; }
   height: 100px;
   grid-column: auto;
 }
-.meet-video-grid.meet-video-speaker {
-  grid-template-columns: 1fr 1fr 1fr 1fr;
-}
 .meet-video-grid.meet-video-speaker .meet-peer-video:first-child {
   grid-column: 1 / -1;
   height: 320px;
 }
 
-/* Fullscreen tweaks */
+/* ── Fullscreen tweaks ───────────────────────────────────── */
 .meet-left-col:fullscreen,
 .meet-left-col:-webkit-full-screen {
   background: #000;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 12px;
-  overflow-y: auto;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+  border-radius: 0;
+}
+.meet-left-col:fullscreen .meet-stream-area,
+.meet-left-col:-webkit-full-screen .meet-stream-area {
+  border-radius: 0;
+  min-height: 100vh;
 }
 
-/* Stream bar inside room */
+/* ── Stream bar: overlay at bottom of stream area ────────── */
 .meet-stream-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
   display: flex;
   align-items: center;
   gap: 8px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.10);
-  border-radius: 10px;
-  padding: 4px 4px 4px 14px;
+  background: rgba(6,6,18,0.94);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-top: 1px solid rgba(255,255,255,0.09);
+  padding: 6px 8px 6px 14px;
+  height: 56px;
+  border-radius: 0 0 14px 14px;
+  box-sizing: border-box;
 }
 
 .meet-stream-icon { font-size: 1rem; flex-shrink: 0; }
 
 .meet-stream-url-in {
   flex: 1;
-  background: transparent;
-  border: none;
-  outline: none;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.12);
   color: var(--text);
-  font-size: 0.88rem;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.85rem;
   font-family: inherit;
-  padding: 10px 0;
+  outline: none;
   min-width: 0;
+  transition: border-color 0.2s, background 0.2s;
 }
+.meet-stream-url-in:focus { border-color: var(--meet-accent); background: rgba(255,255,255,0.10); }
 .meet-stream-url-in::placeholder { color: var(--text-dim); }
 
 .meet-stream-go {
   background: var(--meet-accent);
   color: #fff;
   border: none;
-  padding: 11px 18px;
+  padding: 9px 16px;
   border-radius: 8px;
-  font-size: 0.85rem;
+  font-size: 0.83rem;
   font-weight: 700;
   cursor: pointer;
   flex-shrink: 0;
-  transition: filter 0.2s;
+  transition: filter 0.2s, transform 0.12s;
+  white-space: nowrap;
 }
-.meet-stream-go:hover { filter: brightness(1.15); }
+.meet-stream-go:hover  { filter: brightness(1.18); }
+.meet-stream-go:active { transform: scale(0.96); }
 
-.meet-stream-frame-wrap {
-  position: relative;
-  border-radius: 10px;
-  overflow: hidden;
-  border: 1px solid rgba(255,255,255,0.08);
-  background: #000;
-  flex: 1;
-  min-height: 300px;
+/* Presets toggle button */
+.meet-presets-toggle-btn {
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.14);
+  color: var(--text-dim);
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+  line-height: 1;
 }
-.meet-stream-frame-wrap iframe {
-  width: 100%;
-  height: 100%;
-  min-height: 300px;
-  border: none;
-  display: block;
+.meet-presets-toggle-btn:hover { background: rgba(255,255,255,0.12); color: var(--text); }
+.meet-presets-toggle-btn.active {
+  background: rgba(229,9,20,0.15);
+  border-color: rgba(229,9,20,0.4);
+  color: var(--meet-accent);
 }
+
+/* ── Presets panel: slides up above stream bar ───────────── */
+.meet-presets-panel {
+  position: absolute;
+  bottom: 56px;
+  left: 0;
+  right: 0;
+  z-index: 9;
+  background: rgba(10,10,22,0.97);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255,255,255,0.10);
+  padding: 10px 14px;
+  transform: translateY(16px);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  max-height: 130px;
+  overflow-y: auto;
+}
+.meet-presets-panel.open {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.meet-presets-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.meet-presets-panel .stream-presets {
+  margin-bottom: 0;
+  justify-content: flex-start;
+}
+
+.meet-presets-panel .preset-stream {
+  padding: 7px 14px;
+  font-size: 0.8rem;
+}
+
+/* ── Room entry animation ─────────────────────────────────── */
+@keyframes roomEnter {
+  from { opacity: 0; transform: translateY(16px) scale(0.99); }
+  to   { opacity: 1; transform: translateY(0)    scale(1); }
+}
+.meet-room:not(.hidden) {
+  animation: roomEnter 0.48s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Landing card entrance */
+@keyframes cardEnter {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.meet-identity-card { animation: cardEnter 0.4s 0.05s cubic-bezier(0.4, 0, 0.2, 1) both; }
+.meet-action-card:nth-child(2) { animation: cardEnter 0.4s 0.12s cubic-bezier(0.4, 0, 0.2, 1) both; }
+.meet-action-card:nth-child(3) { animation: cardEnter 0.4s 0.20s cubic-bezier(0.4, 0, 0.2, 1) both; }
 
 /* Emoji rain */
 .meet-emoji-rain {
@@ -3239,7 +3389,8 @@ button { cursor: pointer; }
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 12px;
   overflow: hidden;
-  max-height: 680px;
+  max-height: 720px;
+  min-height: 480px;
 }
 
 .meet-chat-header {
@@ -3338,11 +3489,16 @@ button { cursor: pointer; }
   justify-content: center;
   gap: 8px;
   padding: 10px 16px;
-  background: rgba(10,10,20,0.95);
+  background: rgba(8,8,18,0.96);
   border-top: 1px solid rgba(255,255,255,0.08);
   border-radius: 12px;
-  margin-top: 10px;
+  margin-top: 12px;
   position: relative;
+  animation: barEnter 0.4s 0.1s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+@keyframes barEnter {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 /* Primary button group — centered */
@@ -3735,8 +3891,13 @@ body.meet-active .page-hero { display: none !important; }
 body.meet-active > section > div:not(#meet-room):not(#meet-alert) { display: none !important; }
 
 /* ── Video tile polish ───────────────────────────────────── */
+/* 16:9 default in gallery; strip mode overrides via explicit width/height */
 .meet-peer-video {
   aspect-ratio: 16 / 9;
+}
+
+.meet-left-col.has-stream .meet-peer-video {
+  aspect-ratio: unset;
 }
 
 .meet-peer-video video {
@@ -3744,7 +3905,7 @@ body.meet-active > section > div:not(#meet-room):not(#meet-alert) { display: non
   height: 100%;
   object-fit: cover;
   display: block;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: unset;
   min-height: unset;
   transition: opacity 0.3s;
 }
@@ -3962,8 +4123,12 @@ body.meet-active .meet-peer-video { cursor: pointer; }
 @media (max-width: 960px) {
   .meet-landing-grid  { grid-template-columns: 1fr; }
   .meet-main-layout   { grid-template-columns: 1fr; }
-  .meet-right-col     { max-height: 420px; }
+  .meet-right-col     { max-height: 380px; }
+  .meet-stream-area   { min-height: 360px; }
   .meet-reactions-group { margin-left: 0; }
+  .meet-left-col.has-stream .meet-video-grid { height: 110px; }
+  .meet-left-col.has-stream .meet-video-grid .meet-peer-video { width: 168px; }
+  .meet-left-col.has-stream .meet-video-grid { grid-auto-columns: 168px; }
 }
 
 @media (max-width: 600px) {
@@ -3972,6 +4137,11 @@ body.meet-active .meet-peer-video { cursor: pointer; }
   .meet-room-right  { margin-left: 0; }
   body.meet-active .meet-controls-bar { flex-wrap: wrap; justify-content: flex-start; }
   .meet-toast-container { right: 10px; left: 10px; max-width: unset; }
+  .meet-stream-area { min-height: 300px; }
+  .meet-stream-url-in { font-size: 0.8rem; }
+  .meet-presets-toggle-btn { display: none; }
+  .meet-left-col.has-stream .meet-video-grid { height: 90px; grid-auto-columns: 136px; }
+  .meet-left-col.has-stream .meet-video-grid .meet-peer-video { width: 136px; }
 }
 
 /* ============================================================

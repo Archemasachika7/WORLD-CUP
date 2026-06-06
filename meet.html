@@ -91,43 +91,23 @@
 
     <div class="meet-main-layout" id="meet-main-layout">
 
-      <!-- Left: video grid + stream -->
+      <!-- Left: unified stream + cameras container -->
       <div class="meet-left-col" id="meet-left-col">
-        <div id="meet-video-grid" class="meet-video-grid">
-          <div id="meet-local-vid-wrap" class="meet-peer-video meet-local hidden" data-peer="local">
-            <video id="meet-local-video" autoplay muted playsinline></video>
-            <div class="meet-avatar" id="meet-local-avatar"><span></span></div>
-            <div class="meet-tile-status" id="meet-local-tile-status"></div>
-            <div class="meet-tile-quality"><div class="qb"></div><div class="qb"></div><div class="qb"></div></div>
-            <div class="meet-vid-label">You</div>
-            <div class="meet-tile-overlay">
-              <span class="tile-pin-hint">📌 Click to pin</span>
-            </div>
-          </div>
-        </div>
 
-        <div class="meet-stream-bar">
-          <span class="meet-stream-icon">📺</span>
-          <input id="meet-stream-input" type="url" placeholder="Paste stream URL — syncs for everyone in this room instantly" class="meet-stream-url-in" />
-          <button id="meet-stream-go" class="meet-stream-go">▶ Sync</button>
-        </div>
-
-        <!-- Stream presets inside room -->
-        <div class="stream-presets" id="room-stream-presets" style="padding:8px 0;"></div>
-
-        <!-- Stream area with PiP -->
+        <!-- Everything lives inside the stream area -->
         <div class="meet-stream-area" id="meet-stream-area">
-          <!-- Placeholder shown before stream loads -->
+
+          <!-- Placeholder: visible before any stream loads -->
           <div class="meet-stream-placeholder" id="meet-stream-placeholder">
             <div class="placeholder-icon">📺</div>
             <h3>No stream active</h3>
-            <p>Paste a stream URL above or pick a broadcaster to sync video for everyone in the room.</p>
+            <p>Use the bar below or choose a broadcaster preset to sync video for everyone in the room.</p>
           </div>
 
-          <!-- Iframe fills area when stream is loaded -->
-          <div id="meet-stream-frame-wrap" class="meet-stream-frame-wrap" style="border-radius:12px;">
+          <!-- Iframe fills the entire area when a stream is loaded -->
+          <div id="meet-stream-frame-wrap" class="meet-stream-frame-wrap">
             <iframe id="meet-stream-iframe" src="about:blank" allowfullscreen allow="autoplay; fullscreen; picture-in-picture" frameborder="0" title="Room stream"></iframe>
-            <!-- Fallback card shown when site blocks iframe embedding -->
+            <!-- Fallback card shown when a site blocks iframe embedding -->
             <div id="meet-stream-fallback" class="meet-stream-fallback hidden">
               <div class="stream-fallback-icon">🔗</div>
               <div class="stream-fallback-name" id="stream-fallback-name"></div>
@@ -136,16 +116,45 @@
             </div>
           </div>
 
-          <!-- Picture-in-Picture local cam -->
+          <!-- Camera tiles: full gallery when no stream / horizontal strip when stream active -->
+          <div id="meet-video-grid" class="meet-video-grid">
+            <div id="meet-local-vid-wrap" class="meet-peer-video meet-local hidden" data-peer="local">
+              <video id="meet-local-video" autoplay muted playsinline></video>
+              <div class="meet-avatar" id="meet-local-avatar"><span></span></div>
+              <div class="meet-tile-status" id="meet-local-tile-status"></div>
+              <div class="meet-tile-quality"><div class="qb"></div><div class="qb"></div><div class="qb"></div></div>
+              <div class="meet-vid-label">You</div>
+              <div class="meet-tile-overlay">
+                <span class="tile-pin-hint">📌 Click to pin</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Picture-in-Picture local cam (top-right corner, draggable) -->
           <div class="meet-pip-tile" id="meet-pip-tile">
             <video id="meet-pip-video" autoplay muted playsinline></video>
             <div class="meet-pip-label">You</div>
             <button class="meet-pip-close" id="meet-pip-close" title="Hide PiP">✕</button>
           </div>
-        </div>
+
+          <!-- Stream URL bar — always visible at the bottom edge of the stream area -->
+          <div class="meet-stream-bar">
+            <span class="meet-stream-icon">📺</span>
+            <input id="meet-stream-input" type="url" placeholder="Paste stream URL — syncs for everyone in this room" class="meet-stream-url-in" />
+            <button id="meet-stream-go" class="meet-stream-go">▶ Sync</button>
+            <button class="meet-presets-toggle-btn" id="meet-presets-toggle-btn" title="Quick stream presets">📡</button>
+          </div>
+
+          <!-- Presets panel: slides up above the stream bar -->
+          <div class="meet-presets-panel" id="meet-presets-panel">
+            <div class="meet-presets-label">Quick Stream Presets</div>
+            <div class="stream-presets" id="room-stream-presets"></div>
+          </div>
+
+        </div><!-- /meet-stream-area -->
 
         <div id="meet-emoji-rain" class="meet-emoji-rain" aria-hidden="true"></div>
-      </div>
+      </div><!-- /meet-left-col -->
 
       <!-- Right: chat -->
       <div class="meet-right-col" id="meet-right-col">
@@ -353,6 +362,24 @@ document.addEventListener("DOMContentLoaded", () => {
   // Prevent popup-internal clicks from closing them
   morePopup && morePopup.addEventListener("click", (e) => e.stopPropagation());
   reactPopup && reactPopup.addEventListener("click", (e) => e.stopPropagation());
+
+  // Presets panel toggle
+  const presetsToggleBtn = document.getElementById("meet-presets-toggle-btn");
+  const presetsPanel = document.getElementById("meet-presets-panel");
+  if (presetsToggleBtn && presetsPanel) {
+    presetsToggleBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const isOpen = presetsPanel.classList.toggle("open");
+      presetsToggleBtn.classList.toggle("active", isOpen);
+      morePopup && morePopup.classList.remove("open");
+      reactPopup && reactPopup.classList.remove("open");
+    });
+    presetsPanel.addEventListener("click", (e) => e.stopPropagation());
+    document.addEventListener("click", () => {
+      presetsPanel.classList.remove("open");
+      presetsToggleBtn.classList.remove("active");
+    });
+  }
 });
 
 // ── Iframe embed fallback ───────────────────────────────────
