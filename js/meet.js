@@ -51,6 +51,7 @@ const MeetSystem = (() => {
   let screenSenders = {};       // peerId → RTCRtpSender for the screen-video track (so we can removeTrack)
   let peerScreenStreamIds = {}; // peerId → stream.id expected for that peer's screen share
   let peerScreenStreams = {};   // peerId → received screen MediaStream (ready to show)
+  let peerStreams = {};         // peerId → Map(streamId → MediaStream) of every inbound stream
   let peers = {};
   let peerMeta = {}; // peerId → { nickname, flag, handRaised, micOn, camOn }
   let audioCtx = null;
@@ -178,16 +179,18 @@ const MeetSystem = (() => {
           const name = peerMeta[payload.p]?.nickname || "Someone";
           sysMsg(`🖥️ ${name} started sharing their screen`);
           showToast(`🖥️ ${name} is sharing their screen`, "info");
-          // If ontrack already buffered the screen stream, push it to sv now
-          if (peerScreenStreams[payload.p]) {
-            const sv = document.getElementById("meet-screen-video");
-            if (sv) sv.srcObject = peerScreenStreams[payload.p];
-          }
+          // Now that we know which stream id is the screen, re-route any buffered
+          // streams — this pulls the screen out of the camera tile and into the container.
+          classifyPeerStreams(payload.p);
           showRemoteScreen(payload.p);
         } else {
           if (screenSharingPeer === payload.p) {
             const name = peerMeta[payload.p]?.nickname || "Someone";
             sysMsg(`🖥️ ${name} stopped sharing their screen`);
+            // Drop the (now-ended) screen stream from the buffer so a future share
+            // with a new id classifies cleanly.
+            const oldScreenId = peerScreenStreamIds[payload.p];
+            if (oldScreenId) peerStreams[payload.p]?.delete(oldScreenId);
             delete peerScreenStreams[payload.p];
             delete peerScreenStreamIds[payload.p];
             screenSharingPeer = null;
@@ -785,32 +788,10 @@ const MeetSystem = (() => {
     pc.ontrack = e => {
       const stream = e.streams?.[0];
       if (!stream) return;
-
-      // Route screen share stream to the screen video element, not the peer tile.
-      // We identify it by the stream ID that was broadcast in the screen_share event.
-      const knownScreenId = peerScreenStreamIds[peerId];
-      if (knownScreenId && stream.id === knownScreenId) {
-        peerScreenStreams[peerId] = stream;
-        if (screenSharingPeer === peerId) {
-          const sv = document.getElementById("meet-screen-video");
-          if (sv) sv.srcObject = stream;
-        }
-        return;
-      }
-
-      // If the broadcast hasn't arrived yet but the peer tile already has a camera video,
-      // this second video stream must be the screen — buffer it and show if sharing is active.
-      const existingVid = document.getElementById(`peer-${peerId}`)?.querySelector("video");
-      if (stream.getVideoTracks().length > 0 && existingVid?.srcObject?.getVideoTracks().length > 0) {
-        peerScreenStreams[peerId] = stream;
-        if (screenSharingPeer === peerId) {
-          const sv = document.getElementById("meet-screen-video");
-          if (sv) sv.srcObject = stream;
-        }
-        return;
-      }
-
-      renderRemote(peerId, stream);
+      // Buffer every inbound stream by its id, then classify deterministically.
+      if (!peerStreams[peerId]) peerStreams[peerId] = new Map();
+      peerStreams[peerId].set(stream.id, stream);
+      classifyPeerStreams(peerId);
     };
 
     pc.onconnectionstatechange = () => {
@@ -819,6 +800,10 @@ const MeetSystem = (() => {
         peers[peerId]?.pc?.close();
         delete peers[peerId];
         delete screenSenders[peerId];
+        delete peerStreams[peerId];
+        delete peerScreenStreams[peerId];
+        delete peerScreenStreamIds[peerId];
+        if (screenSharingPeer === peerId) { screenSharingPeer = null; hideRemoteScreen(); }
       }
     };
 
@@ -870,6 +855,32 @@ const MeetSystem = (() => {
   async function handleIce({ from, candidate }) {
     const pc = peers[from]?.pc;
     if (pc && candidate) try { await pc.addIceCandidate(new RTCIceCandidate(candidate)); } catch {}
+  }
+
+  // Deterministically route a peer's inbound streams: the stream whose id matches the
+  // broadcast screen id goes to the main screen container; everything else is the
+  // camera/mic stream and goes to the peer's grid tile. Order-independent and
+  // self-correcting — re-running this after the screen broadcast arrives moves a
+  // mis-placed screen stream out of the tile and into the container.
+  function classifyPeerStreams(peerId) {
+    const map = peerStreams[peerId];
+    if (!map) return;
+    const screenId = peerScreenStreamIds[peerId];
+    const tileVid = document.getElementById(`peer-${peerId}`)?.querySelector("video");
+    const sv = document.getElementById("meet-screen-video");
+
+    map.forEach((stream, id) => {
+      const isScreen = !!screenId && id === screenId;
+      if (isScreen) {
+        peerScreenStreams[peerId] = stream;
+        // Never let the screen stream sit in the camera tile.
+        if (tileVid && tileVid.srcObject === stream) tileVid.srcObject = null;
+        if (screenSharingPeer === peerId && sv && sv.srcObject !== stream) sv.srcObject = stream;
+      } else {
+        // Camera/mic stream → grid tile.
+        renderRemote(peerId, stream);
+      }
+    });
   }
 
   function renderRemote(peerId, stream) {
