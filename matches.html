@@ -371,6 +371,19 @@ function openMatchModal(match) {
       <div class="bpb-draw" style="width:${prob.draw}%">Draw<br>${prob.draw}%</div>
       <div class="bpb-away" style="width:${prob.away}%">${esc(away.name)} ${prob.away}%</div>
     </div>
+    ${match.scorers ? `
+    <div class="modal-scorers mt-16" style="background:rgba(255,255,255,0.05);padding:16px;border-radius:12px;">
+      <h3 class="modal-section-title" style="margin-top:0">Goal Scorers</h3>
+      <div style="display:flex;justify-content:space-between;gap:20px;">
+        <div style="flex:1;text-align:right;">
+          ${match.scorers.filter(s => s.team === match.home).map(s => `<div>${s.player} ${s.minute}' ⚽</div>`).join('')}
+        </div>
+        <div style="width:1px;background:rgba(255,255,255,0.1);"></div>
+        <div style="flex:1;text-align:left;">
+          ${match.scorers.filter(s => s.team === match.away).map(s => `<div>⚽ ${s.player} ${s.minute}'</div>`).join('')}
+        </div>
+      </div>
+    </div>` : ''}
     <div class="modal-scores mt-16">
       <div class="score-box"><div class="score-val">${prob.homeSqScore}</div><div class="score-lbl">${esc(home.name)} Squad</div></div>
       <div class="score-box"><div class="score-val">${prob.homeTop5}</div><div class="score-lbl">${esc(home.name)} Top-5</div></div>

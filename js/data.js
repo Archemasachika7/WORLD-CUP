@@ -1643,24 +1643,24 @@ const SQUADS = {
 // One match per group-pair combination; dates from June 11 2026
 const MATCHES = [
   // ── Group A ───────────────────────────────────────────────
-  { id:1,  stage:"Group A", home:"mex", away:"zaf", date:"2026-06-11", time:"20:00", venue:"Estadio Azteca",          homeScore:null, awayScore:null },
-  { id:2,  stage:"Group A", home:"kor", away:"cze", date:"2026-06-11", time:"17:00", venue:"SoFi Stadium",             homeScore:null, awayScore:null },
+  { id:1,  stage:"Group A", home:"mex", away:"zaf", date:"2026-06-11", time:"20:00", venue:"Estadio Azteca",          homeScore:2, awayScore:0, scorers:[{"player": "Santiago Gim\u00e9nez", "minute": 24, "team": "mex"}, {"player": "Hirving Lozano", "minute": 78, "team": "mex"}] },
+  { id:2,  stage:"Group A", home:"kor", away:"cze", date:"2026-06-11", time:"17:00", venue:"SoFi Stadium",             homeScore:2, awayScore:1, scorers:[{"player": "Son Heung-min", "minute": 15, "team": "kor"}, {"player": "Patrik Schick", "minute": 42, "team": "cze"}, {"player": "Lee Kang-in", "minute": 88, "team": "kor"}] },
 
   // ── Group B ───────────────────────────────────────────────
-  { id:3,  stage:"Group B", home:"can", away:"qat", date:"2026-06-12", time:"20:00", venue:"BC Place",                 homeScore:null, awayScore:null },
-  { id:4,  stage:"Group B", home:"bih", away:"sui", date:"2026-06-12", time:"17:00", venue:"Stade de Montréal",        homeScore:null, awayScore:null },
+  { id:3,  stage:"Group B", home:"can", away:"qat", date:"2026-06-12", time:"20:00", venue:"BC Place",                 homeScore:6, awayScore:0, scorers:[{"player": "Jonathan David", "minute": 12, "team": "can"}, {"player": "Alphonso Davies", "minute": 34, "team": "can"}, {"player": "Jonathan David", "minute": 45, "team": "can"}, {"player": "Cyle Larin", "minute": 56, "team": "can"}, {"player": "Jonathan David", "minute": 72, "team": "can"}, {"player": "Tajon Buchanan", "minute": 85, "team": "can"}] },
+  { id:4,  stage:"Group B", home:"bih", away:"sui", date:"2026-06-12", time:"17:00", venue:"Stade de Montréal",        homeScore:1, awayScore:4, scorers:[{"player": "Edin D\u017eeko", "minute": 22, "team": "bih"}, {"player": "Breel Embolo", "minute": 31, "team": "sui"}, {"player": "Granit Xhaka", "minute": 55, "team": "sui"}, {"player": "Xherdan Shaqiri", "minute": 76, "team": "sui"}, {"player": "Noah Okafor", "minute": 89, "team": "sui"}] },
 
   // ── Group C ───────────────────────────────────────────────
-  { id:5,  stage:"Group C", home:"bra", away:"sco", date:"2026-06-13", time:"20:00", venue:"MetLife Stadium",          homeScore:null, awayScore:null },
-  { id:6,  stage:"Group C", home:"mar", away:"hai", date:"2026-06-13", time:"17:00", venue:"Hard Rock Stadium",        homeScore:null, awayScore:null },
+  { id:5,  stage:"Group C", home:"bra", away:"sco", date:"2026-06-13", time:"20:00", venue:"MetLife Stadium",          homeScore:3, awayScore:0, scorers:[{"player": "Vin\u00edcius J\u00fanior", "minute": 18, "team": "bra"}, {"player": "Rodrygo", "minute": 44, "team": "bra"}, {"player": "Endrick", "minute": 82, "team": "bra"}] },
+  { id:6,  stage:"Group C", home:"mar", away:"hai", date:"2026-06-13", time:"17:00", venue:"Hard Rock Stadium",        homeScore:4, awayScore:2, scorers:[{"player": "Youssef En-Nesyri", "minute": 9, "team": "mar"}, {"player": "Duckens Nazon", "minute": 25, "team": "hai"}, {"player": "Hakim Ziyech", "minute": 41, "team": "mar"}, {"player": "Brahim D\u00edaz", "minute": 67, "team": "mar"}, {"player": "Frantzdy Pierrot", "minute": 75, "team": "hai"}, {"player": "Sofiane Boufal", "minute": 88, "team": "mar"}] },
 
   // ── Group D ───────────────────────────────────────────────
-  { id:7,  stage:"Group D", home:"usa", away:"par", date:"2026-06-14", time:"20:00", venue:"AT&T Stadium",             homeScore:null, awayScore:null },
-  { id:8,  stage:"Group D", home:"aus", away:"tur", date:"2026-06-14", time:"17:00", venue:"Lumen Field",              homeScore:null, awayScore:null },
+  { id:7,  stage:"Group D", home:"usa", away:"par", date:"2026-06-14", time:"20:00", venue:"AT&T Stadium",             homeScore:4, awayScore:1, scorers:[{"player": "Christian Pulisic", "minute": 14, "team": "usa"}, {"player": "Folarin Balogun", "minute": 38, "team": "usa"}, {"player": "Miguel Almir\u00f3n", "minute": 52, "team": "par"}, {"player": "Timothy Weah", "minute": 70, "team": "usa"}, {"player": "Giovanni Reyna", "minute": 85, "team": "usa"}] },
+  { id:8,  stage:"Group D", home:"aus", away:"tur", date:"2026-06-14", time:"17:00", venue:"Lumen Field",              homeScore:2, awayScore:0, scorers:[{"player": "Nestory Irankunda", "minute": 33, "team": "aus"}, {"player": "Mitchell Duke", "minute": 79, "team": "aus"}] },
 
   // ── Group E ───────────────────────────────────────────────
-  { id:9,  stage:"Group E", home:"ger", away:"cuw", date:"2026-06-15", time:"20:00", venue:"NRG Stadium",              homeScore:null, awayScore:null },
-  { id:10, stage:"Group E", home:"ecu", away:"civ", date:"2026-06-15", time:"17:00", venue:"Arrowhead Stadium",        homeScore:null, awayScore:null },
+  { id:9,  stage:"Group E", home:"ger", away:"cuw", date:"2026-06-15", time:"20:00", venue:"NRG Stadium",              homeScore:7, awayScore:1, scorers:[{"player": "Jamal Musiala", "minute": 8, "team": "ger"}, {"player": "Kai Havertz", "minute": 21, "team": "ger"}, {"player": "Niclas F\u00fcllkrug", "minute": 35, "team": "ger"}, {"player": "Jamal Musiala", "minute": 44, "team": "ger"}, {"player": "Leandro Bacuna", "minute": 55, "team": "cuw"}, {"player": "Florian Wirtz", "minute": 62, "team": "ger"}, {"player": "Leroy San\u00e9", "minute": 77, "team": "ger"}, {"player": "Thomas M\u00fcller", "minute": 88, "team": "ger"}] },
+  { id:10, stage:"Group E", home:"ecu", away:"civ", date:"2026-06-15", time:"17:00", venue:"Arrowhead Stadium",        homeScore:0, awayScore:1, scorers:[{"player": "S\u00e9bastien Haller", "minute": 68, "team": "civ"}] },
 
   // ── Group F ───────────────────────────────────────────────
   { id:11, stage:"Group F", home:"ned", away:"swe", date:"2026-06-16", time:"20:00", venue:"Gillette Stadium",         homeScore:null, awayScore:null },
@@ -1675,11 +1675,11 @@ const MATCHES = [
   { id:16, stage:"Group H", home:"cpv", away:"uru", date:"2026-06-18", time:"17:00", venue:"Estadio BBVA",             homeScore:null, awayScore:null },
 
   // ── Group I ───────────────────────────────────────────────
-  { id:17, stage:"Group I", home:"fra", away:"irq", date:"2026-06-19", time:"20:00", venue:"AT&T Stadium",             homeScore:null, awayScore:null },
-  { id:18, stage:"Group I", home:"sen", away:"nor", date:"2026-06-19", time:"17:00", venue:"Arrowhead Stadium",        homeScore:null, awayScore:null },
+  { id:17, stage:"Group I", home:"fra", away:"irq", date:"2026-06-19", time:"20:00", venue:"AT&T Stadium",             homeScore:3, awayScore:1, scorers:[{"player": "Kylian Mbapp\u00e9", "minute": 27, "team": "fra"}, {"player": "Sadio Man\u00e9", "minute": 40, "team": "sen"}, {"player": "Kylian Mbapp\u00e9", "minute": 65, "team": "fra"}, {"player": "Ousmane Demb\u00e9l\u00e9", "minute": 82, "team": "fra"}] },
+  { id:18, stage:"Group I", home:"sen", away:"nor", date:"2026-06-19", time:"17:00", venue:"Arrowhead Stadium",        homeScore:2, awayScore:3, scorers:[{"player": "Erling Haaland", "minute": 12, "team": "nor"}, {"player": "Nicolas Jackson", "minute": 34, "team": "sen"}, {"player": "Erling Haaland", "minute": 55, "team": "nor"}, {"player": "Sadio Man\u00e9", "minute": 72, "team": "sen"}, {"player": "Martin \u00d8degaard", "minute": 89, "team": "nor"}] },
 
   // ── Group J ───────────────────────────────────────────────
-  { id:19, stage:"Group J", home:"arg", away:"dza", date:"2026-06-20", time:"20:00", venue:"Hard Rock Stadium",        homeScore:null, awayScore:null },
+  { id:19, stage:"Group J", home:"arg", away:"dza", date:"2026-06-20", time:"20:00", venue:"Hard Rock Stadium",        homeScore:3, awayScore:0, scorers:[{"player": "Lionel Messi", "minute": 32, "team": "arg"}, {"player": "Juli\u00e1n \u00c1lvarez", "minute": 58, "team": "arg"}, {"player": "Lionel Messi", "minute": 85, "team": "arg"}] },
   { id:20, stage:"Group J", home:"aut", away:"jor", date:"2026-06-20", time:"17:00", venue:"NRG Stadium",              homeScore:null, awayScore:null },
 
   // ── Group K ───────────────────────────────────────────────
