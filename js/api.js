@@ -93,14 +93,59 @@ const API = (() => {
     setInterval(doRefresh, NEWS_TTL);
   }
 
-  // Optional: live match data from football-data.org
+  // Fetch live matches from Supabase Edge Function (which proxies football-data.org)
   async function fetchLiveMatches() {
-    return null;
+    const cached = loadCache("LIVE_MATCHES_KEY");
+    if (cached) return cached;
+    
+    try {
+      const res = await fetch("/api/scores-proxy?endpoint=competitions/WC/matches");
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = await res.json();
+      
+      if (json.matches) {
+        // Cache for 5 minutes
+        saveCache("LIVE_MATCHES_KEY", json.matches, 5 * 60 * 1000);
+        return json.matches;
+      }
+      return [];
+    } catch (e) {
+      console.warn("Live matches fetch failed:", e.message);
+      return [];
+    }
   }
 
-  // Optional: standings
+  // Fetch standings/brackets from Supabase Edge Function
   async function fetchStandings() {
-    return null;
+    const cached = loadCache("STANDINGS_KEY");
+    if (cached) return cached;
+    
+    try {
+      const res = await fetch("/api/scores-proxy?endpoint=competitions/WC/standings");
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = await res.json();
+      
+      if (json.standings) {
+        // Cache for 5 minutes
+        saveCache("STANDINGS_KEY", json.standings, 5 * 60 * 1000);
+        return json.standings;
+      }
+      return [];
+    } catch (e) {
+      console.warn("Standings fetch failed:", e.message);
+      return [];
+    }
+  }
+
+  // Auto-refresh live matches every 30 seconds during tournament
+  function startLiveScoresAutoRefresh(callback) {
+    const doRefresh = async () => {
+      const matches = await fetchLiveMatches();
+      callback(matches);
+    };
+    doRefresh();
+    // Refresh every 30 seconds during tournament
+    setInterval(doRefresh, 30 * 1000);
   }
 
   // ---- LocalStorage helpers ----
@@ -119,5 +164,11 @@ const API = (() => {
     } catch (_) { return null; }
   }
 
-  return { fetchNews, startNewsAutoRefresh, fetchLiveMatches, fetchStandings };
+  return { 
+    fetchNews, 
+    startNewsAutoRefresh, 
+    fetchLiveMatches, 
+    fetchStandings,
+    startLiveScoresAutoRefresh
+  };
 })();

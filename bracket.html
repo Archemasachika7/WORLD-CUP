@@ -600,10 +600,10 @@ function applyLoadedPredictions(data) {
 }
 
 // ── Load existing predictions from Supabase ──
-async function loadPredictions(userId) {
+  async function loadPredictions(userId) {
   try {
     const { data, error } = await _sb
-      .from("predictions")
+      .from("bracket_predictions")
       .select("*")
       .eq("user_id", userId)
       .single();
@@ -611,14 +611,23 @@ async function loadPredictions(userId) {
       console.warn("load predictions:", error.message);
       return;
     }
-    if (data) applyLoadedPredictions(data);
+    if (data) {
+      // Map database columns to expected format
+      const mapped = {
+        favorite_nation: data.fav_team,
+        champion: data.champion,
+        runner_up: data.runner_up,
+        updated_at: data.updated_at
+      };
+      applyLoadedPredictions(mapped);
+    }
   } catch (e) {
     console.warn("load predictions exception:", e);
   }
 }
 
-// ── Save predictions to Supabase ──
-async function savePredictions() {
+  // ── Save predictions to Supabase ──
+  async function savePredictions() {
   if (!currentSession) { showToast("Please sign in first.", true); return; }
 
   const btn = document.getElementById("save-predictions-btn");
@@ -631,16 +640,17 @@ async function savePredictions() {
   const now      = new Date().toISOString();
 
   try {
-    const [predRes, profRes] = await Promise.all([
-      _sb.from("predictions").upsert(
-        { user_id: userId, favorite_nation: favTeam || null, champion, runner_up: runnerUp, updated_at: now },
-        { onConflict: "user_id" }
-      ),
-      _sb.from("profiles").upsert(
-        { id: userId, fav_team: favTeam || null, updated_at: now },
-        { onConflict: "id" }
-      ),
-    ]);
+    // Save to bracket_predictions table with correct column names
+    const predRes = await _sb.from("bracket_predictions").upsert(
+      { 
+        user_id: userId, 
+        fav_team: favTeam || null, 
+        champion, 
+        runner_up: runnerUp, 
+        updated_at: now 
+      },
+      { onConflict: "user_id" }
+    );
 
     if (predRes.error) {
       showToast("Error saving: " + predRes.error.message, true);
@@ -649,7 +659,6 @@ async function savePredictions() {
       document.getElementById("bracket-last-saved").textContent =
         "Last saved: " + new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString();
     }
-    if (profRes.error) console.warn("profiles upsert:", profRes.error.message);
   } catch (e) {
     showToast("Unexpected error. Please try again.", true);
     console.error(e);
