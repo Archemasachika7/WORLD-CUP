@@ -68,8 +68,11 @@ function esc(s) {
 
 // ── Build the complete 104-match schedule ─────────────────────
 function buildFullSchedule() {
-  const schedule = MATCHES.map(m => Object.assign({}, m, { matchday: 1 }));
-  let nextId = 25;
+  // Start with all real matches from data.js
+  const schedule = MATCHES.map(m => Object.assign({}, m, { matchday: m.stage.startsWith("Group") ? 1 : null }));
+  
+  // Find the highest ID to continue from
+  let nextId = Math.max(...MATCHES.map(m => m.id), 0) + 1;
 
   // MD2/MD3 config per group
   const GS_CONFIG = {
@@ -138,11 +141,19 @@ function buildFullSchedule() {
     "Estadio Akron", "BMO Field", "BC Place", "Stade de Montréal"
   ];
 
-  // Round of 32: 16 matches, 4/day from 2026-07-06 through 2026-07-09
+  // Round of 32: Only add placeholders if they don't exist in MATCHES
   const r32Dates = ["2026-07-06","2026-07-07","2026-07-08","2026-07-09"];
   let venueIdx = 0;
-  r32Dates.forEach(date => {
-    for (let i = 0; i < 4; i++) {
+  
+  // Check how many R32 matches we already have
+  const existingR32 = MATCHES.filter(m => m.stage === "Round of 32").length;
+  const remainingR32 = 16 - existingR32;
+
+  if (remainingR32 > 0) {
+    // This is a simplified logic to fill up to 16 matches
+    // In a real scenario, we'd want to match specific dates
+    for (let i = 0; i < remainingR32; i++) {
+      const date = r32Dates[Math.floor(i / 4)];
       const time = (i % 2 === 0) ? "17:00" : "20:00";
       schedule.push({
         id: nextId++, stage: "Round of 32", matchday: null,
@@ -152,7 +163,7 @@ function buildFullSchedule() {
       });
       venueIdx++;
     }
-  });
+  }
 
   // Round of 16: 8 matches, 2/day from 2026-07-11 through 2026-07-14
   const r16Dates = ["2026-07-11","2026-07-12","2026-07-13","2026-07-14"];
