@@ -1,0 +1,242 @@
+<!-- Enhanced Matches Display Section -->
+<!-- This replaces the displayMatches and openMatchModal functions in matches.html -->
+
+<script>
+// ── Enhanced: Display matches with proper knockout handling ────────────────────
+function displayMatches(stageFilter, schedule) {
+  const container = document.getElementById("matches-list");
+  if (!container) return;
+
+  // Filter
+  let list;
+  if (stageFilter === "All") {
+    list = schedule.slice();
+  } else if (stageFilter === "Group Stage") {
+    list = schedule.filter(m => m.stage.startsWith("Group"));
+  } else {
+    list = schedule.filter(m => m.stage === stageFilter);
+  }
+
+  // Sort by date + time
+  list.sort((a, b) => {
+    const da = a.date + "T" + a.time, db = b.date + "T" + b.time;
+    return da < db ? -1 : da > db ? 1 : 0;
+  });
+
+  if (!list.length) {
+    container.innerHTML = `<div class="matches-empty">No matches found.</div>`;
+    return;
+  }
+
+  // Group by date
+  const byDate = {};
+  list.forEach(m => {
+    if (!byDate[m.date]) byDate[m.date] = [];
+    byDate[m.date].push(m);
+  });
+
+  const html = Object.entries(byDate).map(([dateStr, matches]) => {
+    const dt = new Date(dateStr + "T12:00:00");
+    const label = dt.toLocaleDateString("en-US", { weekday:"long", month:"long", day:"numeric", year:"numeric" });
+
+    const cards = matches.map(m => {
+      if (m.home === "tbd") {
+        return `
+          <div class="match-card match-card-tbd card-enter">
+            <div class="match-card-top">
+              <span class="match-stage-pill">${esc(m.stage)}</span>
+              <span class="match-time-badge">${esc(typeof localMatchTime === 'function' ? localMatchTime(m.date, m.time) : m.time)}</span>
+            </div>
+            <div class="match-card-venue">${esc(m.venue)}</div>
+            <div class="match-card-teams" style="justify-content:center;padding:12px 0;">
+              <span style="font-size:1.1rem;font-weight:800;color:var(--text-dim);letter-spacing:1px;">TBD vs TBD</span>
+            </div>
+            <p class="match-tbd-note">Teams to be determined</p>
+          </div>`;
+      }
+
+      const home = TEAMS.find(t => t.id === m.home);
+      const away = TEAMS.find(t => t.id === m.away);
+      if (!home || !away) return "";
+      
+      const prob = Predictions.getProbability(m.home, m.away);
+      const stagePill = m.matchday
+        ? `${esc(m.stage)} · MD${m.matchday}`
+        : esc(m.stage);
+      
+      // Enhanced score display
+      let centerHtml = `<span class="vs-badge">VS</span>`;
+      let matchStatus = "";
+      
+      if (m.homeScore !== null) {
+        centerHtml = `<span class="final-score" style="font-size:1.3rem;font-weight:900;">${m.homeScore}–${m.awayScore}</span>`;
+        
+        // Show penalty shootout info if applicable
+        if (m.extraScore) {
+          matchStatus = `<div style="font-size:0.75rem;color:#ffd700;margin-top:4px;font-weight:600;">${esc(m.extraScore)}</div>`;
+        }
+        
+        // Show scorers preview in card
+        let scorersPreview = "";
+        if (m.scorers && m.scorers.length > 0) {
+          const homeScorers = m.scorers.filter(s => s.team === m.home).map(s => s.player).slice(0, 2).join(", ");
+          const awayScorers = m.scorers.filter(s => s.team === m.away).map(s => s.player).slice(0, 2).join(", ");
+          
+          if (homeScorers || awayScorers) {
+            scorersPreview = `
+              <div style="font-size:0.8rem;color:var(--text-dim);margin-top:8px;border-top:1px solid rgba(255,255,255,0.1);padding-top:8px;">
+                ${homeScorers ? `<div style="text-align:right;margin-bottom:4px;"><span style="color:#90EE90;">⚽ ${esc(homeScorers)}</span></div>` : ''}
+                ${awayScorers ? `<div style="text-align:left;"><span style="color:#90EE90;">⚽ ${esc(awayScorers)}</span></div>` : ''}
+              </div>`;
+          }
+        }
+        
+        centerHtml += matchStatus + scorersPreview;
+      }
+
+      const timeLabel = (typeof localMatchTime === 'function') ? localMatchTime(m.date, m.time) : m.time;
+      return `
+        <div class="match-card card-enter" data-match="${m.id}" style="cursor:pointer;">
+          <div class="match-card-top">
+            <span class="match-stage-pill">${stagePill}</span>
+            <span class="match-time-badge">${esc(timeLabel)}</span>
+          </div>
+          <div class="match-card-venue">${esc(m.venue)}</div>
+          <div class="match-card-teams">
+            <div class="mct-team home-side">
+              <div class="mct-flag">${flagImg(home.id, 48)}</div>
+              <div class="mct-info">
+                <span class="mct-name">${esc(home.name)}</span>
+                <span class="mct-rank">FIFA #${home.ranking}</span>
+              </div>
+            </div>
+            <div class="mct-center">
+              ${centerHtml}
+            </div>
+            <div class="mct-team away-side">
+              <div class="mct-info">
+                <span class="mct-name">${esc(away.name)}</span>
+                <span class="mct-rank">FIFA #${away.ranking}</span>
+              </div>
+              <div class="mct-flag">${flagImg(away.id, 48)}</div>
+            </div>
+          </div>
+          <div class="prob-strip">
+            <div class="prob-seg prob-h" style="width:${prob.home}%"><span>${prob.home}%</span></div>
+            <div class="prob-seg prob-d" style="width:${prob.draw}%"><span>${prob.draw > 8 ? prob.draw + "%" : ""}</span></div>
+            <div class="prob-seg prob-a" style="width:${prob.away}%"><span>${prob.away}%</span></div>
+          </div>
+          <div class="prob-legend">
+            <span>${esc(home.name)} Win</span><span>Draw</span><span>${esc(away.name)} Win</span>
+          </div>
+        </div>`;
+    }).join("");
+
+    return `
+      <div class="match-day-header">
+        <span class="match-day-date">${label}</span>
+        <span class="match-day-count">${matches.length} match${matches.length !== 1 ? "es" : ""}</span>
+      </div>
+      <div class="match-day-grid">
+        ${cards}
+      </div>`;
+  }).join("");
+
+  container.innerHTML = html;
+
+  container.querySelectorAll(".match-card[data-match]").forEach(card => {
+    card.addEventListener("click", () => {
+      const id = +card.dataset.match;
+      const m = window._fullSchedule.find(x => x.id === id);
+      if (m && m.home !== "tbd") openMatchModal(m);
+    });
+  });
+
+  initScrollAnimations();
+}
+
+// ── Enhanced: Modal with better scorers display ────────────────────
+function openMatchModal(match) {
+  const home = TEAMS.find(t => t.id === match.home);
+  const away = TEAMS.find(t => t.id === match.away);
+  if (!home || !away) return;
+  const prob = Predictions.getProbability(match.home, match.away);
+  const body = document.getElementById("modal-body");
+  const dt   = new Date(match.date + "T" + match.time).toLocaleDateString("en-US",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
+  
+  // Build scorers section
+  let scorersSection = "";
+  if (match.homeScore !== null && match.scorers && match.scorers.length > 0) {
+    const homeScorers = match.scorers.filter(s => s.team === match.home);
+    const awayScorers = match.scorers.filter(s => s.team === match.away);
+    
+    scorersSection = `
+    <div class="modal-scorers mt-16" style="background:rgba(255,255,255,0.05);padding:16px;border-radius:12px;">
+      <h3 class="modal-section-title" style="margin-top:0">⚽ Goal Scorers</h3>
+      <div style="display:flex;justify-content:space-between;gap:20px;">
+        <div style="flex:1;text-align:right;">
+          ${homeScorers.map(s => `
+            <div style="padding:6px 0;font-size:0.95rem;">
+              <strong>${esc(s.player)}</strong>
+              <span style="color:#ffd700;margin-left:8px;">${s.minute}'</span>
+            </div>`).join('')}
+        </div>
+        <div style="width:1px;background:rgba(255,255,255,0.1);"></div>
+        <div style="flex:1;text-align:left;">
+          ${awayScorers.map(s => `
+            <div style="padding:6px 0;font-size:0.95rem;">
+              <span style="color:#ffd700;margin-right:8px;">${s.minute}'</span>
+              <strong>${esc(s.player)}</strong>
+            </div>`).join('')}
+        </div>
+      </div>
+      ${match.extraScore ? `<div style="text-align:center;margin-top:12px;font-size:0.85rem;color:#ffd700;font-weight:600;">${esc(match.extraScore)}</div>` : ''}
+    </div>`;
+  }
+  
+  // Build final score display
+  let finalScoreSection = "";
+  if (match.homeScore !== null) {
+    finalScoreSection = `
+    <div class="modal-final-score mt-16" style="background:rgba(255,255,255,0.08);padding:20px;border-radius:12px;text-align:center;">
+      <div style="font-size:2.5rem;font-weight:900;color:#fff;margin:10px 0;">
+        ${match.homeScore} – ${match.awayScore}
+      </div>
+      <div style="font-size:0.9rem;color:var(--text-dim);">FINAL SCORE</div>
+    </div>`;
+  }
+  
+  body.innerHTML = `
+    <div class="match-modal-header">
+      <h2>${esc(match.stage)}</h2><p>${dt} &bull; ${esc(typeof localMatchTime === 'function' ? localMatchTime(match.date, match.time) : match.time)}</p><p>${esc(match.venue)}</p>
+    </div>
+    <div class="big-matchup">
+      <div class="bm-team">${flagImg(home.id, 80)}<br><strong>${esc(home.name)}</strong><br><small>FIFA #${home.ranking} &bull; Elo ${home.elo}</small></div>
+      <div class="bm-vs">VS</div>
+      <div class="bm-team">${flagImg(away.id, 80)}<br><strong>${esc(away.name)}</strong><br><small>FIFA #${away.ranking} &bull; Elo ${away.elo}</small></div>
+    </div>
+    ${finalScoreSection}
+    ${scorersSection}
+    <h3 class="modal-section-title">Pre-Match Win Probability</h3>
+    <div class="big-prob-bar">
+      <div class="bpb-home" style="width:${prob.home}%">${esc(home.name)} ${prob.home}%</div>
+      <div class="bpb-draw" style="width:${prob.draw}%">Draw<br>${prob.draw}%</div>
+      <div class="bpb-away" style="width:${prob.away}%">${esc(away.name)} ${prob.away}%</div>
+    </div>
+    <div class="modal-scores mt-16">
+      <div class="score-box"><div class="score-val">${prob.homeSqScore}</div><div class="score-lbl">${esc(home.name)} Squad</div></div>
+      <div class="score-box"><div class="score-val">${prob.homeTop5}</div><div class="score-lbl">${esc(home.name)} Top-5</div></div>
+      <div class="score-box"><div class="score-val">${prob.awaySqScore}</div><div class="score-lbl">${esc(away.name)} Squad</div></div>
+      <div class="score-box"><div class="score-val">${prob.awayTop5}</div><div class="score-lbl">${esc(away.name)} Top-5</div></div>
+    </div>
+    <p class="prediction-verdict mt-10">
+      🔮 <strong>${prob.home > prob.away + 10 ? esc(home.name) + " to win" : prob.away > prob.home + 10 ? esc(away.name) + " to win" : "Very close — could go either way"}</strong>
+    </p>
+    <div class="quick-live-link" style="margin-top:16px">
+      <button class="btn-sm" onclick="document.getElementById('modal').classList.remove('open');prefillPredictor('${home.id}','${away.id}')">
+        ▶ Run live in-play predictor for this match →
+      </button>
+    </div>`;
+  document.getElementById("modal").classList.add("open");
+}
+</script>

@@ -121,6 +121,10 @@ const TEAMS = [
   { id:"cro", name:"Croatia",             flag:"🇭🇷", conf:"UEFA",     group:"L", ranking:10, elo:1905 },
   { id:"gha", name:"Ghana",               flag:"🇬🇭", conf:"CAF",      group:"L", ranking:62, elo:1778 },
   { id:"pan", name:"Panama",              flag:"🇵🇦", conf:"CONCACAF", group:"L", ranking:50, elo:1768 },
+
+  // ── Qualified Teams (Knockout Stage) ──────────────────────
+  { id:"ita", name:"Italy",               flag:"🇮🇹", conf:"UEFA",     group:"-", ranking:9,  elo:1912, isQualified:true },
+  { id:"den", name:"Denmark",             flag:"🇩🇰", conf:"UEFA",     group:"-", ranking:20, elo:1847, isQualified:true },
 ];
 
 // ---- Real 2025-26 Player Stats (all leagues) ----

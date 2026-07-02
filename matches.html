@@ -283,9 +283,35 @@ function displayMatches(stageFilter, schedule) {
       const stagePill = m.matchday
         ? `${esc(m.stage)} · MD${m.matchday}`
         : esc(m.stage);
-      const centerHtml = m.homeScore !== null
-        ? `<span class="final-score" style="font-size:1.3rem;font-weight:900;">${m.homeScore}–${m.awayScore}</span>`
-        : `<span class="vs-badge">VS</span>`;
+      // ENHANCED: Show scorers in card and penalty info
+      let centerHtml = `<span class="vs-badge">VS</span>`;
+      let matchStatus = "";
+      
+      if (m.homeScore !== null) {
+        centerHtml = `<span class="final-score" style="font-size:1.3rem;font-weight:900;">${m.homeScore}–${m.awayScore}</span>`;
+        
+        // Show penalty shootout info if applicable
+        if (m.extraScore) {
+          matchStatus = `<div style="font-size:0.75rem;color:#ffd700;margin-top:4px;font-weight:600;">${esc(m.extraScore)}</div>`;
+        }
+        
+        // Show scorers preview in card
+        let scorersPreview = "";
+        if (m.scorers && m.scorers.length > 0) {
+          const homeScorers = m.scorers.filter(s => s.team === m.home).map(s => s.player).slice(0, 2).join(", ");
+          const awayScorers = m.scorers.filter(s => s.team === m.away).map(s => s.player).slice(0, 2).join(", ");
+          
+          if (homeScorers || awayScorers) {
+            scorersPreview = `
+              <div style="font-size:0.8rem;color:var(--text-dim);margin-top:8px;border-top:1px solid rgba(255,255,255,0.1);padding-top:8px;">
+                ${homeScorers ? `<div style="text-align:right;margin-bottom:4px;"><span style="color:#90EE90;">⚽ ${esc(homeScorers)}</span></div>` : ''}
+                ${awayScorers ? `<div style="text-align:left;"><span style="color:#90EE90;">⚽ ${esc(awayScorers)}</span></div>` : ''}
+              </div>`;
+          }
+        }
+        
+        centerHtml += matchStatus + scorersPreview;
+      }
 
       const timeLabel = (typeof localMatchTime === 'function') ? localMatchTime(m.date, m.time) : m.time;
       return `
